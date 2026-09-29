@@ -4,6 +4,7 @@ import { getStoredCoffeeStats, CoffeeStats } from '../../config/razorpay';
 
 export const FloatingCoffeeWidget: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
+  const [isExternalModalOpen, setIsExternalModalOpen] = useState(false);
   const [stats, setStats] = useState<CoffeeStats>(getStoredCoffeeStats());
   const [isHovered, setIsHovered] = useState(false);
 
@@ -11,13 +12,29 @@ export const FloatingCoffeeWidget: React.FC = () => {
     const handleUpdate = (e: any) => {
       if (e.detail) setStats(e.detail);
     };
+    const handleModalState = (e: any) => {
+      setIsExternalModalOpen(!!e.detail?.open);
+    };
+
     window.addEventListener('ryperdeck_coffee_updated', handleUpdate);
-    return () => window.removeEventListener('ryperdeck_coffee_updated', handleUpdate);
+    window.addEventListener('ryperdeck_coffee_modal_state', handleModalState);
+    return () => {
+      window.removeEventListener('ryperdeck_coffee_updated', handleUpdate);
+      window.removeEventListener('ryperdeck_coffee_modal_state', handleModalState);
+    };
   }, []);
+
+  const isHidden = modalOpen || isExternalModalOpen;
 
   return (
     <>
-      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 pointer-events-auto">
+      <div
+        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 pointer-events-auto transition-all duration-300 ${
+          isHidden
+            ? 'opacity-0 pointer-events-none scale-75 translate-y-4'
+            : 'opacity-100 scale-100 translate-y-0'
+        }`}
+      >
         <button
           onClick={() => setModalOpen(true)}
           onMouseEnter={() => setIsHovered(true)}

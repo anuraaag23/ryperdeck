@@ -311,6 +311,79 @@ export async function setFeatureStatus(id: string, status: string): Promise<bool
   }
 }
 
+export async function updateFeatureRequest(
+  id: string,
+  updates: {
+    title?: string;
+    description?: string;
+    status?: string;
+    votes?: number;
+    name?: string;
+  }
+): Promise<boolean> {
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('feature_requests').update(updates).eq('id', id);
+      if (!error) return true;
+      console.error('Supabase feature update error:', error);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  try {
+    const list = JSON.parse(localStorage.getItem(LS_KEYS.features) || '[]');
+    const updated = list.map((f: any) => (f.id === id ? { ...f, ...updates } : f));
+    localStorage.setItem(LS_KEYS.features, JSON.stringify(updated));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function createFeatureRequestByAdmin(item: {
+  title: string;
+  description: string;
+  status: string;
+  votes: number;
+  name?: string;
+}): Promise<boolean> {
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('feature_requests').insert([
+        {
+          title: item.title.trim().slice(0, 100),
+          description: item.description.trim(),
+          name: item.name?.trim() || 'Admin / Community',
+          status: item.status || 'planned',
+          votes: item.votes || 1,
+        },
+      ]);
+      if (!error) return true;
+      console.error('Supabase feature insert error:', error);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  try {
+    const list = JSON.parse(localStorage.getItem(LS_KEYS.features) || '[]');
+    list.unshift({
+      id: `f_${Date.now()}`,
+      title: item.title.trim().slice(0, 100),
+      description: item.description.trim(),
+      name: item.name?.trim() || 'Admin / Community',
+      status: item.status || 'planned',
+      votes: item.votes || 1,
+      created_at: new Date().toISOString(),
+    });
+    localStorage.setItem(LS_KEYS.features, JSON.stringify(list));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 // ── Supporters ────────────────────────────────────────────────────────
 export async function submitSupporter(supporter: {
   name: string;

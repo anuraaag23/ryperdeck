@@ -38,6 +38,12 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
   const [starRating, setStarRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [poppedStar, setPoppedStar] = useState<number>(0);
+
+  useEffect(() => {
+    window.dispatchEvent(
+      new CustomEvent('ryperdeck_coffee_modal_state', { detail: { open: isOpen } })
+    );
+  }, [isOpen]);
   const [stats, setStats] = useState<CoffeeStats>(getStoredCoffeeStats());
 
   // Payment states: 'details' | 'processing' | 'success' | 'failed'

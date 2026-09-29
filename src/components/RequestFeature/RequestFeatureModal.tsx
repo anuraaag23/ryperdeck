@@ -1,12 +1,7 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import {
-  submitFeatureRequest,
-  upvoteFeatureRequest,
-  fetchFeatureRequests,
-} from '../../lib/supabase';
+import React, { useState, useEffect } from 'react';
+import { submitFeatureRequest } from '../../lib/supabase';
 import {
   X,
-  ChevronUp,
   Sparkles,
   Send,
   ArrowLeft,
@@ -20,59 +15,6 @@ import {
   RotateCcw,
   Sliders,
 } from 'lucide-react';
-
-interface Feature {
-  id: string;
-  name?: string;
-  email?: string;
-  title: string;
-  description: string;
-  votes: number;
-  status: 'requested' | 'planned' | 'building' | 'done';
-  ts: number;
-}
-
-const STATUS_LABELS: Record<Feature['status'], { label: string; color: string }> = {
-  requested: { label: 'Requested', color: 'text-white/40 border-white/10 bg-white/[0.04]' },
-  planned:   { label: 'Planned',   color: 'text-amber-400/70 border-amber-400/20 bg-amber-400/[0.06]' },
-  building:  { label: 'Building',  color: 'text-blue-400/70 border-blue-400/20 bg-blue-400/[0.06]' },
-  done:      { label: 'Done ✓',    color: 'text-emerald-400/70 border-emerald-400/20 bg-emerald-400/[0.06]' },
-};
-
-const SEED_FEATURES: Feature[] = [
-  {
-    id: 'f1',
-    title: 'Macro chaining — run multiple actions in sequence',
-    description: 'Tap once and fire 3 hotkeys in order with configurable delays.',
-    votes: 52,
-    status: 'planned',
-    ts: Date.now() - 86400000 * 5,
-  },
-  {
-    id: 'f2',
-    title: 'Haptic feedback on action fire',
-    description: 'Short vibration on the phone when a button is pressed successfully.',
-    votes: 41,
-    status: 'building',
-    ts: Date.now() - 86400000 * 3,
-  },
-  {
-    id: 'f3',
-    title: 'Per-page background image / icon pack',
-    description: 'Let users set a custom icon or background per page.',
-    votes: 34,
-    status: 'requested',
-    ts: Date.now() - 86400000 * 7,
-  },
-  {
-    id: 'f4',
-    title: 'Auto-connect on device wake',
-    description: 'RyperDeck should automatically reconnect when the phone screen turns on.',
-    votes: 28,
-    status: 'done',
-    ts: Date.now() - 86400000 * 10,
-  },
-];
 
 const CURRENT_FEATURES = [
   {
@@ -122,78 +64,25 @@ const CURRENT_FEATURES = [
   },
 ];
 
-const STORAGE_KEY = 'ryperdeck_features';
-const VOTED_KEY   = 'ryperdeck_voted_ids';
-
-function loadFeatures(): Feature[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) return JSON.parse(raw) as Feature[];
-  } catch {}
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(SEED_FEATURES));
-  return SEED_FEATURES;
-}
-function saveFeatures(f: Feature[]) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(f));
-}
-function loadVoted(): Set<string> {
-  try {
-    const raw = localStorage.getItem(VOTED_KEY);
-    if (raw) return new Set(JSON.parse(raw) as string[]);
-  } catch {}
-  return new Set();
-}
-function saveVoted(v: Set<string>) {
-  localStorage.setItem(VOTED_KEY, JSON.stringify([...v]));
-}
-
 interface Props {
   isOpen: boolean;
   onClose: () => void;
 }
 
 export const RequestFeatureModal: React.FC<Props> = ({ isOpen, onClose }) => {
-  const [features, setFeatures] = useState<Feature[]>([]);
-  const [voted,    setVoted]    = useState<Set<string>>(new Set());
-  const [name,     setName]     = useState('');
-  const [email,    setEmail]    = useState('');
-  const [request,  setRequest]  = useState('');
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [request, setRequest] = useState('');
   const [submitted, setSubmitted] = useState(false);
-  const [viewCommunity, setViewCommunity] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setSubmitted(false);
+      setSubmitting(false);
       setName('');
       setEmail('');
       setRequest('');
-      setViewCommunity(false);
-      setVoted(loadVoted());
-
-      // Initial load from local cache
-      setFeatures(loadFeatures().sort((a, b) => b.votes - a.votes));
-
-      // Fetch latest from Supabase
-      fetchFeatureRequests().then((dbList) => {
-        if (dbList && dbList.length > 0) {
-          const mapped: Feature[] = dbList.map((item: any) => ({
-            id: item.id || `f_${Date.now()}`,
-            name: item.name || undefined,
-            email: item.email || undefined,
-            title: item.title,
-            description: item.description,
-            votes: item.votes || 1,
-            status: item.status || 'requested',
-            ts: item.created_at ? new Date(item.created_at).getTime() : Date.now(),
-          }));
-          // Merge unique
-          const ids = new Set(mapped.map(m => m.id));
-          const remaining = loadFeatures().filter(f => !ids.has(f.id));
-          const combined = [...mapped, ...remaining].sort((a, b) => b.votes - a.votes);
-          setFeatures(combined);
-          saveFeatures(combined);
-        }
-      });
     }
   }, [isOpen]);
 
@@ -204,45 +93,18 @@ export const RequestFeatureModal: React.FC<Props> = ({ isOpen, onClose }) => {
     return () => window.removeEventListener('keydown', onKey);
   }, [isOpen, onClose]);
 
-  const upvote = useCallback(async (id: string) => {
-    if (voted.has(id)) return;
-    const newFeatures = features.map(f => f.id === id ? { ...f, votes: f.votes + 1 } : f);
-    const newVoted = new Set([...voted, id]);
-    setFeatures(newFeatures.sort((a, b) => b.votes - a.votes));
-    setVoted(newVoted);
-    saveFeatures(newFeatures);
-    saveVoted(newVoted);
-    await upvoteFeatureRequest(id);
-  }, [features, voted]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!request.trim()) return;
+    if (!request.trim() || submitting) return;
 
-    const res = await submitFeatureRequest({
-      title: request.trim(),
+    setSubmitting(true);
+    await submitFeatureRequest({
+      title: request.trim().slice(0, 100),
       description: request.trim(),
       name: name.trim() || undefined,
       email: email.trim() || undefined,
     });
-
-    const newF: Feature = {
-      id: res.data?.id || `f_${Date.now()}`,
-      name: name.trim() || undefined,
-      email: email.trim() || undefined,
-      title: request.trim().slice(0, 100),
-      description: request.trim(),
-      votes: 1,
-      status: 'requested',
-      ts: Date.now(),
-    };
-
-    const newFeatures = [newF, ...features.filter(f => f.id !== newF.id)].sort((a, b) => b.votes - a.votes);
-    const newVoted = new Set([...voted, newF.id]);
-    setFeatures(newFeatures);
-    setVoted(newVoted);
-    saveFeatures(newFeatures);
-    saveVoted(newVoted);
+    setSubmitting(false);
     setSubmitted(true);
   };
 
@@ -370,62 +232,8 @@ export const RequestFeatureModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     <Send className="w-4 h-4" />
                     Submit feature request
                   </button>
-
-                  <button
-                    type="button"
-                    onClick={() => setViewCommunity(!viewCommunity)}
-                    className="text-[12px] text-white/40 hover:text-white underline cursor-pointer transition-colors"
-                  >
-                    {viewCommunity ? 'Hide community votes' : `View community votes (${features.length})`}
-                  </button>
                 </div>
               </form>
-            )}
-
-            {/* Community Upvotes Section */}
-            {viewCommunity && (
-              <div className="mt-8 space-y-3 animate-fadeIn">
-                <p className="text-[12px] font-semibold text-white/40 uppercase tracking-widest mb-4">
-                  Community Upvote Board
-                </p>
-                <div className="grid grid-cols-1 gap-3 max-h-[360px] overflow-y-auto pr-1">
-                  {features.map(f => {
-                    const hasVoted = voted.has(f.id);
-                    const s = STATUS_LABELS[f.status];
-                    return (
-                      <div
-                        key={f.id}
-                        className="flex items-start gap-4 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.07] hover:border-white/[0.12] transition-colors"
-                      >
-                        <button
-                          type="button"
-                          onClick={() => upvote(f.id)}
-                          disabled={hasVoted}
-                          className={`flex flex-col items-center justify-center min-w-[44px] py-2 px-2 rounded-xl border transition-all ${
-                            hasVoted
-                              ? 'bg-white/[0.08] border-white/[0.15] text-white cursor-default'
-                              : 'bg-white/[0.03] border-white/[0.08] text-white/50 hover:bg-white/[0.08] hover:text-white cursor-pointer active:scale-95'
-                          }`}
-                        >
-                          <ChevronUp className="w-4 h-4" />
-                          <span className="text-[12px] font-bold">{f.votes}</span>
-                        </button>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 flex-wrap mb-1">
-                            <span className="text-[14px] font-semibold text-white">{f.title}</span>
-                            <span className={`text-[9px] px-2 py-0.5 rounded-full border font-semibold ${s.color}`}>
-                              {s.label}
-                            </span>
-                          </div>
-                          {f.description && (
-                            <p className="text-[12px] text-white/40 leading-relaxed">{f.description}</p>
-                          )}
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
             )}
           </div>
 

@@ -20,6 +20,12 @@ import {
   LogOut,
   BarChart2,
   AlertCircle,
+  Plus,
+  Edit2,
+  Check,
+  X as XIcon,
+  ChevronUp,
+  ChevronDown,
 } from 'lucide-react';
 import {
   supabase,
@@ -29,6 +35,8 @@ import {
   fetchFeatureRequests,
   fetchSupporters,
   setFeatureStatus,
+  updateFeatureRequest,
+  createFeatureRequestByAdmin,
   deleteRecord,
   DbSubscriber,
   DbBugReport,
@@ -55,6 +63,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
   const [tab, setTab]               = useState<Tab>('bugs');
   const [tick, setTick]             = useState(0);
 
+  // Mobile detection
+  const [isMobile, setIsMobile]     = useState(typeof window !== 'undefined' ? window.innerWidth < 768 : false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Live Data States
   const [emails, setEmails]         = useState<DbSubscriber[]>([]);
   const [bugs, setBugs]             = useState<DbBugReport[]>([]);
@@ -62,6 +79,22 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
   const [supporters, setSupporters] = useState<DbSupporter[]>([]);
   const [visitorCount, setVisitorCount] = useState<number>(1);
   const [authEmail, setAuthEmail]   = useState<string | null>(null);
+
+  // Feature Request Management State
+  const [editFeatureId, setEditFeatureId] = useState<string | null>(null);
+  const [editTitle, setEditTitle]         = useState('');
+  const [editDescription, setEditDescription] = useState('');
+  const [editStatus, setEditStatus]       = useState('requested');
+  const [editVotes, setEditVotes]         = useState(1);
+  const [savingFeature, setSavingFeature] = useState(false);
+
+  // Add Feature Modal / Card State
+  const [showAddFeature, setShowAddFeature] = useState(false);
+  const [newTitle, setNewTitle]             = useState('');
+  const [newDescription, setNewDescription] = useState('');
+  const [newStatus, setNewStatus]           = useState('planned');
+  const [newVotes, setNewVotes]             = useState(5);
+  const [addingFeature, setAddingFeature]   = useState(false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -109,7 +142,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
     }
   }, [authed, tick]);
 
-  // Handle Login: Real Supabase Auth login (with secure env backup fallback)
+  // Handle Login
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -130,7 +163,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
       return;
     }
 
-    // 1. Attempt Supabase Auth login
     if (supabase) {
       try {
         const { data, error: authError } = await supabase.auth.signInWithPassword({
@@ -146,7 +178,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
           return;
         }
 
-        // If Supabase returned an error, check if password matches environment backup
         if (pwTrimmed === BACKUP_ADMIN_PW) {
           setAuthed(true);
           setAuthEmail(emailTrimmed);
@@ -156,21 +187,27 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
         }
 
         setError(authError?.message || 'Invalid email or password.');
-        setLoading(false);
-        return;
       } catch (err: any) {
-        console.error('Supabase sign-in error:', err);
+        if (pwTrimmed === BACKUP_ADMIN_PW) {
+          setAuthed(true);
+          setAuthEmail(emailTrimmed);
+          setLoading(false);
+          if (containerRef.current) containerRef.current.scrollTop = 0;
+          return;
+        }
+        setError(err?.message || 'Authentication error.');
       }
+    } else {
+      if (pwTrimmed === BACKUP_ADMIN_PW) {
+        setAuthed(true);
+        setAuthEmail(emailTrimmed);
+        setLoading(false);
+        if (containerRef.current) containerRef.current.scrollTop = 0;
+        return;
+      }
+      setError('Invalid password.');
     }
 
-    // 2. Fallback check
-    if (pwTrimmed === BACKUP_ADMIN_PW) {
-      setAuthed(true);
-      setAuthEmail(emailTrimmed);
-      setError('');
-    } else {
-      setError('Invalid admin credentials. Please verify your email and password.');
-    }
     setLoading(false);
   };
 
@@ -200,6 +237,57 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
     setTick((t) => t + 1);
   };
 
+  // Start editing a feature request
+  const handleStartEditFeature = (feat: DbFeatureRequest) => {
+    setEditFeatureId(feat.id || null);
+    setEditTitle(feat.title);
+    setEditDescription(feat.description || '');
+    setEditStatus(feat.status);
+    setEditVotes(feat.votes || 1);
+  };
+
+  // Save edited feature request
+  const handleSaveEditFeature = async () => {
+    if (!editFeatureId) return;
+    setSavingFeature(true);
+    await updateFeatureRequest(editFeatureId, {
+      title: editTitle.trim(),
+      description: editDescription.trim(),
+      status: editStatus,
+      votes: Number(editVotes),
+    });
+    setSavingFeature(false);
+    setEditFeatureId(null);
+    setTick((t) => t + 1);
+  };
+
+  // Quick adjust votes (+1 or -1)
+  const handleAdjustVotes = async (id: string, currentVotes: number, delta: number) => {
+    const nextVotes = Math.max(0, currentVotes + delta);
+    await updateFeatureRequest(id, { votes: nextVotes });
+    setTick((t) => t + 1);
+  };
+
+  // Create new feature request
+  const handleCreateFeature = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newTitle.trim()) return;
+    setAddingFeature(true);
+    await createFeatureRequestByAdmin({
+      title: newTitle.trim(),
+      description: newDescription.trim(),
+      status: newStatus,
+      votes: Number(newVotes) || 1,
+    });
+    setAddingFeature(false);
+    setShowAddFeature(false);
+    setNewTitle('');
+    setNewDescription('');
+    setNewStatus('planned');
+    setNewVotes(5);
+    setTick((t) => t + 1);
+  };
+
   const exportJSON = (data: any[], filename: string) => {
     const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob);
@@ -219,7 +307,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
   ];
 
   // ════════════════════════════════════════════════════════════════════════════
-  // ── 1. CLEAN SECURE LOGIN SCREEN ───────────────────────────────────────────
+  // ── 1. CLEAN SECURE LOGIN SCREEN (MOBILE-OPTIMIZED) ─────────────────────────
   // ════════════════════════════════════════════════════════════════════════════
   if (!authed) {
     return (
@@ -236,7 +324,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          padding: '24px',
+          padding: isMobile ? '16px' : '24px',
           fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
           color: '#ffffff',
         }}
@@ -246,145 +334,135 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
           onClick={onBack}
           style={{
             position: 'absolute',
-            top: '24px',
-            left: '24px',
+            top: isMobile ? '16px' : '24px',
+            left: isMobile ? '16px' : '24px',
             display: 'inline-flex',
             alignItems: 'center',
             gap: '8px',
-            padding: '10px 18px',
+            padding: '8px 16px',
             borderRadius: '999px',
-            background: 'rgba(255, 255, 255, 0.08)',
-            border: '1px solid rgba(255, 255, 255, 0.16)',
-            color: '#ffffff',
+            background: 'rgba(255, 255, 255, 0.06)',
+            border: '1px solid rgba(255, 255, 255, 0.12)',
+            color: 'rgba(255, 255, 255, 0.7)',
             fontSize: '13px',
             fontWeight: 500,
             cursor: 'pointer',
-            transition: 'background 0.2s',
           }}
-          onMouseEnter={(e) => ((e.currentTarget as HTMLElement).style.background = 'rgba(255, 255, 255, 0.15)')}
-          onMouseLeave={(e) => ((e.currentTarget as HTMLElement).style.background = 'rgba(255, 255, 255, 0.08)')}
         >
-          <ArrowLeft style={{ width: 16, height: 16 }} />
-          Back to Site
+          <ArrowLeft style={{ width: 15, height: 15 }} />
+          <span>Exit to Site</span>
         </button>
 
-        {/* Main login card */}
+        {/* Login Box */}
         <div
           style={{
             width: '100%',
-            maxWidth: '420px',
-            background: '#0d0e16',
-            border: '1px solid rgba(255, 255, 255, 0.16)',
-            borderRadius: '24px',
-            padding: '38px 32px',
-            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.8), 0 0 1px rgba(255, 255, 255, 0.3)',
+            maxWidth: isMobile ? '100%' : '440px',
+            background: '#0d0e15',
+            border: '1px solid rgba(255, 255, 255, 0.14)',
+            borderRadius: isMobile ? '24px' : '28px',
+            padding: isMobile ? '32px 20px' : '44px 36px',
+            boxShadow: '0 30px 80px rgba(0, 0, 0, 0.8), inset 0 1px 1px rgba(255, 255, 255, 0.15)',
+            boxSizing: 'border-box',
           }}
         >
-          {/* Header */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: '14px', marginBottom: '22px' }}>
+          <div style={{ textAlign: 'center', marginBottom: '28px' }}>
             <div
               style={{
-                width: '46px',
-                height: '46px',
-                borderRadius: '14px',
-                background: 'rgba(255, 255, 255, 0.1)',
-                border: '1px solid rgba(255, 255, 255, 0.2)',
+                width: isMobile ? '48px' : '56px',
+                height: isMobile ? '48px' : '56px',
+                borderRadius: '18px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.18)',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
+                margin: '0 auto 16px',
                 color: '#ffffff',
+                boxShadow: '0 8px 24px rgba(0,0,0,0.5)',
               }}
             >
-              <Shield style={{ width: 24, height: 24 }} />
+              <Shield style={{ width: isMobile ? 22 : 26, height: isMobile ? 22 : 26 }} />
             </div>
-            <div>
-              <p style={{ margin: 0, fontSize: '11px', textTransform: 'uppercase', letterSpacing: '0.12em', color: 'rgba(255, 255, 255, 0.45)', fontWeight: 600 }}>
-                RyperDeck System
-              </p>
-              <h1 style={{ margin: 0, fontSize: '22px', fontWeight: 700, color: '#ffffff', letterSpacing: '-0.02em' }}>
-                Admin Console
-              </h1>
-            </div>
+
+            <h1 style={{ fontSize: isMobile ? '20px' : '22px', fontWeight: 800, margin: '0 0 6px 0', letterSpacing: '-0.02em', color: '#ffffff' }}>
+              RyperDeck Console
+            </h1>
+            <p style={{ fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)', margin: 0, lineHeight: 1.4 }}>
+              Sign in with your admin credentials
+            </p>
           </div>
 
-          {/* Database indicator */}
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '8px',
-              padding: '9px 12px',
-              borderRadius: '12px',
-              background: 'rgba(16, 185, 129, 0.12)',
-              border: '1px solid rgba(16, 185, 129, 0.3)',
-              fontSize: '12px',
-              color: '#34d399',
-              marginBottom: '24px',
-            }}
-          >
-            <Database style={{ width: 14, height: 14, flexShrink: 0 }} />
-            <span>Supabase Database Connected</span>
-          </div>
+          {error && (
+            <div
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+                padding: '12px 14px',
+                borderRadius: '12px',
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#f87171',
+                fontSize: '13px',
+                marginBottom: '20px',
+              }}
+            >
+              <AlertCircle style={{ width: 16, height: 16, flexShrink: 0 }} />
+              <span>{error}</span>
+            </div>
+          )}
 
-          {/* Login form */}
-          <form onSubmit={handleLogin} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '18px' }}>
-
-            {/* Email field */}
+          <form onSubmit={handleLogin} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255, 255, 255, 0.65)', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '6px' }}>
                 Admin Email
               </label>
               <input
-                type="email"
+                type="text"
+                autoComplete="email"
+                placeholder="anurag.ay8840@gmail.com"
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value.replace(',', '.'))}
-                placeholder="your-admin@example.com"
-                autoFocus
-                required
                 style={{
                   width: '100%',
-                  height: '46px',
-                  padding: '0 16px',
+                  padding: '12px 14px',
                   borderRadius: '12px',
-                  background: 'rgba(255, 255, 255, 0.06)',
-                  border: '1px solid rgba(255, 255, 255, 0.2)',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.15)',
                   color: '#ffffff',
-                  fontSize: '14px',
+                  fontSize: '16px',
                   outline: 'none',
                   boxSizing: 'border-box',
                 }}
               />
             </div>
 
-            {/* Password input */}
             <div>
-              <label style={{ display: 'block', fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em', color: 'rgba(255, 255, 255, 0.65)', marginBottom: '8px' }}>
+              <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '6px' }}>
                 Password
               </label>
-
               <div style={{ position: 'relative' }}>
                 <input
                   type={showPw ? 'text' : 'password'}
+                  placeholder="••••••••••••"
                   value={pw}
                   onChange={(e) => setPw(e.target.value)}
-                  placeholder="Enter your password"
-                  required
                   style={{
                     width: '100%',
-                    height: '46px',
-                    padding: '0 46px 0 16px',
+                    padding: '12px 42px 12px 14px',
                     borderRadius: '12px',
-                    background: 'rgba(255, 255, 255, 0.06)',
-                    border: '1px solid rgba(255, 255, 255, 0.2)',
+                    background: 'rgba(255, 255, 255, 0.05)',
+                    border: '1px solid rgba(255, 255, 255, 0.15)',
                     color: '#ffffff',
-                    fontSize: '14px',
+                    fontSize: '16px',
                     outline: 'none',
                     boxSizing: 'border-box',
                   }}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPw((v) => !v)}
+                  onClick={() => setShowPw(!showPw)}
                   style={{
                     position: 'absolute',
                     right: '12px',
@@ -392,11 +470,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                     transform: 'translateY(-50%)',
                     background: 'none',
                     border: 'none',
-                    color: 'rgba(255, 255, 255, 0.5)',
+                    color: 'rgba(255, 255, 255, 0.4)',
                     cursor: 'pointer',
-                    padding: '4px',
                     display: 'flex',
                     alignItems: 'center',
+                    padding: '4px',
                   }}
                 >
                   {showPw ? <EyeOff style={{ width: 16, height: 16 }} /> : <Eye style={{ width: 16, height: 16 }} />}
@@ -404,59 +482,40 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
               </div>
             </div>
 
-            {/* Error display */}
-            {error && (
-              <div
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '8px',
-                  padding: '10px 12px',
-                  borderRadius: '10px',
-                  background: 'rgba(239, 68, 68, 0.15)',
-                  border: '1px solid rgba(239, 68, 68, 0.3)',
-                  color: '#f87171',
-                  fontSize: '12px',
-                }}
-              >
-                <AlertCircle style={{ width: 15, height: 15, flexShrink: 0 }} />
-                <span>{error}</span>
-              </div>
-            )}
-
-            {/* Submit button */}
             <button
               type="submit"
               disabled={loading}
               style={{
+                marginTop: '8px',
                 width: '100%',
-                height: '48px',
+                padding: '13px',
                 borderRadius: '12px',
                 background: '#ffffff',
                 border: 'none',
                 color: '#000000',
-                fontWeight: 700,
                 fontSize: '14px',
+                fontWeight: 700,
                 cursor: loading ? 'not-allowed' : 'pointer',
-                transition: 'opacity 0.2s',
-                marginTop: '4px',
+                opacity: loading ? 0.7 : 1,
+                boxShadow: '0 4px 16px rgba(255, 255, 255, 0.2)',
               }}
             >
-              {loading ? 'Authenticating...' : 'Sign In to Admin Console →'}
+              {loading ? 'Authenticating...' : 'Sign In to Console'}
             </button>
           </form>
 
-          <p style={{ textAlign: 'center', fontSize: '11px', color: 'rgba(255, 255, 255, 0.3)', marginTop: '22px', marginBottom: 0 }}>
-            <Lock style={{ width: 11, height: 11, display: 'inline', marginRight: '4px' }} />
-            Secured via Supabase Authentication
-          </p>
+          <div style={{ marginTop: '24px', paddingTop: '16px', borderTop: '1px solid rgba(255, 255, 255, 0.08)', textAlign: 'center' }}>
+            <span style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.35)', display: 'inline-flex', alignItems: 'center', gap: '5px' }}>
+              <Lock style={{ width: 10, height: 10 }} /> 256-bit Encrypted Session
+            </span>
+          </div>
         </div>
       </div>
     );
   }
 
   // ════════════════════════════════════════════════════════════════════════════
-  // ── 2. ADMIN DASHBOARD ─────────────────────────────────────────────────────
+  // ── 2. MAIN ADMIN CONSOLE (FULLY RESPONSIVE & MOBILE-OPTIMIZED) ────────────
   // ════════════════════════════════════════════════════════════════════════════
   return (
     <div
@@ -467,124 +526,135 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
         zIndex: 99999,
         overflowY: 'auto',
         backgroundColor: '#07070c',
-        color: '#ffffff',
         fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+        color: '#ffffff',
       }}
     >
       {/* Top Navbar */}
       <div
         style={{
+          borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+          background: 'rgba(10, 11, 18, 0.95)',
+          backdropFilter: 'blur(20px)',
           position: 'sticky',
           top: 0,
           zIndex: 50,
-          backgroundColor: 'rgba(9, 10, 16, 0.96)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid rgba(255, 255, 255, 0.12)',
-          padding: '14px 24px',
+          padding: isMobile ? '12px 14px' : '14px 28px',
           display: 'flex',
-          alignItems: 'center',
+          flexDirection: isMobile ? 'column' : 'row',
+          alignItems: isMobile ? 'stretch' : 'center',
           justifyContent: 'space-between',
+          gap: isMobile ? '10px' : '16px',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-          <button
-            onClick={onBack}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              borderRadius: '999px',
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.14)',
-              color: '#ffffff',
-              fontSize: '12px',
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            <ArrowLeft style={{ width: 14, height: 14 }} />
-            Back to Site
-          </button>
-
-          <span style={{ color: 'rgba(255, 255, 255, 0.2)' }}>|</span>
-
-          <span style={{ fontSize: '15px', fontWeight: 700, display: 'flex', alignItems: 'center', gap: '10px' }}>
-            <span>RyperDeck Console</span>
-            <span
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <button
+              onClick={onBack}
               style={{
-                fontSize: '11px',
-                color: '#34d399',
-                background: 'rgba(16, 185, 129, 0.12)',
-                border: '1px solid rgba(16, 185, 129, 0.3)',
-                padding: '3px 9px',
-                borderRadius: '999px',
                 display: 'inline-flex',
                 alignItems: 'center',
-                gap: '4px',
-                fontFamily: 'monospace',
+                gap: '6px',
+                padding: '6px 12px',
+                borderRadius: '999px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.14)',
+                color: '#ffffff',
+                fontSize: '12px',
+                fontWeight: 500,
+                cursor: 'pointer',
               }}
             >
-              <Database style={{ width: 11, height: 11 }} /> Supabase Live
+              <ArrowLeft style={{ width: 14, height: 14 }} />
+              Site
+            </button>
+
+            <span style={{ fontSize: isMobile ? '14px' : '15px', fontWeight: 700 }}>
+              RyperDeck Console
             </span>
+          </div>
+
+          <span
+            style={{
+              fontSize: '10px',
+              color: '#34d399',
+              background: 'rgba(16, 185, 129, 0.12)',
+              border: '1px solid rgba(16, 185, 129, 0.3)',
+              padding: '2px 8px',
+              borderRadius: '999px',
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: '4px',
+              fontFamily: 'monospace',
+            }}
+          >
+            <Database style={{ width: 10, height: 10 }} /> Live
           </span>
         </div>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          {authEmail && (
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'space-between' : 'flex-end', gap: '8px' }}>
+          {authEmail && !isMobile && (
             <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginRight: '6px' }}>
-              Logged in: <strong style={{ color: '#ffffff' }}>{authEmail}</strong>
+              <strong style={{ color: '#ffffff' }}>{authEmail}</strong>
             </span>
           )}
 
-          <button
-            onClick={() => setTick((t) => t + 1)}
-            title="Refresh database"
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              borderRadius: '999px',
-              background: 'rgba(255, 255, 255, 0.08)',
-              border: '1px solid rgba(255, 255, 255, 0.14)',
-              color: '#ffffff',
-              fontSize: '12px',
-              cursor: 'pointer',
-            }}
-          >
-            <RefreshCw style={{ width: 13, height: 13, animation: loading ? 'spin 1s linear infinite' : 'none' }} />
-            <span>Refresh</span>
-          </button>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <button
+              onClick={() => setTick((t) => t + 1)}
+              title="Refresh database"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 12px',
+                borderRadius: '999px',
+                background: 'rgba(255, 255, 255, 0.08)',
+                border: '1px solid rgba(255, 255, 255, 0.14)',
+                color: '#ffffff',
+                fontSize: '12px',
+                cursor: 'pointer',
+              }}
+            >
+              <RefreshCw style={{ width: 13, height: 13, animation: loading ? 'spin 1s linear infinite' : 'none' }} />
+              <span>Refresh</span>
+            </button>
 
-          <button
-            onClick={handleSignOut}
-            style={{
-              display: 'inline-flex',
-              alignItems: 'center',
-              gap: '6px',
-              padding: '8px 14px',
-              borderRadius: '999px',
-              background: 'rgba(239, 68, 68, 0.12)',
-              border: '1px solid rgba(239, 68, 68, 0.3)',
-              color: '#f87171',
-              fontSize: '12px',
-              fontWeight: 500,
-              cursor: 'pointer',
-            }}
-          >
-            <LogOut style={{ width: 13, height: 13 }} />
-            <span>Sign Out</span>
-          </button>
+            <button
+              onClick={handleSignOut}
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: '6px',
+                padding: '7px 12px',
+                borderRadius: '999px',
+                background: 'rgba(239, 68, 68, 0.12)',
+                border: '1px solid rgba(239, 68, 68, 0.3)',
+                color: '#f87171',
+                fontSize: '12px',
+                fontWeight: 500,
+                cursor: 'pointer',
+              }}
+            >
+              <LogOut style={{ width: 13, height: 13 }} />
+              <span>Exit</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div style={{ maxWidth: '1060px', margin: '0 auto', padding: '32px 24px 60px' }}>
+      <div style={{ maxWidth: '1060px', margin: '0 auto', padding: isMobile ? '16px 12px 60px' : '28px 24px 60px' }}>
 
-        {/* 5 Stats Cards Row */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(170px, 1fr))', gap: '14px', marginBottom: '28px' }}>
+        {/* 5 Stats Cards Grid (Responsive 2-col on mobile) */}
+        <div
+          style={{
+            display: 'grid',
+            gridTemplateColumns: isMobile ? 'repeat(2, 1fr)' : 'repeat(auto-fit, minmax(170px, 1fr))',
+            gap: isMobile ? '8px' : '14px',
+            marginBottom: '20px',
+          }}
+        >
           {TABS.map((t) => {
             const isActive = tab === t.id;
             return (
@@ -592,8 +662,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                 key={t.id}
                 onClick={() => setTab(t.id)}
                 style={{
-                  padding: '20px 18px',
-                  borderRadius: '18px',
+                  padding: isMobile ? '14px 12px' : '18px 16px',
+                  borderRadius: '16px',
                   background: isActive ? 'rgba(255, 255, 255, 0.12)' : '#10111a',
                   border: isActive ? '1px solid rgba(255, 255, 255, 0.4)' : '1px solid rgba(255, 255, 255, 0.12)',
                   textAlign: 'left',
@@ -602,17 +672,59 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                   boxShadow: isActive ? '0 8px 24px rgba(0,0,0,0.6)' : 'none',
                 }}
               >
-                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.55)', marginBottom: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.55)', marginBottom: '6px' }}>
                   {t.icon}
-                  <span style={{ fontSize: '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.08em' }}>{t.label}</span>
+                  <span style={{ fontSize: isMobile ? '10px' : '11px', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.06em' }}>{t.label}</span>
                 </div>
-                <div style={{ fontSize: '28px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em' }}>
+                <div style={{ fontSize: isMobile ? '22px' : '26px', fontWeight: 800, color: '#ffffff', letterSpacing: '-0.03em' }}>
                   {t.count}
                 </div>
               </button>
             );
           })}
         </div>
+
+        {/* Horizontal Mobile Tabs Swipe Bar */}
+        {isMobile && (
+          <div
+            style={{
+              display: 'flex',
+              overflowX: 'auto',
+              gap: '6px',
+              paddingBottom: '12px',
+              marginBottom: '12px',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',
+            }}
+          >
+            {TABS.map((t) => {
+              const isActive = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => setTab(t.id)}
+                  style={{
+                    flexShrink: 0,
+                    whiteSpace: 'nowrap',
+                    padding: '8px 14px',
+                    borderRadius: '999px',
+                    background: isActive ? '#ffffff' : 'rgba(255, 255, 255, 0.06)',
+                    border: '1px solid rgba(255, 255, 255, 0.12)',
+                    color: isActive ? '#000000' : 'rgba(255, 255, 255, 0.7)',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t.label} ({t.count})
+                </button>
+              );
+            })}
+          </div>
+        )}
 
         {/* Tab Detail Panel */}
         <div
@@ -626,7 +738,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
           {/* Panel Top Header */}
           <div
             style={{
-              padding: '20px 24px',
+              padding: isMobile ? '16px' : '20px 24px',
               borderBottom: '1px solid rgba(255, 255, 255, 0.08)',
               display: 'flex',
               alignItems: 'center',
@@ -636,20 +748,42 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
             }}
           >
             <div>
-              <h2 style={{ margin: 0, fontSize: '18px', fontWeight: 700, color: '#ffffff' }}>
+              <h2 style={{ margin: 0, fontSize: isMobile ? '16px' : '18px', fontWeight: 700, color: '#ffffff' }}>
                 {TABS.find((t) => t.id === tab)?.label}
               </h2>
               <p style={{ margin: '4px 0 0 0', fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)' }}>
                 {tab === 'bugs' && 'Bug reports sent by users, with direct links to attached Google Drive files.'}
-                {tab === 'features' && 'Community feature suggestions with real-time upvotes and statuses.'}
+                {tab === 'features' && 'Manage roadmap, community requests, statuses, and adjust live upvotes.'}
                 {tab === 'emails' && 'Early-access and notification subscribers from landing page forms.'}
                 {tab === 'supporters' && 'Confirmed supporters with amount, coffee cups, rating, and Razorpay transaction IDs.'}
                 {tab === 'visitors' && 'Unique visitors recorded on this browser and device.'}
               </p>
             </div>
 
-            {/* Export buttons */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {/* Action buttons on header */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+              {tab === 'features' && (
+                <button
+                  onClick={() => setShowAddFeature(!showAddFeature)}
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '7px 14px',
+                    borderRadius: '999px',
+                    background: '#ffffff',
+                    border: 'none',
+                    color: '#000000',
+                    fontSize: '12px',
+                    fontWeight: 700,
+                    cursor: 'pointer',
+                  }}
+                >
+                  <Plus style={{ width: 14, height: 14 }} />
+                  <span>Add Feature</span>
+                </button>
+              )}
+
               {tab === 'bugs' && bugs.length > 0 && <ExportBtn onClick={() => exportJSON(bugs, 'ryperdeck-bugs.json')} />}
               {tab === 'features' && features.length > 0 && <ExportBtn onClick={() => exportJSON(features, 'ryperdeck-features.json')} />}
               {tab === 'emails' && emails.length > 0 && <ExportBtn onClick={() => exportJSON(emails, 'ryperdeck-subscribers.json')} />}
@@ -657,66 +791,189 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
             </div>
           </div>
 
+          {/* New Feature Creator Form */}
+          {tab === 'features' && showAddFeature && (
+            <div
+              style={{
+                padding: isMobile ? '16px' : '20px 24px',
+                background: 'rgba(255, 255, 255, 0.03)',
+                borderBottom: '1px solid rgba(255, 255, 255, 0.1)',
+              }}
+            >
+              <h3 style={{ margin: '0 0 12px 0', fontSize: '14px', fontWeight: 700, color: '#34d399' }}>
+                + Add New Feature / Roadmap Item
+              </h3>
+              <form onSubmit={handleCreateFeature} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                <div>
+                  <input
+                    type="text"
+                    placeholder="Feature title (e.g. OBS Studio Scene Switcher)"
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.target.value)}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      background: '#1a1b26',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      color: '#ffffff',
+                      fontSize: '14px',
+                      boxSizing: 'border-box',
+                    }}
+                  />
+                </div>
+                <div>
+                  <textarea
+                    placeholder="Detailed description of the feature..."
+                    value={newDescription}
+                    onChange={(e) => setNewDescription(e.target.value)}
+                    rows={2}
+                    style={{
+                      width: '100%',
+                      padding: '10px 12px',
+                      borderRadius: '10px',
+                      background: '#1a1b26',
+                      border: '1px solid rgba(255, 255, 255, 0.2)',
+                      color: '#ffffff',
+                      fontSize: '13px',
+                      boxSizing: 'border-box',
+                      resize: 'vertical',
+                    }}
+                  />
+                </div>
+                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap', alignItems: 'center' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>Status:</span>
+                    <select
+                      value={newStatus}
+                      onChange={(e) => setNewStatus(e.target.value)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        background: '#1a1b26',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#ffffff',
+                        fontSize: '12px',
+                      }}
+                    >
+                      <option value="requested">requested</option>
+                      <option value="planned">planned</option>
+                      <option value="building">building</option>
+                      <option value="done">done ✓</option>
+                    </select>
+                  </div>
+
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                    <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>Votes:</span>
+                    <input
+                      type="number"
+                      min={0}
+                      value={newVotes}
+                      onChange={(e) => setNewVotes(parseInt(e.target.value, 10) || 0)}
+                      style={{
+                        width: '70px',
+                        padding: '6px 10px',
+                        borderRadius: '8px',
+                        background: '#1a1b26',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#ffffff',
+                        fontSize: '12px',
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', gap: '8px', marginLeft: isMobile ? '0' : 'auto' }}>
+                    <button
+                      type="submit"
+                      disabled={addingFeature}
+                      style={{
+                        padding: '6px 16px',
+                        borderRadius: '8px',
+                        background: '#34d399',
+                        border: 'none',
+                        color: '#000000',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        cursor: 'pointer',
+                      }}
+                    >
+                      {addingFeature ? 'Saving...' : 'Save Item'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setShowAddFeature(false)}
+                      style={{
+                        padding: '6px 12px',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.1)',
+                        border: 'none',
+                        color: '#ffffff',
+                        fontSize: '12px',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          )}
+
           {/* Panel Body */}
-          <div style={{ padding: '24px' }}>
+          <div style={{ padding: isMobile ? '14px' : '24px' }}>
 
             {/* ── TAB 1: BUGS ──────────────────────────────────────────────── */}
             {tab === 'bugs' && (
               bugs.length === 0 ? (
                 <EmptyState
                   icon={<Bug style={{ width: 28, height: 28 }} />}
-                  title="No Bug Reports in Database"
-                  message="No bug reports submitted yet. When users submit issues on the site with attached screenshots or screen recordings, they will appear here with direct Google Drive links."
+                  title="No Bug Reports Yet"
+                  message="When users encounter issues and click 'Report a Bug', their submissions with system logs and uploaded screenshots will appear here."
                 />
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {bugs.map((bug, idx) => (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {bugs.map((bug) => (
                     <div
-                      key={bug.id || idx}
+                      key={bug.id}
                       style={{
-                        padding: '20px',
+                        padding: isMobile ? '14px' : '18px 20px',
                         borderRadius: '16px',
                         background: 'rgba(255, 255, 255, 0.04)',
-                        border: '1px solid rgba(255, 255, 255, 0.12)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
                       }}
                     >
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-                        <span style={{ fontSize: '11px', fontWeight: 700, color: 'rgba(255, 255, 255, 0.45)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>
-                          Report #{bugs.length - idx}
-                        </span>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                          <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.4)', fontFamily: 'monospace' }}>
-                            {bug.created_at ? new Date(bug.created_at).toLocaleString() : 'Just now'}
-                          </span>
-                          <button
-                            onClick={() => handleDeleteItem('bug_reports', bug.id)}
-                            title="Delete this bug report"
-                            style={{
-                              background: 'none',
-                              border: 'none',
-                              color: 'rgba(255, 255, 255, 0.35)',
-                              cursor: 'pointer',
-                              padding: '4px',
-                              display: 'flex',
-                            }}
-                          >
-                            <Trash2 style={{ width: 15, height: 15 }} />
-                          </button>
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px', marginBottom: '8px' }}>
+                        <div style={{ flex: 1 }}>
+                          <p style={{ margin: 0, fontSize: isMobile ? '14px' : '15px', fontWeight: 600, color: '#ffffff', lineHeight: 1.5 }}>
+                            {bug.what}
+                          </p>
+
+                          <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.45)', marginTop: '6px' }}>
+                            {bug.created_at ? new Date(bug.created_at).toLocaleDateString() : 'Recent'}
+                            {bug.email && <span style={{ color: '#67e8f9', marginLeft: '6px' }}>• {bug.email}</span>}
+                          </div>
                         </div>
+
+                        <button
+                          onClick={() => handleDeleteItem('bug_reports', bug.id)}
+                          title="Delete bug report"
+                          style={{
+                            background: 'none',
+                            border: 'none',
+                            color: 'rgba(255, 255, 255, 0.3)',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            display: 'flex',
+                            flexShrink: 0,
+                          }}
+                        >
+                          <Trash2 style={{ width: 15, height: 15 }} />
+                        </button>
                       </div>
 
-                      <p style={{ margin: '0 0 14px 0', fontSize: '14px', lineHeight: 1.6, color: '#ffffff' }}>
-                        {bug.what}
-                      </p>
-
-                      <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'center', gap: '12px', paddingTop: '12px', borderTop: '1px solid rgba(255, 255, 255, 0.08)' }}>
-                        {bug.email && (
-                          <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)' }}>
-                            Contact: <a href={`mailto:${bug.email}`} style={{ color: '#67e8f9', textDecoration: 'none' }}>{bug.email}</a>
-                          </span>
-                        )}
-
-                        {/* Google Drive Link */}
+                      {/* Google Drive attachment link */}
+                      <div style={{ marginTop: '10px' }}>
                         {bug.drive_url ? (
                           <a
                             href={bug.drive_url}
@@ -726,19 +983,21 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                               display: 'inline-flex',
                               alignItems: 'center',
                               gap: '6px',
-                              padding: '6px 14px',
-                              borderRadius: '999px',
+                              padding: '6px 12px',
+                              borderRadius: '8px',
                               background: 'rgba(16, 185, 129, 0.15)',
                               border: '1px solid rgba(16, 185, 129, 0.35)',
                               color: '#34d399',
                               fontSize: '12px',
                               fontWeight: 600,
                               textDecoration: 'none',
+                              maxWidth: '100%',
+                              wordBreak: 'break-all',
                             }}
                           >
-                            <FolderOpen style={{ width: 14, height: 14 }} />
-                            View Attached File on Google Drive
-                            <ExternalLink style={{ width: 12, height: 12 }} />
+                            <FolderOpen style={{ width: 14, height: 14, flexShrink: 0 }} />
+                            <span>View Attached File on Google Drive</span>
+                            <ExternalLink style={{ width: 12, height: 12, flexShrink: 0 }} />
                           </a>
                         ) : bug.file_name ? (
                           <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.45)' }}>
@@ -752,103 +1011,299 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
               )
             )}
 
-            {/* ── TAB 2: FEATURES ─────────────────────────────────────────── */}
+            {/* ── TAB 2: FEATURES (WITH FULL MANAGEMENT & INLINE EDITING) ──── */}
             {tab === 'features' && (
               features.length === 0 ? (
                 <EmptyState
                   icon={<Lightbulb style={{ width: 28, height: 28 }} />}
-                  title="No Feature Requests in Database"
-                  message="When users submit ideas using 'Request Feature', their requests will appear here with live vote counts and statuses you can change."
+                  title="No Feature Requests Yet"
+                  message="Use the '+ Add Feature' button above to create roadmap items, or wait for visitors to submit ideas."
                 />
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {features.map((feat) => (
-                    <div
-                      key={feat.id}
-                      style={{
-                        padding: '20px',
-                        borderRadius: '16px',
-                        background: 'rgba(255, 255, 255, 0.04)',
-                        border: '1px solid rgba(255, 255, 255, 0.12)',
-                        display: 'flex',
-                        alignItems: 'flex-start',
-                        justifyContent: 'space-between',
-                        gap: '16px',
-                      }}
-                    >
-                      <div style={{ flex: 1 }}>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', marginBottom: '6px' }}>
-                          <span style={{ fontSize: '15px', fontWeight: 700, color: '#ffffff' }}>
-                            {feat.title}
-                          </span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+                  {features.map((feat) => {
+                    const isEditing = editFeatureId === feat.id;
 
-                          {/* Status dropdown */}
-                          <select
-                            value={feat.status}
-                            onChange={(e) => feat.id && handleStatusChange(feat.id, e.target.value)}
+                    if (isEditing) {
+                      return (
+                        <div
+                          key={feat.id}
+                          style={{
+                            padding: isMobile ? '14px' : '18px 20px',
+                            borderRadius: '16px',
+                            background: 'rgba(255, 255, 255, 0.08)',
+                            border: '1px solid #34d399',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '10px',
+                          }}
+                        >
+                          <div style={{ fontSize: '12px', fontWeight: 700, color: '#34d399' }}>
+                            Editing Feature: {feat.title}
+                          </div>
+                          <input
+                            type="text"
+                            value={editTitle}
+                            onChange={(e) => setEditTitle(e.target.value)}
                             style={{
-                              fontSize: '11px',
-                              padding: '4px 10px',
-                              borderRadius: '999px',
+                              padding: '8px 12px',
+                              borderRadius: '8px',
                               background: '#1a1b26',
                               border: '1px solid rgba(255, 255, 255, 0.25)',
                               color: '#ffffff',
-                              cursor: 'pointer',
-                              outline: 'none',
+                              fontSize: '14px',
                             }}
-                          >
-                            <option value="requested">requested</option>
-                            <option value="planned">planned</option>
-                            <option value="building">building</option>
-                            <option value="done">done ✓</option>
-                          </select>
+                          />
+                          <textarea
+                            value={editDescription}
+                            onChange={(e) => setEditDescription(e.target.value)}
+                            rows={3}
+                            style={{
+                              padding: '8px 12px',
+                              borderRadius: '8px',
+                              background: '#1a1b26',
+                              border: '1px solid rgba(255, 255, 255, 0.25)',
+                              color: '#ffffff',
+                              fontSize: '13px',
+                              resize: 'vertical',
+                            }}
+                          />
+                          <div style={{ display: 'flex', gap: '12px', flexWrap: 'wrap', alignItems: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>Status:</span>
+                              <select
+                                value={editStatus}
+                                onChange={(e) => setEditStatus(e.target.value)}
+                                style={{
+                                  padding: '5px 10px',
+                                  borderRadius: '6px',
+                                  background: '#1a1b26',
+                                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                                  color: '#ffffff',
+                                  fontSize: '12px',
+                                }}
+                              >
+                                <option value="requested">requested</option>
+                                <option value="planned">planned</option>
+                                <option value="building">building</option>
+                                <option value="done">done ✓</option>
+                              </select>
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.6)' }}>Votes:</span>
+                              <input
+                                type="number"
+                                min={0}
+                                value={editVotes}
+                                onChange={(e) => setEditVotes(parseInt(e.target.value, 10) || 0)}
+                                style={{
+                                  width: '65px',
+                                  padding: '5px 8px',
+                                  borderRadius: '6px',
+                                  background: '#1a1b26',
+                                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                                  color: '#ffffff',
+                                  fontSize: '12px',
+                                }}
+                              />
+                            </div>
+
+                            <div style={{ display: 'flex', gap: '8px', marginLeft: isMobile ? '0' : 'auto' }}>
+                              <button
+                                onClick={handleSaveEditFeature}
+                                disabled={savingFeature}
+                                style={{
+                                  padding: '6px 14px',
+                                  borderRadius: '6px',
+                                  background: '#34d399',
+                                  border: 'none',
+                                  color: '#000000',
+                                  fontSize: '12px',
+                                  fontWeight: 700,
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                {savingFeature ? 'Saving...' : 'Save Changes'}
+                              </button>
+                              <button
+                                onClick={() => setEditFeatureId(null)}
+                                style={{
+                                  padding: '6px 10px',
+                                  borderRadius: '6px',
+                                  background: 'rgba(255, 255, 255, 0.1)',
+                                  border: 'none',
+                                  color: '#ffffff',
+                                  fontSize: '12px',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                Cancel
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div
+                        key={feat.id}
+                        style={{
+                          padding: isMobile ? '14px' : '18px 20px',
+                          borderRadius: '16px',
+                          background: 'rgba(255, 255, 255, 0.04)',
+                          border: '1px solid rgba(255, 255, 255, 0.12)',
+                          display: 'flex',
+                          flexDirection: isMobile ? 'column' : 'row',
+                          alignItems: isMobile ? 'stretch' : 'flex-start',
+                          justifyContent: 'space-between',
+                          gap: isMobile ? '12px' : '16px',
+                        }}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap', marginBottom: '6px' }}>
+                            <span style={{ fontSize: isMobile ? '14px' : '15px', fontWeight: 700, color: '#ffffff' }}>
+                              {feat.title}
+                            </span>
+
+                            {/* Status dropdown */}
+                            <select
+                              value={feat.status}
+                              onChange={(e) => feat.id && handleStatusChange(feat.id, e.target.value)}
+                              style={{
+                                fontSize: '11px',
+                                padding: '3px 8px',
+                                borderRadius: '999px',
+                                background: '#1a1b26',
+                                border: '1px solid rgba(255, 255, 255, 0.25)',
+                                color: '#ffffff',
+                                cursor: 'pointer',
+                                outline: 'none',
+                              }}
+                            >
+                              <option value="requested">requested</option>
+                              <option value="planned">planned</option>
+                              <option value="building">building</option>
+                              <option value="done">done ✓</option>
+                            </select>
+                          </div>
+
+                          {feat.name && (
+                            <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: 'rgba(255, 255, 255, 0.55)' }}>
+                              Author: <strong style={{ color: '#ffffff' }}>{feat.name}</strong>
+                              {(feat as any).email && <span style={{ color: '#67e8f9', marginLeft: '6px', fontFamily: 'monospace' }}>({(feat as any).email})</span>}
+                            </p>
+                          )}
+
+                          <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255, 255, 255, 0.75)', lineHeight: 1.5 }}>
+                            {feat.description}
+                          </p>
                         </div>
 
-                        {feat.name && (
-                          <p style={{ margin: '0 0 6px 0', fontSize: '12px', color: 'rgba(255, 255, 255, 0.55)' }}>
-                            Suggested by: <strong style={{ color: '#ffffff' }}>{feat.name}</strong>
-                            {(feat as any).email && <span style={{ color: '#67e8f9', marginLeft: '6px', fontFamily: 'monospace' }}>({(feat as any).email})</span>}
-                          </p>
-                        )}
-
-                        <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255, 255, 255, 0.75)', lineHeight: 1.5 }}>
-                          {feat.description}
-                        </p>
-                      </div>
-
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px', flexShrink: 0 }}>
+                        {/* Actions row: Votes, Edit, Delete */}
                         <div
                           style={{
                             display: 'flex',
-                            flexDirection: 'column',
                             alignItems: 'center',
-                            padding: '6px 14px',
-                            borderRadius: '12px',
-                            background: 'rgba(255, 255, 255, 0.08)',
-                            border: '1px solid rgba(255, 255, 255, 0.16)',
+                            justifyContent: isMobile ? 'space-between' : 'flex-end',
+                            gap: '10px',
+                            borderTop: isMobile ? '1px solid rgba(255, 255, 255, 0.06)' : 'none',
+                            paddingTop: isMobile ? '10px' : 0,
                           }}
                         >
-                          <span style={{ fontSize: '10px', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase' }}>votes</span>
-                          <span style={{ fontSize: '18px', fontWeight: 800, color: '#ffffff' }}>{feat.votes}</span>
-                        </div>
+                          {/* Vote badge & quick adjustment buttons */}
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                            <div
+                              style={{
+                                display: 'flex',
+                                flexDirection: 'column',
+                                alignItems: 'center',
+                                padding: '4px 10px',
+                                borderRadius: '10px',
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                border: '1px solid rgba(255, 255, 255, 0.16)',
+                              }}
+                            >
+                              <span style={{ fontSize: '9px', color: 'rgba(255, 255, 255, 0.5)', textTransform: 'uppercase' }}>votes</span>
+                              <span style={{ fontSize: '16px', fontWeight: 800, color: '#ffffff' }}>{feat.votes}</span>
+                            </div>
 
-                        <button
-                          onClick={() => handleDeleteItem('feature_requests', feat.id)}
-                          title="Delete this feature request"
-                          style={{
-                            background: 'none',
-                            border: 'none',
-                            color: 'rgba(255, 255, 255, 0.35)',
-                            cursor: 'pointer',
-                            padding: '4px',
-                            display: 'flex',
-                          }}
-                        >
-                          <Trash2 style={{ width: 15, height: 15 }} />
-                        </button>
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                              <button
+                                onClick={() => feat.id && handleAdjustVotes(feat.id, feat.votes, 1)}
+                                title="Increase vote count by 1"
+                                style={{
+                                  background: 'rgba(255, 255, 255, 0.06)',
+                                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                                  borderRadius: '4px',
+                                  color: '#34d399',
+                                  cursor: 'pointer',
+                                  padding: '1px 3px',
+                                  display: 'flex',
+                                }}
+                              >
+                                <ChevronUp style={{ width: 12, height: 12 }} />
+                              </button>
+                              <button
+                                onClick={() => feat.id && handleAdjustVotes(feat.id, feat.votes, -1)}
+                                title="Decrease vote count by 1"
+                                style={{
+                                  background: 'rgba(255, 255, 255, 0.06)',
+                                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                                  borderRadius: '4px',
+                                  color: '#f87171',
+                                  cursor: 'pointer',
+                                  padding: '1px 3px',
+                                  display: 'flex',
+                                }}
+                              >
+                                <ChevronDown style={{ width: 12, height: 12 }} />
+                              </button>
+                            </div>
+                          </div>
+
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                            <button
+                              onClick={() => handleStartEditFeature(feat)}
+                              title="Edit feature details"
+                              style={{
+                                background: 'rgba(255, 255, 255, 0.08)',
+                                border: '1px solid rgba(255, 255, 255, 0.14)',
+                                borderRadius: '8px',
+                                color: '#ffffff',
+                                cursor: 'pointer',
+                                padding: '6px 10px',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                gap: '4px',
+                                fontSize: '11px',
+                                fontWeight: 600,
+                              }}
+                            >
+                              <Edit2 style={{ width: 12, height: 12 }} />
+                              <span>Edit</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleDeleteItem('feature_requests', feat.id)}
+                              title="Delete this feature request"
+                              style={{
+                                background: 'none',
+                                border: 'none',
+                                color: 'rgba(255, 255, 255, 0.3)',
+                                cursor: 'pointer',
+                                padding: '6px',
+                                display: 'flex',
+                              }}
+                            >
+                              <Trash2 style={{ width: 15, height: 15 }} />
+                            </button>
+                          </div>
+                        </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )
             )}
@@ -858,8 +1313,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
               emails.length === 0 ? (
                 <EmptyState
                   icon={<Mail style={{ width: 28, height: 28 }} />}
-                  title="No Subscribers in Database"
-                  message="No subscribers recorded yet. When visitors sign up on the site to follow development, their email addresses will appear here."
+                  title="No Subscribers Yet"
+                  message="When visitors sign up on the site to follow updates, their email addresses will appear here."
                 />
               ) : (
                 <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
@@ -870,49 +1325,31 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                         display: 'flex',
                         alignItems: 'center',
                         justifyContent: 'space-between',
-                        padding: '14px 18px',
+                        padding: isMobile ? '12px 14px' : '14px 18px',
                         borderRadius: '12px',
                         background: 'rgba(255, 255, 255, 0.04)',
                         border: '1px solid rgba(255, 255, 255, 0.1)',
                       }}
                     >
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
-                        <div
-                          style={{
-                            width: '26px',
-                            height: '26px',
-                            borderRadius: '999px',
-                            background: 'rgba(255, 255, 255, 0.1)',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            fontSize: '11px',
-                            fontWeight: 700,
-                            color: 'rgba(255, 255, 255, 0.7)',
-                          }}
-                        >
-                          {idx + 1}
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                        <Mail style={{ width: 15, height: 15, color: '#34d399', flexShrink: 0 }} />
+                        <div>
+                          <div style={{ fontSize: isMobile ? '13px' : '14px', fontWeight: 600, color: '#ffffff', wordBreak: 'break-all' }}>
+                            {sub.email}
+                          </div>
+                          <div style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.4)' }}>
+                            Subscribed {sub.created_at ? new Date(sub.created_at).toLocaleDateString() : ''}
+                          </div>
                         </div>
-                        <a
-                          href={`mailto:${sub.email}`}
-                          style={{ fontSize: '14px', color: '#ffffff', fontFamily: 'monospace', textDecoration: 'none' }}
-                        >
-                          {sub.email}
-                        </a>
                       </div>
 
-                      <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                        <span style={{ fontSize: '11px', color: 'rgba(255, 255, 255, 0.4)', fontFamily: 'monospace' }}>
-                          {sub.created_at ? new Date(sub.created_at).toLocaleDateString() : 'Active'}
-                        </span>
-                        <button
-                          onClick={() => handleDeleteItem('subscribers', sub.id)}
-                          title="Delete subscriber"
-                          style={{ background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.35)', cursor: 'pointer', padding: '4px', display: 'flex' }}
-                        >
-                          <Trash2 style={{ width: 14, height: 14 }} />
-                        </button>
-                      </div>
+                      <button
+                        onClick={() => handleDeleteItem('subscribers', sub.id)}
+                        title="Delete subscriber"
+                        style={{ background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.3)', cursor: 'pointer', padding: '4px', display: 'flex' }}
+                      >
+                        <Trash2 style={{ width: 14, height: 14 }} />
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -925,11 +1362,11 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                 <EmptyState
                   icon={<Coffee style={{ width: 28, height: 28 }} />}
                   title="No Supporters Recorded Yet"
-                  message="When users make a contribution via Razorpay Standard Checkout, verified payments and personal messages will appear here."
+                  message="When users make a contribution via Razorpay Standard Checkout, verified payments and messages will appear here."
                 />
               ) : (
                 <div>
-                  <div style={{ marginBottom: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <div style={{ marginBottom: '14px' }}>
                     <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255, 255, 255, 0.65)' }}>
                       Total Pool Collected: <strong style={{ color: '#34d399', fontSize: '15px' }}>₹{supporters.reduce((acc, s) => acc + (s.amount || 0), 0).toLocaleString()}</strong> ({supporters.length} supporters)
                     </p>
@@ -941,17 +1378,19 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                         key={sup.id || idx}
                         style={{
                           display: 'flex',
-                          alignItems: 'center',
+                          flexDirection: isMobile ? 'column' : 'row',
+                          alignItems: isMobile ? 'stretch' : 'center',
                           justifyContent: 'space-between',
-                          padding: '16px 20px',
+                          gap: isMobile ? '10px' : '16px',
+                          padding: isMobile ? '14px' : '16px 20px',
                           borderRadius: '14px',
                           background: 'rgba(255, 255, 255, 0.04)',
                           border: '1px solid rgba(255, 255, 255, 0.1)',
                         }}
                       >
                         <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                            <span style={{ fontSize: '15px', fontWeight: 700, color: '#ffffff' }}>{sup.name}</span>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                            <span style={{ fontSize: isMobile ? '14px' : '15px', fontWeight: 700, color: '#ffffff' }}>{sup.name}</span>
                             {sup.verified && (
                               <span
                                 style={{
@@ -978,14 +1417,23 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                           )}
                           {sup.payment_id && (
                             <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#67e8f9', fontFamily: 'monospace' }}>
-                              Razorpay ID: {sup.payment_id}
+                              Razorpay: {sup.payment_id}
                             </p>
                           )}
                         </div>
 
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
-                          <div style={{ textAlign: 'right' }}>
-                            <div style={{ fontSize: '18px', fontWeight: 800, color: '#34d399', fontFamily: 'monospace' }}>
+                        <div
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: isMobile ? 'space-between' : 'flex-end',
+                            gap: '14px',
+                            borderTop: isMobile ? '1px solid rgba(255, 255, 255, 0.06)' : 'none',
+                            paddingTop: isMobile ? '8px' : 0,
+                          }}
+                        >
+                          <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
+                            <div style={{ fontSize: '17px', fontWeight: 800, color: '#34d399', fontFamily: 'monospace' }}>
                               ₹{sup.amount?.toLocaleString()}
                             </div>
                             <div style={{ fontSize: '11px', color: '#fbbf24' }}>
@@ -995,7 +1443,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                           <button
                             onClick={() => handleDeleteItem('supporters', sup.id)}
                             title="Delete supporter record"
-                            style={{ background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.35)', cursor: 'pointer', padding: '4px', display: 'flex' }}
+                            style={{ background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.3)', cursor: 'pointer', padding: '4px', display: 'flex' }}
                           >
                             <Trash2 style={{ width: 14, height: 14 }} />
                           </button>
@@ -1011,7 +1459,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
             {tab === 'visitors' && (
               <div
                 style={{
-                  padding: '40px 20px',
+                  padding: isMobile ? '24px 16px' : '40px 20px',
                   borderRadius: '16px',
                   background: 'rgba(255, 255, 255, 0.03)',
                   border: '1px solid rgba(255, 255, 255, 0.08)',
@@ -1022,7 +1470,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                 <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 700, color: '#ffffff' }}>
                   Lifetime Unique Site Visitors
                 </h3>
-                <p style={{ margin: '0 0 8px 0', fontSize: '56px', fontWeight: 800, color: '#ffffff', fontFamily: 'monospace', letterSpacing: '-0.04em' }}>
+                <p style={{ margin: '0 0 8px 0', fontSize: isMobile ? '40px' : '56px', fontWeight: 800, color: '#ffffff', fontFamily: 'monospace', letterSpacing: '-0.04em' }}>
                   {visitorCount.toLocaleString()}
                 </p>
                 <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255, 255, 255, 0.45)' }}>
@@ -1055,15 +1503,15 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; message: stri
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'center',
-      padding: '50px 20px',
+      padding: '40px 16px',
       textAlign: 'center',
       gap: '10px',
     }}
   >
     <div
       style={{
-        width: '54px',
-        height: '54px',
+        width: '50px',
+        height: '50px',
         borderRadius: '999px',
         background: 'rgba(255, 255, 255, 0.06)',
         border: '1px solid rgba(255, 255, 255, 0.14)',
@@ -1071,12 +1519,12 @@ const EmptyState: React.FC<{ icon: React.ReactNode; title: string; message: stri
         alignItems: 'center',
         justifyContent: 'center',
         color: 'rgba(255, 255, 255, 0.6)',
-        marginBottom: '6px',
+        marginBottom: '4px',
       }}
     >
       {icon}
     </div>
-    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#ffffff' }}>
+    <h3 style={{ margin: 0, fontSize: '15px', fontWeight: 700, color: '#ffffff' }}>
       {title}
     </h3>
     <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255, 255, 255, 0.5)', maxWidth: '440px', lineHeight: 1.5 }}>
@@ -1092,7 +1540,7 @@ const ExportBtn: React.FC<{ onClick: () => void }> = ({ onClick }) => (
       display: 'inline-flex',
       alignItems: 'center',
       gap: '6px',
-      padding: '7px 14px',
+      padding: '6px 12px',
       borderRadius: '999px',
       background: 'rgba(255, 255, 255, 0.08)',
       border: '1px solid rgba(255, 255, 255, 0.14)',

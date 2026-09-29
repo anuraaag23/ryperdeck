@@ -5,10 +5,10 @@ import { DeveloperPhotoFrame } from './DeveloperPhotoFrame';
 export const DeveloperStorySection: React.FC = () => {
 
   const milestones = [
+    { label: 'Solo Creator Age', value: '20' },
     { label: 'Free Forever', value: '100%' },
     { label: 'Cloud Servers / Telemetry', value: '0' },
     { label: 'Local UDP Response', value: '< 1ms' },
-    { label: 'Windows & Android', value: 'Native' },
   ];
 
   return (
@@ -30,7 +30,7 @@ export const DeveloperStorySection: React.FC = () => {
             <svg className="w-3 h-3 text-white/70" fill="currentColor" viewBox="0 0 16 16">
               <path d="M8 0l1.8 5.5H16l-4.9 3.6L12.9 15 8 11.4 3.1 15l1.8-5.9L0 5.5h6.2z" />
             </svg>
-            Built by one person
+            Built by one person • Age 20
           </span>
         </Reveal>
 
@@ -51,7 +51,7 @@ export const DeveloperStorySection: React.FC = () => {
             <Reveal direction="up" delay={100}>
               <div className="space-y-5 text-[16px] sm:text-[17px] text-white/50 leading-relaxed font-light mb-10">
                 <p>
-                  I'm Anurag — a solo developer who got tired of spending{' '}
+                  I'm Anurag — I am 20, a solo developer who got tired of spending{' '}
                   <span className="text-white/80 font-medium">$250 on a Stream Deck</span> just to control my
                   Windows PC while streaming and working. So I built my own.
                 </p>
