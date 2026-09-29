@@ -1,0 +1,527 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ── Safe Area Insets (notched phones, landscape mode) ─────────────── */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+
+/* Prevent horizontal scrollbar from content overflow */
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+/* Smooth scroll with offset for fixed navbar */
+html {
+  scroll-padding-top: 80px;
+}
+
+/* Touch interactions */
+* {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Landscape mode: reduce section padding on short viewports */
+@media (max-height: 500px) and (orientation: landscape) {
+  section {
+    padding-top: 4rem !important;
+    padding-bottom: 4rem !important;
+  }
+  .min-h-screen, .min-h-\[100svh\] {
+    min-height: 100vh;
+  }
+}
+
+/* ── Scroll-reveal animation system ────────────────────────────────── */
+@keyframes revealFadeUp {
+  from { opacity: 0; transform: translateY(36px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes revealFadeLeft {
+  from { opacity: 0; transform: translateX(-32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes revealFadeRight {
+  from { opacity: 0; transform: translateX(32px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes revealScale {
+  from { opacity: 0; transform: scale(0.94); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+/* Base: hidden until revealed */
+.reveal {
+  opacity: 0;
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  animation-fill-mode: both;
+  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1);
+  animation-duration: 0.75s;
+}
+.reveal-up.is-visible       { animation-name: revealFadeUp; }
+.reveal-left.is-visible     { animation-name: revealFadeLeft; }
+.reveal-right.is-visible    { animation-name: revealFadeRight; }
+.reveal-scale.is-visible    { animation-name: revealScale; }
+
+/* Stagger delays for grid children */
+.stagger-1 { animation-delay: 0.05s; }
+.stagger-2 { animation-delay: 0.12s; }
+.stagger-3 { animation-delay: 0.20s; }
+.stagger-4 { animation-delay: 0.28s; }
+.stagger-5 { animation-delay: 0.36s; }
+.stagger-6 { animation-delay: 0.44s; }
+
+
+:root {
+  color-scheme: dark;
+  --glass-bg: rgba(14, 15, 22, 0.65);
+  --glass-surface: rgba(255, 255, 255, 0.04);
+  --glass-surface-hover: rgba(255, 255, 255, 0.075);
+  --glass-border: rgba(255, 255, 255, 0.12);
+  --glass-border-strong: rgba(255, 255, 255, 0.25);
+  --glass-highlight: rgba(255, 255, 255, 0.35);
+  --glass-cyan-glow: rgba(0, 240, 255, 0.25);
+  --glass-amber-glow: rgba(245, 158, 11, 0.25);
+}
+
+/* Completely remove visible scrollbar across all browsers */
+html,
+body,
+* {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+::-webkit-scrollbar {
+  display: none !important;
+  width: 0px !important;
+  height: 0px !important;
+  background: transparent !important;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  background-color: #000000;
+  color: #f5f5f7;
+  font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Inter", system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+/* Non-clickable showcase images */
+.showcase-image {
+  pointer-events: none !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -webkit-user-drag: none !important;
+}
+
+/* ==========================================================================
+   LIQUID GLASS DESIGN SYSTEM (inspired by liquidglassdesign.com & iOS 26)
+   ========================================================================== */
+
+/* 1. Liquid Glass Surfaces & Panels */
+.liquid-glass-panel {
+  background: rgba(13, 14, 20, 0.65);
+  backdrop-filter: blur(28px) saturate(190%) contrast(105%);
+  -webkit-backdrop-filter: blur(28px) saturate(190%) contrast(105%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 
+    0 30px 80px -20px rgba(0, 0, 0, 0.85),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.25),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.4);
+}
+
+.liquid-glass-panel-subtle {
+  background: rgba(255, 255, 255, 0.025);
+  backdrop-filter: blur(20px) saturate(160%);
+  -webkit-backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 
+    0 15px 40px -10px rgba(0, 0, 0, 0.6),
+    inset 0 1px 0.5px 0 rgba(255, 255, 255, 0.15);
+}
+
+/* 2. Liquid Glass Buttons */
+.liquid-glass-btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(18px) saturate(180%);
+  -webkit-backdrop-filter: blur(18px) saturate(180%);
+  border-radius: 9999px;
+  font-weight: 600;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+  overflow: hidden;
+}
+
+.liquid-glass-btn:active {
+  transform: scale(0.96);
+}
+
+/* Primary White/Ice Liquid Glass Capsule */
+.liquid-glass-btn-primary {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(240, 245, 255, 0.85) 100%);
+  color: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.6);
+  box-shadow: 
+    0 10px 30px -5px rgba(255, 255, 255, 0.25),
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1px rgba(255, 255, 255, 1),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.15);
+}
+
+.liquid-glass-btn-primary:hover {
+  background: linear-gradient(135deg, #ffffff 0%, rgba(245, 250, 255, 0.95) 100%);
+  box-shadow: 
+    0 12px 35px -3px rgba(255, 255, 255, 0.4),
+    0 6px 16px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1.5px rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+/* Translucent Frosted Glass Button (Secondary) */
+.liquid-glass-btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 8px 24px -4px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25),
+    inset 0 -1px 1px rgba(0, 0, 0, 0.2);
+}
+
+.liquid-glass-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.09);
+  border-color: rgba(255, 255, 255, 0.22);
+  box-shadow: 
+    0 12px 28px -4px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.35);
+  transform: translateY(-1px);
+}
+
+/* Ice Optical Glass Button */
+.liquid-glass-btn-cyan {
+  background: #ffffff;
+  color: #000000;
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 
+    0 10px 25px -4px rgba(255, 255, 255, 0.25),
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1.5px rgba(255, 255, 255, 1);
+}
+
+.liquid-glass-btn-cyan:hover {
+  background: #f8fafc;
+  box-shadow: 
+    0 14px 32px -4px rgba(255, 255, 255, 0.35),
+    inset 0 1px 2px rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+/* Amber/Coffee Liquid Glass Button */
+.liquid-glass-btn-amber {
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.9) 0%, rgba(217, 119, 6, 0.85) 100%);
+  color: #000000;
+  border: 1px solid rgba(254, 215, 170, 0.6);
+  box-shadow: 
+    0 12px 30px -4px rgba(245, 158, 11, 0.35),
+    0 4px 12px rgba(0, 0, 0, 0.3),
+    inset 0 1px 1.5px rgba(255, 255, 255, 0.8);
+}
+
+.liquid-glass-btn-amber:hover {
+  background: linear-gradient(135deg, rgba(251, 191, 36, 1) 0%, rgba(245, 158, 11, 0.95) 100%);
+  box-shadow: 
+    0 16px 40px -4px rgba(245, 158, 11, 0.5),
+    inset 0 1px 2px rgba(255, 255, 255, 1);
+  transform: translateY(-1px);
+}
+
+/* Amber Frosted Pill (Compact) */
+.liquid-glass-pill-amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fde68a;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  box-shadow: 
+    0 4px 15px rgba(245, 158, 11, 0.15),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25);
+  transition: all 0.2s ease;
+}
+
+.liquid-glass-pill-amber:hover {
+  background: rgba(245, 158, 11, 0.2);
+  border-color: rgba(245, 158, 11, 0.45);
+  box-shadow: 
+    0 6px 20px rgba(245, 158, 11, 0.25),
+    inset 0 1px 1px rgba(255, 255, 255, 0.4);
+}
+
+/* 3. Liquid Glass Icon Pods (Standardized Apple iOS 26 optical housing) */
+.liquid-glass-icon-pod {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  box-shadow: 
+    0 8px 20px -4px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px 0 rgba(255, 255, 255, 0.28),
+    inset 0 -1px 1px 0 rgba(0, 0, 0, 0.3);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.liquid-glass-icon-pod-cyan {
+  background: rgba(0, 240, 255, 0.08);
+  border-color: rgba(0, 240, 255, 0.25);
+  box-shadow: 
+    0 8px 24px -4px rgba(0, 240, 255, 0.2),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.4);
+}
+
+.liquid-glass-icon-pod-amber {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.3);
+  box-shadow: 
+    0 8px 24px -4px rgba(245, 158, 11, 0.2),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.4);
+}
+
+.liquid-glass-icon-pod-purple {
+  background: rgba(147, 51, 234, 0.1);
+  border-color: rgba(168, 85, 247, 0.3);
+  box-shadow: 
+    0 8px 24px -4px rgba(147, 51, 234, 0.2),
+    inset 0 1px 1.5px 0 rgba(255, 255, 255, 0.4);
+}
+
+/* 4. Liquid Glass Badges & Chips */
+.liquid-glass-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  padding: 0.25rem 0.75rem;
+  border-radius: 9999px;
+  font-size: 0.6875rem;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 0.5px rgba(255, 255, 255, 0.2);
+}
+
+.liquid-glass-badge-cyan {
+  background: rgba(0, 240, 255, 0.08);
+  border-color: rgba(0, 240, 255, 0.25);
+  color: #38bdf8;
+  box-shadow: 
+    0 2px 10px rgba(0, 240, 255, 0.12),
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.3);
+}
+
+.liquid-glass-badge-amber {
+  background: rgba(245, 158, 11, 0.1);
+  border-color: rgba(245, 158, 11, 0.28);
+  color: #fcd34d;
+  box-shadow: 
+    0 2px 10px rgba(245, 158, 11, 0.12),
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.3);
+}
+
+.liquid-glass-badge-emerald {
+  background: rgba(16, 185, 129, 0.1);
+  border-color: rgba(16, 185, 129, 0.28);
+  color: #6ee7b7;
+  box-shadow: 
+    0 2px 10px rgba(16, 185, 129, 0.12),
+    inset 0 1px 0.5px rgba(255, 255, 255, 0.3);
+}
+
+/* 5. Liquid Glass Input Fields */
+.liquid-glass-input {
+  background: rgba(255, 255, 255, 0.035);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.4);
+  color: #ffffff;
+  transition: all 0.2s ease;
+}
+
+.liquid-glass-input:focus {
+  outline: none;
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 
+    0 0 20px rgba(0, 240, 255, 0.2),
+    inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* 6. Animations */
+@keyframes specularSweep {
+  0% {
+    transform: translateX(-150%) skewX(-20deg);
+  }
+  50%, 100% {
+    transform: translateX(250%) skewX(-20deg);
+  }
+}
+
+.animate-specular {
+  animation: specularSweep 6s cubic-bezier(0.16, 1, 0.3, 1) infinite;
+}
+
+@keyframes frameTopSweep {
+  0% {
+    transform: translateX(-120%);
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  80% {
+    opacity: 1;
+  }
+  100% {
+    transform: translateX(250%);
+    opacity: 0;
+  }
+}
+
+.animate-top-sweep {
+  animation: frameTopSweep 3.5s ease-in-out infinite;
+}
+
+@keyframes liquidGlintPulse {
+  0%, 100% {
+    opacity: 0.4;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1.05);
+  }
+}
+
+.animate-liquid-glint {
+  animation: liquidGlintPulse 4s ease-in-out infinite;
+}
+
+/* Scroll mouse dot — bounces inside the mouse outline on hero */
+@keyframes scrollDot {
+  0%   { transform: translateY(0px);   opacity: 1; }
+  40%  { transform: translateY(12px);  opacity: 0.3; }
+  41%  { transform: translateY(0px);   opacity: 0; }
+  42%  { transform: translateY(0px);   opacity: 1; }
+  100% { transform: translateY(0px);   opacity: 1; }
+}
+.animate-scroll-dot {
+  animation: scrollDot 2.2s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Slide name fade-swap */
+@keyframes slideNameIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.slide-name-in {
+  animation: slideNameIn 380ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Developer story timeline pulse */
+@keyframes timelinePulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0,240,255,0.4); }
+  50%       { box-shadow: 0 0 0 8px rgba(0,240,255,0); }
+}
+.timeline-pulse {
+  animation: timelinePulse 2.4s ease-in-out infinite;
+}
+
+/* Notify me ripple */
+@keyframes notifyRipple {
+  to { transform: scale(2.5); opacity: 0; }
+}
+.notify-ripple {
+  animation: notifyRipple 600ms ease-out forwards;
+}
+
+/* Carousel slide in/out */
+@keyframes slideInFromRight {
+  from { opacity: 0; transform: translateX(60px) scale(0.96); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+@keyframes slideInFromLeft {
+  from { opacity: 0; transform: translateX(-60px) scale(0.96); }
+  to   { opacity: 1; transform: translateX(0) scale(1); }
+}
+.slide-in-right {
+  animation: slideInFromRight 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+.slide-in-left {
+  animation: slideInFromLeft 420ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* Floating animated coffee cup */
+@keyframes floatCoffee {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  50% {
+    transform: translateY(-8px) rotate(-1.5deg);
+  }
+}
+.animate-float-coffee {
+  animation: floatCoffee 3.8s ease-in-out infinite;
+}
+
+@keyframes steamRise {
+  0% {
+    opacity: 0;
+    transform: translateY(0) scaleX(0.8);
+  }
+  50% {
+    opacity: 0.55;
+    transform: translateY(-7px) scaleX(1.2);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-14px) scaleX(1.5);
+  }
+}
+.animate-steam-1 {
+  animation: steamRise 2.2s ease-in-out infinite;
+}
+.animate-steam-2 {
+  animation: steamRise 2.2s ease-in-out infinite 0.7s;
+}
+.animate-steam-3 {
+  animation: steamRise 2.2s ease-in-out infinite 1.4s;
+}
+
+/* Star rating pop animation */
+@keyframes starPop {
+  0%   { transform: scale(1); }
+  30%  { transform: scale(1.55) rotate(-8deg); }
+  55%  { transform: scale(0.85) rotate(5deg); }
+  75%  { transform: scale(1.2) rotate(-3deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+.star-pop {
+  animation: starPop 380ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}

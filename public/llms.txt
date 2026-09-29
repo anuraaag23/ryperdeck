@@ -1,0 +1,35 @@
+# RyperDeck
+
+> Turn your phone or tablet into an ultra-fluid liquid glass wireless macro deck for Windows. 100% free, zero latency, limitless pages, and zero hardware required.
+
+## Overview
+RyperDeck is an open, modern, and free alternative to expensive macro hardware like the Elgato Stream Deck ($150-$250). Created by solo developer Anurag, RyperDeck connects your Android phone or tablet to your Windows 10/11 PC over local Wi-Fi via UDP multipeer protocol, offering sub-millisecond tap response without any cloud relay or telemetry.
+
+## Key Features
+- **100% Free Forever**: No subscriptions, no in-app purchases, no paywalls, no device limits.
+- **Limitless Pages**: Unlike physical 8 or 15-key decks, RyperDeck allows unlimited custom pages and matrix grids (e.g. Media Controls, Gaming Hotkeys, Workflows, PC Hardware Monitoring).
+- **Zero Latency**: Direct low-latency UDP socket packet transmission over local network (0.3ms latency).
+- **100% Private by Design**: Keystrokes, macros, and layouts never leave your local Wi-Fi router. No account creation, no external servers, no telemetry.
+- **Windows System Tray Companion**: Runs as a native, lightweight background service on Windows 11 & 10 consuming under 15MB of RAM.
+- **Audio & Media Control**: Per-app Windows volume mixer dials and hotkeys.
+- **OBS Studio & Streaming**: Native macro triggers for scenes, mic mute, push-to-talk, and clipping.
+- **Custom .JSON Preset Engine**: Export and import full workspace layouts or individual pages with 1-click .json files.
+
+## Platforms & Requirements
+- **Windows**: Windows 11 and Windows 10 (64-bit). Installer: RyperDeck-Windows-Setup.exe
+- **Mobile**: Android phones and tablets. App installer: RyperDeck.apk
+- **Mac Alternative**: For macOS users, PhoneDeck (https://phonedeck.io) is recommended.
+
+## Frequently Asked Questions (FAQ)
+- **Is RyperDeck truly 100% free?** Yes, completely free forever with zero ads or subscriptions.
+- **Does it require an internet connection?** No, it communicates purely over local network UDP broadcast.
+- **Can I run it on an old phone or tablet?** Yes, leave any old Android device beside your keyboard and it will auto-reconnect on PC boot.
+
+## Quick Links
+- **Website**: https://ryperdeck.app
+- **Download Windows & Android**: https://ryperdeck.app/#download
+- **Preset Workspace**: https://ryperdeck.app/#presets
+- **Privacy Policy**: https://ryperdeck.app/#privacy-policy
+- **Creator (GitHub)**: https://github.com/anuraaag23
+- **Telegram Community**: https://t.me/Anurag_y2
+- **Instagram**: https://instagram.com/anuraaag12
