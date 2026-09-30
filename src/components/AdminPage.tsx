@@ -44,8 +44,8 @@ import {
   DbSupporter,
 } from '../lib/supabase';
 
-// Secret fallback password for developer access (never shown in UI)
-const BACKUP_ADMIN_PW = (import.meta as any).env?.VITE_ADMIN_PASSWORD || 'ryper@admin2025';
+// Admin password from private environment variables
+const BACKUP_ADMIN_PW = (import.meta as any).env?.VITE_ADMIN_PASSWORD || '';
 
 interface AdminPageProps {
   onBack: () => void;
@@ -178,7 +178,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
           return;
         }
 
-        if (pwTrimmed === BACKUP_ADMIN_PW) {
+        if (BACKUP_ADMIN_PW && pwTrimmed === BACKUP_ADMIN_PW) {
           setAuthed(true);
           setAuthEmail(emailTrimmed);
           setLoading(false);
@@ -188,7 +188,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
 
         setError(authError?.message || 'Invalid email or password.');
       } catch (err: any) {
-        if (pwTrimmed === BACKUP_ADMIN_PW) {
+        if (BACKUP_ADMIN_PW && pwTrimmed === BACKUP_ADMIN_PW) {
           setAuthed(true);
           setAuthEmail(emailTrimmed);
           setLoading(false);
@@ -198,7 +198,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
         setError(err?.message || 'Authentication error.');
       }
     } else {
-      if (pwTrimmed === BACKUP_ADMIN_PW) {
+      if (BACKUP_ADMIN_PW && pwTrimmed === BACKUP_ADMIN_PW) {
         setAuthed(true);
         setAuthEmail(emailTrimmed);
         setLoading(false);
