@@ -1772,6 +1772,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                           </div>
                           <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)', lineHeight: 1.4 }}>
                             Webhook URL: <code style={{ color: '#38bdf8', fontFamily: 'monospace' }}>https://ryperdeck.vercel.app/api/kofi-webhook</code>
+                            <span style={{ marginLeft: '8px', color: '#34d399', fontSize: '11px', fontFamily: 'monospace' }}>• Token: c7bf...1df8 (Secured ✓)</span>
                           </p>
                         </div>
 
