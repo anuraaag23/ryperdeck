@@ -120,6 +120,7 @@ export const App: React.FC = () => {
           <Navbar
             onRequestFeature={() => setFeatureOpen(true)}
             onReportBug={() => setBugOpen(true)}
+            isModalOpen={featureOpen || bugOpen}
           />
 
           <main className="relative z-10">

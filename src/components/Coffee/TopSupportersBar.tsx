@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { createPortal } from 'react-dom';
 import { getTopSupporters, SupporterReview } from '../../config/razorpay';
 import { Star, MessageSquare, X, Award } from 'lucide-react';
 import { CoffeeSupportModal } from './CoffeeSupportModal';
@@ -15,6 +16,19 @@ export const TopSupportersBar: React.FC = () => {
     window.addEventListener('ryperdeck_supporters_updated', handleUpdate);
     return () => window.removeEventListener('ryperdeck_supporters_updated', handleUpdate);
   }, []);
+
+  useEffect(() => {
+    if (selectedSupporter) {
+      window.dispatchEvent(
+        new CustomEvent('ryperdeck_coffee_modal_state', { detail: { open: true } })
+      );
+      return () => {
+        window.dispatchEvent(
+          new CustomEvent('ryperdeck_coffee_modal_state', { detail: { open: false } })
+        );
+      };
+    }
+  }, [selectedSupporter]);
 
   const getRankBadge = (index: number) => {
     switch (index) {
@@ -86,8 +100,11 @@ export const TopSupportersBar: React.FC = () => {
       </span>
 
       {/* Supporter Review Modal */}
-      {selectedSupporter && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl animate-fadeIn">
+      {selectedSupporter && createPortal(
+        <div
+          className="fixed inset-0 flex items-center justify-center p-4 bg-black/80 backdrop-blur-2xl animate-fadeIn"
+          style={{ zIndex: 9999999 }}
+        >
           <div className="relative w-full max-w-md rounded-[32px] bg-[#090a12]/95 border border-white/[0.15] p-7 sm:p-8 shadow-[0_40px_100px_rgba(0,0,0,0.95),inset_0_1px_1px_rgba(255,255,255,0.3)]">
             {/* Close Button */}
             <button
@@ -163,7 +180,8 @@ export const TopSupportersBar: React.FC = () => {
               </button>
             </div>
           </div>
-        </div>
+        </div>,
+        document.body
       )}
 
       {/* Coffee Payment Modal */}

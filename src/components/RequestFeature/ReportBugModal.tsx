@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { X, ArrowLeft, Bug, Upload, CheckCircle2 } from 'lucide-react';
 import { uploadToGoogleDrive } from '../../lib/gdrive';
 import { submitBugReport } from '../../lib/supabase';
@@ -104,9 +105,10 @@ export const ReportBugModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   if (!isOpen) return null;
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-[999999] overflow-y-auto bg-black/90 backdrop-blur-2xl animate-fadeIn p-4 sm:p-6 md:p-10 cursor-default"
+      className="fixed inset-0 overflow-y-auto bg-black/90 backdrop-blur-2xl animate-fadeIn p-4 sm:p-6 md:p-10 cursor-default"
+      style={{ zIndex: 9999999 }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
       <div className="max-w-4xl mx-auto my-6 sm:my-10 bg-[#090a10] border border-white/[0.12] rounded-[32px] sm:rounded-[40px] shadow-[0_40px_140px_rgba(0,0,0,0.98)] overflow-hidden">
@@ -295,6 +297,7 @@ export const ReportBugModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
 
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };

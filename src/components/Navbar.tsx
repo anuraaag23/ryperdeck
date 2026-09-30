@@ -6,12 +6,14 @@ import { getStoredCoffeeStats, CoffeeStats } from '../config/razorpay';
 interface NavbarProps {
   onRequestFeature?: () => void;
   onReportBug?: () => void;
+  isModalOpen?: boolean;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onRequestFeature, onReportBug }) => {
+export const Navbar: React.FC<NavbarProps> = ({ onRequestFeature, onReportBug, isModalOpen = false }) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [coffeeModalOpen, setCoffeeModalOpen] = useState(false);
+  const [isCoffeeModalActive, setIsCoffeeModalActive] = useState(false);
   const [stats, setStats] = useState<CoffeeStats>(getStoredCoffeeStats());
 
   useEffect(() => {
@@ -24,13 +26,29 @@ export const Navbar: React.FC<NavbarProps> = ({ onRequestFeature, onReportBug })
     const handleUpdate = (e: any) => {
       if (e.detail) setStats(e.detail);
     };
+    const handleCoffeeModal = (e: any) => {
+      setIsCoffeeModalActive(!!e.detail?.open);
+    };
+
     window.addEventListener('ryperdeck_coffee_updated', handleUpdate);
-    return () => window.removeEventListener('ryperdeck_coffee_updated', handleUpdate);
+    window.addEventListener('ryperdeck_coffee_modal_state', handleCoffeeModal);
+    return () => {
+      window.removeEventListener('ryperdeck_coffee_updated', handleUpdate);
+      window.removeEventListener('ryperdeck_coffee_modal_state', handleCoffeeModal);
+    };
   }, []);
+
+  const shouldHideHeader = isModalOpen || isCoffeeModalActive || coffeeModalOpen;
 
   return (
     <>
-      <header className="fixed top-0 left-0 right-0 z-50 flex items-center justify-center p-4 sm:p-6 pointer-events-none">
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-center p-4 sm:p-6 pointer-events-none transition-all duration-300 ${
+          shouldHideHeader
+            ? 'opacity-0 pointer-events-none -translate-y-6'
+            : 'opacity-100 translate-y-0'
+        }`}
+      >
         <nav
           className={`pointer-events-auto flex items-center justify-between w-full max-w-5xl px-6 py-2.5 rounded-full transition-all duration-500 ${
             scrolled
