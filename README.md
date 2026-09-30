@@ -19,7 +19,7 @@
 
   <br />
 
-  [🌐 Live Website](https://ryperdeck.app) • [✨ Key Features](#-key-features) • [📱 Interface Showcase](#-interface-showcase) • [⚡ Quick Start](#-quick-start) • [🔐 Environment Variables](#-environment-variables) • [🚀 Vercel Deployment](#-vercel-deployment) • [📄 License](#-license)
+  [🌐 Live Website](https://ryperdeck.vercel.app) • [✨ Key Features](#-key-features) • [📱 Interface Showcase](#-interface-showcase) • [⚡ Quick Start](#-quick-start) • [🔐 Environment Variables](#-environment-variables) • [🚀 Vercel Deployment](#-vercel-deployment) • [📄 License](#-license)
 
 </div>
 
@@ -236,7 +236,7 @@ Contributions, issues, and feature requests are welcome! Feel free to check the 
 **Anurag**
 - Age: 20 • Solo Creator & Developer
 - GitHub: [@anuraaag23](https://github.com/anuraaag23)
-- Website: [ryperdeck.app](https://ryperdeck.app)
+- Website: [ryperdeck.vercel.app](https://ryperdeck.vercel.app)
 - Email: [anurag.ay8840@gmail.com](mailto:anurag.ay8840@gmail.com)
 
 ---

@@ -26,10 +26,10 @@ RyperDeck is an open, modern, and free alternative to expensive macro hardware l
 - **Can I run it on an old phone or tablet?** Yes, leave any old Android device beside your keyboard and it will auto-reconnect on PC boot.
 
 ## Quick Links
-- **Website**: https://ryperdeck.app
-- **Download Windows & Android**: https://ryperdeck.app/#download
-- **Preset Workspace**: https://ryperdeck.app/#presets
-- **Privacy Policy**: https://ryperdeck.app/#privacy-policy
+- **Website**: https://ryperdeck.vercel.app
+- **Download Windows & Android**: https://ryperdeck.vercel.app/#download
+- **Preset Workspace**: https://ryperdeck.vercel.app/#presets
+- **Privacy Policy**: https://ryperdeck.vercel.app/#privacy-policy
 - **Creator (GitHub)**: https://github.com/anuraaag23
 - **Telegram Community**: https://t.me/Anurag_y2
 - **Instagram**: https://instagram.com/anuraaag12

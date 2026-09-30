@@ -8,7 +8,7 @@
     "type": "git",
     "url": "https://github.com/anuraaag23/ryperdeck.git"
   },
-  "homepage": "https://ryperdeck.app",
+  "homepage": "https://ryperdeck.vercel.app",
   "keywords": [
     "macro-deck",
     "streamdeck-alternative",

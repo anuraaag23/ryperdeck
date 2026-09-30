@@ -4,43 +4,43 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <url>
-    <loc>https://ryperdeck.app/</loc>
+    <loc>https://ryperdeck.vercel.app/</loc>
     <lastmod>2026-09-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://ryperdeck.app/#download</loc>
+    <loc>https://ryperdeck.vercel.app/#download</loc>
     <lastmod>2026-09-28</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.9</priority>
   </url>
   <url>
-    <loc>https://ryperdeck.app/#current-features</loc>
+    <loc>https://ryperdeck.vercel.app/#current-features</loc>
     <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ryperdeck.app/#presets</loc>
+    <loc>https://ryperdeck.vercel.app/#presets</loc>
     <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://ryperdeck.app/#windows</loc>
+    <loc>https://ryperdeck.vercel.app/#windows</loc>
     <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ryperdeck.app/#comparison</loc>
+    <loc>https://ryperdeck.vercel.app/#comparison</loc>
     <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://ryperdeck.app/#privacy-policy</loc>
+    <loc>https://ryperdeck.vercel.app/#privacy-policy</loc>
     <lastmod>2026-09-28</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.6</priority>

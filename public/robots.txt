@@ -1,5 +1,5 @@
 # RyperDeck Robots.txt
-# https://ryperdeck.app
+# https://ryperdeck.vercel.app
 
 User-agent: *
 Allow: /
@@ -58,4 +58,4 @@ User-agent: CCBot
 Allow: /
 
 # Sitemap Location
-Sitemap: https://ryperdeck.app/sitemap.xml
+Sitemap: https://ryperdeck.vercel.app/sitemap.xml
