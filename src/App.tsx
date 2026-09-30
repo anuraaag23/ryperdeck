@@ -39,7 +39,7 @@ export const App: React.FC = () => {
   // Preserve scroll position before navigating away from the home view
   const savedScrollY = useRef<number>(0);
 
-  // Hash-based routing: #terms, #privacy-policy, #refund-policy, #shipping-policy, #contact, #admin-ryper-2025
+  // Hash-based routing
   useEffect(() => {
     const handleHash = () => {
       const h = window.location.hash.toLowerCase();
@@ -68,7 +68,7 @@ export const App: React.FC = () => {
         setLegalTab('contact');
         setCurrentView('legal');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (h === '#admin-ryper-2025') {
+      } else if (h === '#ryper-ctrl-adminpnl') {
         savedScrollY.current = window.scrollY;
         setCurrentView('admin');
         window.scrollTo({ top: 0, behavior: 'smooth' });
