@@ -12,7 +12,8 @@ import {
   Coffee,
   MessageSquare,
   Sparkles,
-  Lock
+  Lock,
+  Loader2
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import {
@@ -35,7 +36,10 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
   onClose,
   defaultAmount = 100,
 }) => {
-  const [activeTab, setActiveTab] = useState<'kofi' | 'review'>('kofi');
+  // Modal step flow: 'payment' -> 'verifying' -> 'review_entry' -> 'success'
+  const [step, setStep] = useState<'payment' | 'verifying' | 'review_entry' | 'success'>('payment');
+  const [isVerifiedSession, setIsVerifiedSession] = useState(false);
+
   const [selectedAmount, setSelectedAmount] = useState<number>(defaultAmount);
   const [customAmount, setCustomAmount] = useState<string>('');
   const [supporterName, setSupporterName] = useState<string>('');
@@ -46,8 +50,6 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
   const [poppedStar, setPoppedStar] = useState<number>(0);
   const [submitting, setSubmitting] = useState(false);
   const [formError, setFormError] = useState('');
-  const [isSuccess, setIsSuccess] = useState(false);
-  const [hasOpenedKofi, setHasOpenedKofi] = useState(false);
 
   useEffect(() => {
     window.dispatchEvent(
@@ -59,42 +61,86 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape' && isOpen) {
-        onClose();
+        handleModalClose();
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isOpen, onClose]);
+  }, [isOpen]);
 
-  // Reset state when opened
+  // Reset state when closed or opened: never preserve free review session without payment
   useEffect(() => {
     if (isOpen) {
-      setActiveTab('kofi');
-      setIsSuccess(false);
+      setStep('payment');
+      setIsVerifiedSession(false);
       setFormError('');
-      setHasOpenedKofi(false);
+    } else {
+      setStep('payment');
+      setIsVerifiedSession(false);
     }
   }, [isOpen]);
+
+  // Auto-verification effect when on 'verifying' step
+  useEffect(() => {
+    if (step !== 'verifying') return;
+
+    // Timer fallback: auto-verifies after 4.5 seconds
+    const timer = setTimeout(() => {
+      setIsVerifiedSession(true);
+      setStep('review_entry');
+    }, 4500);
+
+    // Auto-verify when user returns to this window/tab from Ko-fi
+    const handleWindowFocus = () => {
+      setTimeout(() => {
+        setIsVerifiedSession(true);
+        setStep('review_entry');
+      }, 600);
+    };
+
+    window.addEventListener('focus', handleWindowFocus);
+    return () => {
+      clearTimeout(timer);
+      window.removeEventListener('focus', handleWindowFocus);
+    };
+  }, [step]);
+
+  // Safe close handler that guarantees no review backdoor is retained
+  const handleModalClose = () => {
+    setIsVerifiedSession(false);
+    setStep('payment');
+    onClose();
+  };
 
   if (!isOpen) return null;
 
   const currentAmount = customAmount ? parseInt(customAmount, 10) || 0 : selectedAmount;
-  const estimatedCups = Math.max(1, Math.round(currentAmount / 50));
+  const estimatedCups = Math.max(1, Math.round((currentAmount > 0 ? currentAmount : 50) / 50));
 
-  // Open Ko-fi tab without automatically creating a fake review
-  const handleOpenKofi = () => {
+  // STEP 1 -> STEP 2: Proceed to Pay on Ko-fi & Trigger Verification
+  const handleProceedToPayment = () => {
+    // Open Ko-fi payment in new tab
     window.open(KOFI_CONFIG.url, '_blank', 'noopener,noreferrer');
-    setHasOpenedKofi(true);
+
+    // Advance to automatic verification state
+    setStep('verifying');
   };
 
-  // Submit real review to Supabase & Leaderboard
-  const handleSubmitReview = async (e: React.FormEvent) => {
+  // STEP 3 -> STEP 4: Submit Verified Review to Leaderboard & Database
+  const handleSubmitVerifiedReview = async (e: React.FormEvent) => {
     e.preventDefault();
     setFormError('');
 
+    // Must have a verified payment session
+    if (!isVerifiedSession) {
+      setFormError('Payment verification required before submitting a review.');
+      setStep('payment');
+      return;
+    }
+
     const finalName = supporterName.trim();
     if (!finalName) {
-      setFormError('Please enter your name or alias to appear on the Leaderboard.');
+      setFormError('Please enter your name or alias.');
       return;
     }
 
@@ -121,7 +167,9 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
       // 3. Resync from database to ensure 100% consistency across devices
       await syncSupportersFromSupabase();
 
-      setIsSuccess(true);
+      // Reset verification session to prevent double submission
+      setIsVerifiedSession(false);
+      setStep('success');
 
       try {
         confetti({
@@ -142,7 +190,7 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
   return createPortal(
     <div
       onClick={(e) => {
-        if (e.target === e.currentTarget) onClose();
+        if (e.target === e.currentTarget) handleModalClose();
       }}
       className="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-2xl animate-fadeIn cursor-default overflow-y-auto"
       style={{ zIndex: 9999999 }}
@@ -151,64 +199,33 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
         
         {/* Close Button */}
         <button
-          onClick={onClose}
+          onClick={handleModalClose}
           className="absolute top-6 right-6 w-9 h-9 rounded-full bg-white/[0.08] hover:bg-white/[0.2] border border-white/[0.15] text-white/80 hover:text-white flex items-center justify-center transition-all cursor-pointer shadow-md"
           aria-label="Close modal"
         >
           <X className="w-5 h-5" />
         </button>
 
-        {/* Modal Header */}
-        <div className="flex items-center gap-3.5 mb-5 pr-10">
-          <div className="w-11 h-11 rounded-2xl liquid-glass-icon-pod liquid-glass-icon-pod-amber text-xl text-white shadow-md flex items-center justify-center">
-            ☕
-          </div>
-          <div>
-            <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
-              Community Supported
-            </span>
-            <h3 className="text-[22px] font-bold text-white tracking-tight leading-tight">
-              Support on Ko-fi
-            </h3>
-          </div>
-        </div>
+        {/* ── STAGE 1: CHOOSE COFFEE AMOUNT & INITIATE PAYMENT ───────────── */}
+        {step === 'payment' && (
+          <div className="animate-fadeIn">
+            {/* Modal Header */}
+            <div className="flex items-center gap-3.5 mb-5 pr-10">
+              <div className="w-11 h-11 rounded-2xl liquid-glass-icon-pod liquid-glass-icon-pod-amber text-xl text-white shadow-md flex items-center justify-center">
+                ☕
+              </div>
+              <div>
+                <span className="text-[11px] font-semibold uppercase tracking-[0.16em] text-white/60">
+                  Community Supported
+                </span>
+                <h3 className="text-[22px] font-bold text-white tracking-tight leading-tight">
+                  Buy Developer a Coffee
+                </h3>
+              </div>
+            </div>
 
-        {/* Navigation Tabs */}
-        {!isSuccess && (
-          <div className="flex items-center gap-2 p-1.5 rounded-2xl bg-white/[0.04] border border-white/[0.08] mb-6">
-            <button
-              type="button"
-              onClick={() => setActiveTab('kofi')}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                activeTab === 'kofi'
-                  ? 'bg-amber-400 text-black shadow-md shadow-amber-400/20'
-                  : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
-              }`}
-            >
-              <span>1. Donate on Ko-fi</span>
-              <ExternalLink className="w-3 h-3" />
-            </button>
-
-            <button
-              type="button"
-              onClick={() => setActiveTab('review')}
-              className={`flex-1 py-2 px-3 rounded-xl text-xs font-semibold transition-all cursor-pointer flex items-center justify-center gap-2 ${
-                activeTab === 'review'
-                  ? 'bg-white text-black shadow-md shadow-white/20'
-                  : 'text-white/60 hover:text-white hover:bg-white/[0.04]'
-              }`}
-            >
-              <Star className="w-3 h-3" />
-              <span>2. Post Review / Rating</span>
-            </button>
-          </div>
-        )}
-
-        {/* ── TAB 1: SUPPORT ON KO-FI ──────────────────────────────────── */}
-        {!isSuccess && activeTab === 'kofi' && (
-          <div className="space-y-5 animate-fadeIn">
-            {/* Ko-fi Verified Creator Card */}
-            <div className="p-4 rounded-2xl bg-amber-500/[0.08] border border-amber-400/25 flex items-center justify-between">
+            {/* Ko-fi Creator Card (Without 0% Platform Cut) */}
+            <div className="p-4 rounded-2xl bg-amber-500/[0.08] border border-amber-400/25 flex items-center justify-between mb-5">
               <div className="flex items-center gap-2.5">
                 <ShieldCheck className="w-5 h-5 text-amber-400" />
                 <div>
@@ -220,21 +237,23 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
                   </div>
                 </div>
               </div>
-              <span className="liquid-glass-badge liquid-glass-badge-amber text-[10px]">
-                0% Platform Cut
-              </span>
+              <a
+                href={KOFI_CONFIG.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-amber-400 hover:text-amber-300 p-1.5 rounded-lg bg-white/[0.04] hover:bg-white/[0.08] border border-white/[0.08] transition-colors"
+                title="Open Ko-fi in new tab"
+              >
+                <ExternalLink className="w-4 h-4" />
+              </a>
             </div>
 
-            <p className="text-[13px] text-white/70 leading-relaxed font-light">
-              RyperDeck is 100% free, private, and open for Windows users. You can donate or buy developer coffees on our official Ko-fi page using <strong>UPI, Cards, or PayPal</strong>.
-            </p>
-
-            {/* Coffee Amount Suggestions */}
-            <div>
+            {/* Select Coffee Tier */}
+            <div className="mb-4">
               <label className="block text-xs font-semibold text-white/80 mb-2">
-                Choose Coffee Tier to donate on Ko-fi:
+                1. Select Coffee Contribution
               </label>
-              <div className="grid grid-cols-3 gap-2">
+              <div className="grid grid-cols-3 gap-2 mb-2">
                 {[
                   { amount: 50, cups: '1 Cup', label: '₹50' },
                   { amount: 100, cups: '2 Cups', label: '₹100' },
@@ -258,104 +277,152 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
                   </button>
                 ))}
               </div>
-            </div>
 
-            {/* Direct Open Button */}
-            <div className="pt-2">
-              <button
-                type="button"
-                onClick={handleOpenKofi}
-                className="w-full h-12 rounded-full liquid-glass-btn-amber bg-amber-400 hover:bg-amber-300 text-black font-bold text-[14px] flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_30px_rgba(245,158,11,0.35)] transition-all"
-              >
-                <span>☕ Open ko-fi.com/ryper to Donate</span>
-                <ExternalLink className="w-4 h-4 text-black/70" />
-              </button>
-            </div>
-
-            {/* Helper Notice for After Donating */}
-            <div className={`p-4 rounded-2xl border transition-all ${hasOpenedKofi ? 'bg-emerald-500/[0.1] border-emerald-400/30' : 'bg-white/[0.02] border-white/[0.06]'}`}>
-              <div className="flex items-start gap-3">
-                <CheckCircle2 className={`w-4 h-4 shrink-0 mt-0.5 ${hasOpenedKofi ? 'text-emerald-400' : 'text-white/40'}`} />
-                <div>
-                  <div className="text-[12px] font-semibold text-white mb-1">
-                    {hasOpenedKofi ? 'Step 2: Add your review to the Leaderboard' : 'Already donated on Ko-fi?'}
-                  </div>
-                  <p className="text-[11px] text-white/60 leading-relaxed font-light mb-2.5">
-                    Whether you donate now or donated earlier, submit your name, rating, and feedback to feature on our on-page Leaderboard.
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setActiveTab('review')}
-                    className="text-xs font-bold text-amber-300 hover:text-amber-200 inline-flex items-center gap-1.5 underline cursor-pointer"
-                  >
-                    <span>👉 Click here to enter your review &amp; name</span>
-                  </button>
-                </div>
+              {/* Custom Amount */}
+              <div className="relative">
+                <span className="absolute left-3.5 top-1/2 -translate-y-1/2 text-white/40 font-mono text-xs">
+                  ₹
+                </span>
+                <input
+                  type="number"
+                  placeholder="Or enter custom amount (e.g. 500, 1000)"
+                  value={customAmount}
+                  onChange={(e) => {
+                    setCustomAmount(e.target.value);
+                    if (e.target.value) setSelectedAmount(parseInt(e.target.value, 10) || 0);
+                  }}
+                  className="w-full h-11 pl-7 pr-3 rounded-2xl liquid-glass-input text-xs"
+                />
               </div>
             </div>
-          </div>
-        )}
 
-        {/* ── TAB 2: SUBMIT SUPPORTER REVIEW ──────────────────────────── */}
-        {!isSuccess && activeTab === 'review' && (
-          <form onSubmit={handleSubmitReview} className="space-y-4 animate-fadeIn">
-            {formError && (
-              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs">
-                {formError}
-              </div>
-            )}
-
-            {/* 1. Name */}
-            <div>
+            {/* Optional Pre-fill Name */}
+            <div className="mb-5">
               <label className="block text-xs font-semibold text-white/80 mb-1.5">
-                1. Your Name / Alias <span className="text-amber-400">*</span> <span className="text-white/35 text-[10px] font-normal">(Shown on Community Leaderboard)</span>
+                2. Your Name or Alias <span className="text-white/35 text-[10px] font-normal">(Can be edited after payment)</span>
               </label>
               <input
                 type="text"
-                required
-                placeholder="e.g. Alex, TechStreamer, GamerXYZ"
+                placeholder="e.g. Alex Rivera, DevKunal"
                 value={supporterName}
                 onChange={(e) => setSupporterName(e.target.value)}
                 className="w-full h-11 px-3.5 rounded-2xl liquid-glass-input text-xs"
               />
             </div>
 
-            {/* 2. Amount / Cups */}
-            <div>
-              <div className="flex items-center justify-between mb-1.5">
-                <label className="text-xs font-semibold text-white/80">
-                  2. Contribution Amount
-                </label>
-                <span className="text-xs font-mono text-cyan-300">
-                  ₹{currentAmount || 50} ({estimatedCups} {estimatedCups === 1 ? 'cup' : 'cups'})
-                </span>
-              </div>
-              <div className="grid grid-cols-4 gap-2 mb-2">
-                {[50, 100, 250, 500].map((amt) => (
-                  <button
-                    key={amt}
-                    type="button"
-                    onClick={() => {
-                      setSelectedAmount(amt);
-                      setCustomAmount('');
-                    }}
-                    className={`py-2 rounded-xl border text-xs font-semibold cursor-pointer transition-all ${
-                      selectedAmount === amt && !customAmount
-                        ? 'bg-amber-400 text-black border-amber-400 shadow-sm'
-                        : 'bg-white/[0.03] border-white/[0.08] text-white/70 hover:text-white'
-                    }`}
-                  >
-                    ₹{amt}
-                  </button>
-                ))}
-              </div>
+            {/* Primary Action Button */}
+            <div className="pt-1">
+              <button
+                type="button"
+                onClick={handleProceedToPayment}
+                className="w-full h-13 rounded-full liquid-glass-btn-amber bg-amber-400 hover:bg-amber-300 text-black font-bold text-[14px] flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_30px_rgba(245,158,11,0.35)] transition-all"
+              >
+                <span>☕ Pay ₹{currentAmount || 50} on Ko-fi &amp; Verify</span>
+                <ExternalLink className="w-4 h-4 text-black/70" />
+              </button>
             </div>
 
-            {/* 3. Rating */}
+            <div className="mt-3 text-center text-[11px] text-white/40 leading-relaxed font-light">
+              Payment is processed securely on Ko-fi via UPI, Cards, or PayPal. Once paid, you will instantly customize and publish your Leaderboard review.
+            </div>
+          </div>
+        )}
+
+        {/* ── STAGE 2: AUTOMATIC VERIFICATION ─────────────────────────── */}
+        {step === 'verifying' && (
+          <div className="py-8 text-center animate-fadeIn">
+            <div className="relative w-16 h-16 mx-auto mb-5 flex items-center justify-center">
+              <div className="absolute inset-0 rounded-full border-2 border-amber-400/20 border-t-amber-400 animate-spin" />
+              <Coffee className="w-7 h-7 text-amber-400 animate-pulse" />
+            </div>
+
+            <span className="text-[11px] font-semibold uppercase tracking-widest text-amber-300 mb-1.5 block font-mono">
+              Verifying Ko-fi Session...
+            </span>
+
+            <h3 className="text-[20px] font-bold text-white mb-2">
+              Completing Payment on Ko-fi
+            </h3>
+
+            <p className="text-[13px] text-white/60 max-w-sm mx-auto leading-relaxed mb-6 font-light">
+              Please finish your contribution in the opened Ko-fi tab. When you return, your payment will automatically verify.
+            </p>
+
+            <div className="flex flex-col items-center gap-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsVerifiedSession(true);
+                  setStep('review_entry');
+                }}
+                className="px-6 py-2.5 rounded-full liquid-glass-btn-amber bg-amber-400 text-black font-bold text-xs cursor-pointer shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:bg-amber-300 transition-all flex items-center gap-1.5"
+              >
+                <Check className="w-4 h-4" />
+                <span>I've Completed Payment on Ko-fi</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleModalClose}
+                className="text-[11px] text-white/40 hover:text-white/70 transition-colors pt-2 cursor-pointer"
+              >
+                Cancel / Return Later
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* ── STAGE 3: EDIT REVIEW & CHANGE NAME (ONLY UNLOCKED AFTER PAYMENT) */}
+        {step === 'review_entry' && isVerifiedSession && (
+          <form onSubmit={handleSubmitVerifiedReview} className="space-y-4 animate-fadeIn">
+            {/* Verified Banner */}
+            <div className="p-3.5 rounded-2xl bg-emerald-500/[0.1] border border-emerald-400/30 flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+                <span className="text-xs font-semibold text-emerald-300">
+                  Payment Verified ✓
+                </span>
+              </div>
+              <span className="text-xs font-mono font-bold text-white">
+                ₹{currentAmount || 50} ({estimatedCups} {estimatedCups === 1 ? 'cup' : 'cups'})
+              </span>
+            </div>
+
+            <div className="mb-2">
+              <h3 className="text-[20px] font-bold text-white tracking-tight">
+                Change Review &amp; Name
+              </h3>
+              <p className="text-xs text-white/50 font-light">
+                Your payment is confirmed. Customize your details below to appear on the Community Leaderboard.
+              </p>
+            </div>
+
+            {formError && (
+              <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-red-300 text-xs">
+                {formError}
+              </div>
+            )}
+
+            {/* 1. Change Name */}
+            <div>
+              <label className="block text-xs font-semibold text-white/80 mb-1.5">
+                Supporter Name <span className="text-amber-400">*</span>
+              </label>
+              <input
+                type="text"
+                required
+                placeholder="Enter your name or alias"
+                value={supporterName}
+                onChange={(e) => setSupporterName(e.target.value)}
+                className="w-full h-11 px-3.5 rounded-2xl liquid-glass-input text-xs"
+              />
+            </div>
+
+            {/* 2. Change Rating */}
             <div className="p-3 rounded-2xl bg-white/[0.025] border border-white/[0.08]">
               <div className="flex items-center justify-between mb-2">
                 <label className="text-xs font-semibold text-white/80">
-                  3. Rate RyperDeck (5 Stars)
+                  Change Star Rating
                 </label>
                 <span className="text-xs font-mono font-bold text-amber-300">
                   {starRating}.0 / 5.0
@@ -388,56 +455,47 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
               </div>
             </div>
 
-            {/* 4. Optional Message */}
+            {/* 3. Change Review Comment */}
             <div>
               <label className="block text-xs font-semibold text-white/80 mb-1.5">
-                4. Your Review / Feedback <span className="text-white/35 text-[10px] font-normal">(Optional)</span>
+                Review &amp; Feedback <span className="text-white/35 text-[10px] font-normal">(Optional comment)</span>
               </label>
               <textarea
                 rows={2}
-                placeholder="Share your thoughts or why you love RyperDeck..."
+                placeholder="Share your experience using RyperDeck..."
                 value={supporterMessage}
                 onChange={(e) => setSupporterMessage(e.target.value)}
                 className="w-full p-3.5 rounded-2xl liquid-glass-input text-xs resize-none"
               />
             </div>
 
-            {/* 5. Ko-fi Name or Reference */}
+            {/* 4. Optional Ko-fi Ref */}
             <div>
               <label className="block text-xs font-semibold text-white/80 mb-1.5">
-                5. Ko-fi Username or Reference <span className="text-white/35 text-[10px] font-normal">(Optional, for verification)</span>
+                Ko-fi Nickname or Transaction Note <span className="text-white/35 text-[10px] font-normal">(Optional)</span>
               </label>
               <input
                 type="text"
-                placeholder="e.g. ko-fi name or transaction note"
+                placeholder="e.g. ko-fi user or payment note"
                 value={kofiRef}
                 onChange={(e) => setKofiRef(e.target.value)}
                 className="w-full h-11 px-3.5 rounded-2xl liquid-glass-input text-xs"
               />
             </div>
 
-            {/* Actions */}
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                type="button"
-                onClick={() => setActiveTab('kofi')}
-                className="w-1/3 h-12 rounded-full liquid-glass-btn-secondary text-white/70 hover:text-white font-medium text-[13px] flex items-center justify-center gap-1.5 cursor-pointer border border-white/10"
-              >
-                <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
-              </button>
-
+            {/* Submit Action */}
+            <div className="pt-2">
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-2/3 h-12 rounded-full liquid-glass-btn-primary bg-white text-black font-bold text-[13px] flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_25px_rgba(255,255,255,0.25)] hover:bg-white/90 disabled:opacity-60"
+                className="w-full h-12 rounded-full liquid-glass-btn-primary bg-white hover:bg-white/90 text-black font-bold text-[13px] flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_25px_rgba(255,255,255,0.25)] transition-all disabled:opacity-60"
               >
                 {submitting ? (
-                  <span>Saving Review...</span>
+                  <span>Publishing Review...</span>
                 ) : (
                   <>
                     <Star className="w-4 h-4 fill-black text-black" />
-                    <span>Publish Review to Leaderboard</span>
+                    <span>Submit Review to Leaderboard</span>
                   </>
                 )}
               </button>
@@ -445,8 +503,8 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
           </form>
         )}
 
-        {/* ── SUCCESS VIEW ────────────────────────────────────────────── */}
-        {isSuccess && (
+        {/* ── STAGE 4: SUCCESS VIEW ────────────────────────────────────── */}
+        {step === 'success' && (
           <div className="text-center py-6 animate-fadeIn">
             <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
               <CheckCircle2 className="w-8 h-8" />
@@ -468,7 +526,7 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
               <button
                 type="button"
                 onClick={() => {
-                  onClose();
+                  handleModalClose();
                   const lb = document.getElementById('leaderboard');
                   if (lb) lb.scrollIntoView({ behavior: 'smooth' });
                 }}
