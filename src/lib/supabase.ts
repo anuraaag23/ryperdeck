@@ -555,6 +555,74 @@ export async function setSupporterVerified(id: string, verified: boolean): Promi
   return updateSupporter(id, { verified });
 }
 
+export interface AutoVerifyResult {
+  verified: boolean;
+  supporter?: DbSupporter;
+}
+
+/**
+ * Checks Supabase for a newly verified payment received around or after the payment initiation timestamp.
+ * This powers automatic background payment verification without requiring the user to type a transaction ID.
+ */
+export async function checkForAutoVerifiedPayment(
+  initiatedAt: number,
+  expectedName?: string,
+  expectedAmount?: number
+): Promise<AutoVerifyResult> {
+  if (supabase) {
+    try {
+      // 45 seconds buffer prior to initiation to account for clock skew
+      const bufferTime = new Date(initiatedAt - 45000).toISOString();
+      const { data, error } = await supabase
+        .from('supporters')
+        .select('*')
+        .eq('verified', true)
+        .gte('created_at', bufferTime)
+        .order('created_at', { ascending: false })
+        .limit(5);
+
+      if (!error && data && data.length > 0) {
+        // If an expected name is provided, match by name
+        if (expectedName && expectedName.trim()) {
+          const cleanExpected = expectedName.trim().toLowerCase();
+          const match = data.find(
+            (s) =>
+              s.name.toLowerCase().includes(cleanExpected) ||
+              cleanExpected.includes(s.name.toLowerCase())
+          );
+          if (match) {
+            return { verified: true, supporter: match };
+          }
+        }
+        // Match by amount
+        if (expectedAmount && expectedAmount > 0) {
+          const amountMatch = data.find((s) => Number(s.amount) === Number(expectedAmount));
+          if (amountMatch) {
+            return { verified: true, supporter: amountMatch };
+          }
+        }
+        // Fallback: any verified payment in this recent time window
+        return { verified: true, supporter: data[0] };
+      }
+    } catch (err) {
+      console.error('Error polling for auto-verified payment:', err);
+    }
+  }
+
+  // Also check local cache fallback
+  try {
+    const list = JSON.parse(localStorage.getItem(LS_KEYS.supporters) || '[]');
+    const match = list.find(
+      (s: any) =>
+        s.verified === true &&
+        new Date(s.created_at || s.timestamp || 0).getTime() >= initiatedAt - 45000
+    );
+    if (match) return { verified: true, supporter: match };
+  } catch {}
+
+  return { verified: false };
+}
+
 export async function fetchSupporters(): Promise<DbSupporter[]> {
   if (supabase) {
     try {

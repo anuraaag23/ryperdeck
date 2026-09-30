@@ -111,6 +111,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
   const [newSupVerified, setNewSupVerified]     = useState(true);
   const [addingSupporter, setAddingSupporter]   = useState(false);
   const [supporterFilter, setSupporterFilter]   = useState<'all' | 'pending' | 'verified'>('all');
+  const [copiedWebhook, setCopiedWebhook]       = useState(false);
+  const [showWebhookGuide, setShowWebhookGuide] = useState(false);
 
   // Supporter Inline Edit State
   const [editSupporterId, setEditSupporterId]   = useState<string | null>(null);
@@ -1734,6 +1736,116 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                           ☕ Check Ko-fi Creator Ledger ↗
                         </a>
                       </div>
+
+                      {/* Automated Ko-fi Webhook Quick Setup Banner */}
+                      <div
+                        style={{
+                          marginBottom: '16px',
+                          padding: '14px 16px',
+                          borderRadius: '12px',
+                          background: 'rgba(56, 189, 248, 0.06)',
+                          border: '1px solid rgba(56, 189, 248, 0.25)',
+                          display: 'flex',
+                          flexDirection: isMobile ? 'column' : 'row',
+                          alignItems: isMobile ? 'flex-start' : 'center',
+                          justifyContent: 'space-between',
+                          gap: '12px',
+                        }}
+                      >
+                        <div style={{ flex: 1 }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
+                            <span style={{ fontSize: '13px', fontWeight: 700, color: '#38bdf8' }}>
+                              ⚡ Instant Auto-Verification
+                            </span>
+                            <span
+                              style={{
+                                fontSize: '10px',
+                                padding: '2px 8px',
+                                borderRadius: '999px',
+                                background: 'rgba(16, 185, 129, 0.15)',
+                                color: '#34d399',
+                                fontFamily: 'monospace',
+                              }}
+                            >
+                              Active
+                            </span>
+                          </div>
+                          <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255, 255, 255, 0.65)', lineHeight: 1.4 }}>
+                            Webhook URL: <code style={{ color: '#38bdf8', fontFamily: 'monospace' }}>https://ryperdeck.vercel.app/api/kofi-webhook</code>
+                          </p>
+                        </div>
+
+                        <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              navigator.clipboard.writeText('https://ryperdeck.vercel.app/api/kofi-webhook');
+                              setCopiedWebhook(true);
+                              setTimeout(() => setCopiedWebhook(false), 2500);
+                            }}
+                            style={{
+                              padding: '6px 12px',
+                              borderRadius: '8px',
+                              background: copiedWebhook ? '#34d399' : 'rgba(56, 189, 248, 0.15)',
+                              border: '1px solid rgba(56, 189, 248, 0.35)',
+                              color: copiedWebhook ? '#000000' : '#38bdf8',
+                              fontSize: '11px',
+                              fontWeight: 700,
+                              cursor: 'pointer',
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '4px',
+                            }}
+                          >
+                            {copiedWebhook ? '✓ Copied URL!' : 'Copy Webhook URL'}
+                          </button>
+
+                          <button
+                            type="button"
+                            onClick={() => setShowWebhookGuide(!showWebhookGuide)}
+                            style={{
+                              padding: '6px 10px',
+                              borderRadius: '8px',
+                              background: 'rgba(255, 255, 255, 0.05)',
+                              border: '1px solid rgba(255, 255, 255, 0.12)',
+                              color: 'rgba(255, 255, 255, 0.7)',
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                            }}
+                          >
+                            {showWebhookGuide ? 'Hide Guide' : 'Setup Guide (30s)'}
+                          </button>
+                        </div>
+                      </div>
+
+                      {showWebhookGuide && (
+                        <div
+                          style={{
+                            marginBottom: '16px',
+                            padding: '14px 16px',
+                            borderRadius: '12px',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                            fontSize: '12px',
+                            color: 'rgba(255, 255, 255, 0.75)',
+                            lineHeight: 1.6,
+                          }}
+                        >
+                          <strong style={{ color: '#ffffff', display: 'block', marginBottom: '6px' }}>
+                            How to enable real-time automatic verification:
+                          </strong>
+                          <ol style={{ margin: 0, paddingLeft: '18px' }}>
+                            <li>
+                              Open <a href="https://ko-fi.com/manage/webhooks" target="_blank" rel="noopener noreferrer" style={{ color: '#fbbf24' }}>ko-fi.com/manage/webhooks ↗</a>
+                            </li>
+                            <li>
+                              Paste Webhook URL: <code style={{ color: '#38bdf8' }}>https://ryperdeck.vercel.app/api/kofi-webhook</code>
+                            </li>
+                            <li>Click <strong>Update</strong> or <strong>Send Test</strong>.</li>
+                            <li>All future donations automatically verify on the website within 3 seconds!</li>
+                          </ol>
+                        </div>
+                      )}
 
                       {/* Filter Tabs */}
                       <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap' }}>
