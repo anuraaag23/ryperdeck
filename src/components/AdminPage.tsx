@@ -37,12 +37,16 @@ import {
   setFeatureStatus,
   updateFeatureRequest,
   createFeatureRequestByAdmin,
+  createSupporterByAdmin,
+  updateSupporter,
+  setSupporterVerified,
   deleteRecord,
   DbSubscriber,
   DbBugReport,
   DbFeatureRequest,
   DbSupporter,
 } from '../lib/supabase';
+import { syncSupportersFromSupabase, clearLocalSupporters } from '../config/kofi';
 
 // Admin password from private environment variables
 const BACKUP_ADMIN_PW = (import.meta as any).env?.VITE_ADMIN_PASSWORD || '';
@@ -95,6 +99,28 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
   const [newStatus, setNewStatus]           = useState('planned');
   const [newVotes, setNewVotes]             = useState(5);
   const [addingFeature, setAddingFeature]   = useState(false);
+
+  // Supporter Management State
+  const [showAddSupporter, setShowAddSupporter] = useState(false);
+  const [newSupName, setNewSupName]             = useState('');
+  const [newSupAmount, setNewSupAmount]         = useState('100');
+  const [newSupCups, setNewSupCups]             = useState('2');
+  const [newSupRating, setNewSupRating]         = useState(5);
+  const [newSupMessage, setNewSupMessage]       = useState('');
+  const [newSupRef, setNewSupRef]               = useState('');
+  const [newSupVerified, setNewSupVerified]     = useState(true);
+  const [addingSupporter, setAddingSupporter]   = useState(false);
+
+  // Supporter Inline Edit State
+  const [editSupporterId, setEditSupporterId]   = useState<string | null>(null);
+  const [editSupName, setEditSupName]           = useState('');
+  const [editSupAmount, setEditSupAmount]       = useState('100');
+  const [editSupCups, setEditSupCups]           = useState('2');
+  const [editSupRating, setEditSupRating]       = useState(5);
+  const [editSupMessage, setEditSupMessage]     = useState('');
+  const [editSupRef, setEditSupRef]             = useState('');
+  const [editSupVerified, setEditSupVerified]   = useState(true);
+  const [savingSupporter, setSavingSupporter]   = useState(false);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -286,6 +312,73 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
     setNewStatus('planned');
     setNewVotes(5);
     setTick((t) => t + 1);
+  };
+
+  // Supporter Management Handlers
+  const handleStartEditSupporter = (sup: DbSupporter) => {
+    setEditSupporterId(sup.id || null);
+    setEditSupName(sup.name);
+    setEditSupAmount(String(sup.amount || 50));
+    setEditSupCups(String(sup.cups || 1));
+    setEditSupRating(sup.rating || 5);
+    setEditSupMessage(sup.message || '');
+    setEditSupRef(sup.payment_id || '');
+    setEditSupVerified(sup.verified ?? true);
+  };
+
+  const handleSaveEditSupporter = async () => {
+    if (!editSupporterId) return;
+    setSavingSupporter(true);
+    await updateSupporter(editSupporterId, {
+      name: editSupName.trim() || 'Anonymous Supporter',
+      amount: Number(editSupAmount) || 50,
+      cups: Number(editSupCups) || 1,
+      rating: Number(editSupRating) || 5,
+      message: editSupMessage.trim() || undefined,
+      payment_id: editSupRef.trim() || undefined,
+      verified: editSupVerified,
+    });
+    await syncSupportersFromSupabase();
+    setSavingSupporter(false);
+    setEditSupporterId(null);
+    setTick((t) => t + 1);
+  };
+
+  const handleToggleVerified = async (id?: string, current = true) => {
+    if (!id) return;
+    await setSupporterVerified(id, !current);
+    await syncSupportersFromSupabase();
+    setTick((t) => t + 1);
+  };
+
+  const handleCreateSupporter = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newSupName.trim()) return;
+    setAddingSupporter(true);
+    await createSupporterByAdmin({
+      name: newSupName.trim(),
+      amount: Number(newSupAmount) || 50,
+      cups: Number(newSupCups) || Math.max(1, Math.round(Number(newSupAmount) / 50)),
+      rating: Number(newSupRating) || 5,
+      message: newSupMessage.trim() || undefined,
+      payment_id: newSupRef.trim() || undefined,
+      verified: newSupVerified,
+    });
+    await syncSupportersFromSupabase();
+    setAddingSupporter(false);
+    setShowAddSupporter(false);
+    setNewSupName('');
+    setNewSupMessage('');
+    setNewSupRef('');
+    setTick((t) => t + 1);
+  };
+
+  const handleClearLocalCache = async () => {
+    if (window.confirm('Clear local supporter cache and refresh live from Supabase database?')) {
+      clearLocalSupporters();
+      await syncSupportersFromSupabase();
+      setTick((t) => t + 1);
+    }
   };
 
   const exportJSON = (data: any[], filename: string) => {
@@ -782,6 +875,50 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                   <Plus style={{ width: 14, height: 14 }} />
                   <span>Add Feature</span>
                 </button>
+              )}
+
+              {tab === 'supporters' && (
+                <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+                  <button
+                    onClick={() => setShowAddSupporter(!showAddSupporter)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '6px',
+                      padding: '7px 14px',
+                      borderRadius: '999px',
+                      background: '#fbbf24',
+                      border: 'none',
+                      color: '#000000',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <Plus style={{ width: 14, height: 14 }} />
+                    <span>Add Supporter</span>
+                  </button>
+
+                  <button
+                    onClick={handleClearLocalCache}
+                    title="Purge stale local cache and sync live from database"
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '5px',
+                      padding: '7px 12px',
+                      borderRadius: '999px',
+                      background: 'rgba(255, 255, 255, 0.06)',
+                      border: '1px solid rgba(255, 255, 255, 0.12)',
+                      color: 'rgba(255, 255, 255, 0.7)',
+                      fontSize: '11px',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <RefreshCw style={{ width: 12, height: 12 }} />
+                    <span>Purge Cache</span>
+                  </button>
+                </div>
               )}
 
               {tab === 'bugs' && bugs.length > 0 && <ExportBtn onClick={() => exportJSON(bugs, 'ryperdeck-bugs.json')} />}
@@ -1356,103 +1493,513 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
               )
             )}
 
-            {/* ── TAB 4: SUPPORTERS ────────────────────────────────────────── */}
+            {/* ── TAB 4: SUPPORTERS (WITH FULL MANAGEMENT & INLINE EDITING) ── */}
             {tab === 'supporters' && (
-              supporters.length === 0 ? (
-                <EmptyState
-                  icon={<Coffee style={{ width: 28, height: 28 }} />}
-                  title="No Supporters Recorded Yet"
-                  message="When users make a contribution via Ko-fi (ko-fi.com/ryper), verified payments and supporter reviews will appear here."
-                />
-              ) : (
-                <div>
-                  <div style={{ marginBottom: '14px' }}>
-                    <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255, 255, 255, 0.65)' }}>
-                      Total Pool Collected: <strong style={{ color: '#34d399', fontSize: '15px' }}>₹{supporters.reduce((acc, s) => acc + (s.amount || 0), 0).toLocaleString()}</strong> ({supporters.length} supporters)
-                    </p>
-                  </div>
+              <div>
+                {/* Add Supporter Form */}
+                {showAddSupporter && (
+                  <form
+                    onSubmit={handleCreateSupporter}
+                    style={{
+                      padding: isMobile ? '16px' : '20px',
+                      borderRadius: '16px',
+                      background: 'rgba(251, 191, 36, 0.05)',
+                      border: '1px solid rgba(251, 191, 36, 0.3)',
+                      marginBottom: '20px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '12px',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                      <span style={{ fontSize: '13px', fontWeight: 700, color: '#fbbf24' }}>
+                        + Add Supporter / Ko-fi Donation
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setShowAddSupporter(false)}
+                        style={{ background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.4)', cursor: 'pointer' }}
+                      >
+                        <XIcon style={{ width: 16, height: 16 }} />
+                      </button>
+                    </div>
 
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-                    {supporters.map((sup, idx) => (
-                      <div
-                        key={sup.id || idx}
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr 1fr', gap: '10px' }}>
+                      <input
+                        type="text"
+                        required
+                        placeholder="Supporter Name (e.g. Alex Rivera)"
+                        value={newSupName}
+                        onChange={(e) => setNewSupName(e.target.value)}
                         style={{
-                          display: 'flex',
-                          flexDirection: isMobile ? 'column' : 'row',
-                          alignItems: isMobile ? 'stretch' : 'center',
-                          justifyContent: 'space-between',
-                          gap: isMobile ? '10px' : '16px',
-                          padding: isMobile ? '14px' : '16px 20px',
-                          borderRadius: '14px',
-                          background: 'rgba(255, 255, 255, 0.04)',
-                          border: '1px solid rgba(255, 255, 255, 0.1)',
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          background: '#1a1b26',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#ffffff',
+                          fontSize: '13px',
+                        }}
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Amount (₹)"
+                        value={newSupAmount}
+                        onChange={(e) => {
+                          setNewSupAmount(e.target.value);
+                          const amt = Number(e.target.value) || 0;
+                          setNewSupCups(String(Math.max(1, Math.round(amt / 50))));
+                        }}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          background: '#1a1b26',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#ffffff',
+                          fontSize: '13px',
+                        }}
+                      />
+
+                      <input
+                        type="number"
+                        placeholder="Cups"
+                        value={newSupCups}
+                        onChange={(e) => setNewSupCups(e.target.value)}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          background: '#1a1b26',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#ffffff',
+                          fontSize: '13px',
+                        }}
+                      />
+
+                      <select
+                        value={newSupRating}
+                        onChange={(e) => setNewSupRating(Number(e.target.value))}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          background: '#1a1b26',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#ffffff',
+                          fontSize: '13px',
                         }}
                       >
-                        <div>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
-                            <span style={{ fontSize: isMobile ? '14px' : '15px', fontWeight: 700, color: '#ffffff' }}>{sup.name}</span>
-                            {sup.verified && (
-                              <span
-                                style={{
-                                  fontSize: '10px',
-                                  color: '#34d399',
-                                  background: 'rgba(16, 185, 129, 0.12)',
-                                  border: '1px solid rgba(16, 185, 129, 0.3)',
-                                  padding: '2px 8px',
-                                  borderRadius: '999px',
-                                  display: 'inline-flex',
-                                  alignItems: 'center',
-                                  gap: '3px',
-                                  fontFamily: 'monospace',
-                                }}
-                              >
-                                <CheckCircle style={{ width: 10, height: 10 }} /> Verified
-                              </span>
-                            )}
-                          </div>
-                          {sup.message && (
-                            <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'rgba(255, 255, 255, 0.65)', fontStyle: 'italic' }}>
-                              "{sup.message}"
-                            </p>
-                          )}
-                          {sup.payment_id && (
-                            <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#67e8f9', fontFamily: 'monospace' }}>
-                              Ref: {sup.payment_id}
-                            </p>
-                          )}
-                        </div>
+                        <option value={5}>★ 5 Stars</option>
+                        <option value={4}>★ 4 Stars</option>
+                        <option value={3}>★ 3 Stars</option>
+                        <option value={2}>★ 2 Stars</option>
+                        <option value={1}>★ 1 Star</option>
+                      </select>
+                    </div>
 
-                        <div
+                    <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: '10px' }}>
+                      <input
+                        type="text"
+                        placeholder="Review / Message (Optional)"
+                        value={newSupMessage}
+                        onChange={(e) => setNewSupMessage(e.target.value)}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          background: '#1a1b26',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#ffffff',
+                          fontSize: '13px',
+                        }}
+                      />
+
+                      <input
+                        type="text"
+                        placeholder="Ko-fi Ref / Note (Optional)"
+                        value={newSupRef}
+                        onChange={(e) => setNewSupRef(e.target.value)}
+                        style={{
+                          padding: '8px 12px',
+                          borderRadius: '8px',
+                          background: '#1a1b26',
+                          border: '1px solid rgba(255, 255, 255, 0.2)',
+                          color: '#ffffff',
+                          fontSize: '13px',
+                        }}
+                      />
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                      <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255, 255, 255, 0.8)', cursor: 'pointer' }}>
+                        <input
+                          type="checkbox"
+                          checked={newSupVerified}
+                          onChange={(e) => setNewSupVerified(e.target.checked)}
+                        />
+                        <span>Verified Supporter (shows on Leaderboard immediately)</span>
+                      </label>
+
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setShowAddSupporter(false)}
                           style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: isMobile ? 'space-between' : 'flex-end',
-                            gap: '14px',
-                            borderTop: isMobile ? '1px solid rgba(255, 255, 255, 0.06)' : 'none',
-                            paddingTop: isMobile ? '8px' : 0,
+                            padding: '6px 14px',
+                            borderRadius: '8px',
+                            background: 'rgba(255, 255, 255, 0.08)',
+                            border: 'none',
+                            color: 'rgba(255, 255, 255, 0.7)',
+                            fontSize: '12px',
+                            cursor: 'pointer',
                           }}
                         >
-                          <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
-                            <div style={{ fontSize: '17px', fontWeight: 800, color: '#34d399', fontFamily: 'monospace' }}>
-                              ₹{sup.amount?.toLocaleString()}
+                          Cancel
+                        </button>
+                        <button
+                          type="submit"
+                          disabled={addingSupporter}
+                          style={{
+                            padding: '6px 18px',
+                            borderRadius: '8px',
+                            background: '#fbbf24',
+                            border: 'none',
+                            color: '#000000',
+                            fontWeight: 700,
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            opacity: addingSupporter ? 0.6 : 1,
+                          }}
+                        >
+                          {addingSupporter ? 'Adding...' : 'Save Supporter'}
+                        </button>
+                      </div>
+                    </div>
+                  </form>
+                )}
+
+                {/* Pool Stats */}
+                <div style={{ marginBottom: '14px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '8px' }}>
+                  <p style={{ margin: 0, fontSize: '13px', color: 'rgba(255, 255, 255, 0.65)' }}>
+                    Total Pool Collected: <strong style={{ color: '#34d399', fontSize: '15px' }}>₹{supporters.filter(s => s.verified !== false).reduce((acc, s) => acc + (Number(s.amount) || 0), 0).toLocaleString()}</strong> ({supporters.filter(s => s.verified !== false).length} verified / {supporters.length} total)
+                  </p>
+                </div>
+
+                {supporters.length === 0 ? (
+                  <EmptyState
+                    icon={<Coffee style={{ width: 28, height: 28 }} />}
+                    title="No Supporters Recorded Yet"
+                    message="When supporters contribute via Ko-fi or submit a review, they will appear here. You can also click '+ Add Supporter' to add one manually."
+                  />
+                ) : (
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+                    {supporters.map((sup, idx) => {
+                      const isEditing = editSupporterId === sup.id;
+
+                      if (isEditing) {
+                        return (
+                          <div
+                            key={sup.id || idx}
+                            style={{
+                              padding: isMobile ? '14px' : '18px 20px',
+                              borderRadius: '16px',
+                              background: 'rgba(255, 255, 255, 0.08)',
+                              border: '1px solid #fbbf24',
+                              display: 'flex',
+                              flexDirection: 'column',
+                              gap: '10px',
+                            }}
+                          >
+                            <div style={{ fontSize: '12px', fontWeight: 700, color: '#fbbf24' }}>
+                              Editing Supporter: {sup.name}
                             </div>
-                            <div style={{ fontSize: '11px', color: '#fbbf24' }}>
-                              ★ {sup.rating}/5 · {sup.cups} cups
+
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr 1fr 1fr', gap: '10px' }}>
+                              <input
+                                type="text"
+                                value={editSupName}
+                                onChange={(e) => setEditSupName(e.target.value)}
+                                placeholder="Name"
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '8px',
+                                  background: '#1a1b26',
+                                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                                  color: '#ffffff',
+                                  fontSize: '13px',
+                                }}
+                              />
+                              <input
+                                type="number"
+                                value={editSupAmount}
+                                onChange={(e) => setEditSupAmount(e.target.value)}
+                                placeholder="Amount (₹)"
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '8px',
+                                  background: '#1a1b26',
+                                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                                  color: '#ffffff',
+                                  fontSize: '13px',
+                                }}
+                              />
+                              <input
+                                type="number"
+                                value={editSupCups}
+                                onChange={(e) => setEditSupCups(e.target.value)}
+                                placeholder="Cups"
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '8px',
+                                  background: '#1a1b26',
+                                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                                  color: '#ffffff',
+                                  fontSize: '13px',
+                                }}
+                              />
+                              <select
+                                value={editSupRating}
+                                onChange={(e) => setEditSupRating(Number(e.target.value))}
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '8px',
+                                  background: '#1a1b26',
+                                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                                  color: '#ffffff',
+                                  fontSize: '13px',
+                                }}
+                              >
+                                <option value={5}>★ 5 Stars</option>
+                                <option value={4}>★ 4 Stars</option>
+                                <option value={3}>★ 3 Stars</option>
+                                <option value={2}>★ 2 Stars</option>
+                                <option value={1}>★ 1 Star</option>
+                              </select>
+                            </div>
+
+                            <div style={{ display: 'grid', gridTemplateColumns: isMobile ? '1fr' : '2fr 1fr', gap: '10px' }}>
+                              <input
+                                type="text"
+                                value={editSupMessage}
+                                onChange={(e) => setEditSupMessage(e.target.value)}
+                                placeholder="Review / Message"
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '8px',
+                                  background: '#1a1b26',
+                                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                                  color: '#ffffff',
+                                  fontSize: '13px',
+                                }}
+                              />
+                              <input
+                                type="text"
+                                value={editSupRef}
+                                onChange={(e) => setEditSupRef(e.target.value)}
+                                placeholder="Ko-fi Ref / Note"
+                                style={{
+                                  padding: '8px 12px',
+                                  borderRadius: '8px',
+                                  background: '#1a1b26',
+                                  border: '1px solid rgba(255, 255, 255, 0.25)',
+                                  color: '#ffffff',
+                                  fontSize: '13px',
+                                }}
+                              />
+                            </div>
+
+                            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px', flexWrap: 'wrap' }}>
+                              <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: 'rgba(255, 255, 255, 0.8)', cursor: 'pointer' }}>
+                                <input
+                                  type="checkbox"
+                                  checked={editSupVerified}
+                                  onChange={(e) => setEditSupVerified(e.target.checked)}
+                                />
+                                <span>Verified Supporter</span>
+                              </label>
+
+                              <div style={{ display: 'flex', gap: '8px' }}>
+                                <button
+                                  type="button"
+                                  onClick={() => setEditSupporterId(null)}
+                                  style={{
+                                    padding: '6px 14px',
+                                    borderRadius: '8px',
+                                    background: 'rgba(255, 255, 255, 0.08)',
+                                    border: 'none',
+                                    color: 'rgba(255, 255, 255, 0.7)',
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                  }}
+                                >
+                                  Cancel
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={handleSaveEditSupporter}
+                                  disabled={savingSupporter}
+                                  style={{
+                                    padding: '6px 18px',
+                                    borderRadius: '8px',
+                                    background: '#34d399',
+                                    border: 'none',
+                                    color: '#000000',
+                                    fontWeight: 700,
+                                    fontSize: '12px',
+                                    cursor: 'pointer',
+                                    opacity: savingSupporter ? 0.6 : 1,
+                                  }}
+                                >
+                                  {savingSupporter ? 'Saving...' : 'Save Changes'}
+                                </button>
+                              </div>
                             </div>
                           </div>
-                          <button
-                            onClick={() => handleDeleteItem('supporters', sup.id)}
-                            title="Delete supporter record"
-                            style={{ background: 'none', border: 'none', color: 'rgba(255, 255, 255, 0.3)', cursor: 'pointer', padding: '4px', display: 'flex' }}
+                        );
+                      }
+
+                      return (
+                        <div
+                          key={sup.id || idx}
+                          style={{
+                            display: 'flex',
+                            flexDirection: isMobile ? 'column' : 'row',
+                            alignItems: isMobile ? 'stretch' : 'center',
+                            justifyContent: 'space-between',
+                            gap: isMobile ? '10px' : '16px',
+                            padding: isMobile ? '14px' : '16px 20px',
+                            borderRadius: '14px',
+                            background: 'rgba(255, 255, 255, 0.04)',
+                            border: '1px solid rgba(255, 255, 255, 0.1)',
+                          }}
+                        >
+                          <div>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+                              <span style={{ fontSize: isMobile ? '14px' : '15px', fontWeight: 700, color: '#ffffff' }}>
+                                {sup.name}
+                              </span>
+
+                              {sup.verified !== false ? (
+                                <span
+                                  style={{
+                                    fontSize: '10px',
+                                    color: '#34d399',
+                                    background: 'rgba(16, 185, 129, 0.12)',
+                                    border: '1px solid rgba(16, 185, 129, 0.3)',
+                                    padding: '2px 8px',
+                                    borderRadius: '999px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    fontFamily: 'monospace',
+                                  }}
+                                >
+                                  <CheckCircle style={{ width: 10, height: 10 }} /> Verified
+                                </span>
+                              ) : (
+                                <span
+                                  style={{
+                                    fontSize: '10px',
+                                    color: '#fbbf24',
+                                    background: 'rgba(251, 191, 36, 0.12)',
+                                    border: '1px solid rgba(251, 191, 36, 0.3)',
+                                    padding: '2px 8px',
+                                    borderRadius: '999px',
+                                    display: 'inline-flex',
+                                    alignItems: 'center',
+                                    gap: '3px',
+                                    fontFamily: 'monospace',
+                                  }}
+                                >
+                                  Pending Verification
+                                </span>
+                              )}
+                            </div>
+
+                            {sup.message && (
+                              <p style={{ margin: '4px 0 0 0', fontSize: '13px', color: 'rgba(255, 255, 255, 0.65)', fontStyle: 'italic' }}>
+                                "{sup.message}"
+                              </p>
+                            )}
+
+                            {sup.payment_id && (
+                              <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#67e8f9', fontFamily: 'monospace' }}>
+                                Ref: {sup.payment_id}
+                              </p>
+                            )}
+                          </div>
+
+                          <div
+                            style={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: isMobile ? 'space-between' : 'flex-end',
+                              gap: '12px',
+                              borderTop: isMobile ? '1px solid rgba(255, 255, 255, 0.06)' : 'none',
+                              paddingTop: isMobile ? '8px' : 0,
+                            }}
                           >
-                            <Trash2 style={{ width: 14, height: 14 }} />
-                          </button>
+                            <div style={{ textAlign: isMobile ? 'left' : 'right' }}>
+                              <div style={{ fontSize: '17px', fontWeight: 800, color: '#34d399', fontFamily: 'monospace' }}>
+                                ₹{sup.amount?.toLocaleString()}
+                              </div>
+                              <div style={{ fontSize: '11px', color: '#fbbf24' }}>
+                                ★ {sup.rating || 5}/5 · {sup.cups || 1} {sup.cups === 1 ? 'cup' : 'cups'}
+                              </div>
+                            </div>
+
+                            {/* Management Actions */}
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                              <button
+                                onClick={() => handleToggleVerified(sup.id, sup.verified ?? true)}
+                                title={sup.verified !== false ? 'Mark as Unverified' : 'Mark as Verified'}
+                                style={{
+                                  padding: '4px 8px',
+                                  borderRadius: '6px',
+                                  background: sup.verified !== false ? 'rgba(255, 255, 255, 0.06)' : 'rgba(16, 185, 129, 0.2)',
+                                  border: '1px solid rgba(255, 255, 255, 0.15)',
+                                  color: sup.verified !== false ? 'rgba(255, 255, 255, 0.6)' : '#34d399',
+                                  fontSize: '11px',
+                                  cursor: 'pointer',
+                                }}
+                              >
+                                {sup.verified !== false ? 'Unverify' : 'Verify ✓'}
+                              </button>
+
+                              <button
+                                onClick={() => handleStartEditSupporter(sup)}
+                                title="Edit supporter record"
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'rgba(255, 255, 255, 0.4)',
+                                  cursor: 'pointer',
+                                  padding: '5px',
+                                  display: 'flex',
+                                }}
+                              >
+                                <Edit2 style={{ width: 14, height: 14 }} />
+                              </button>
+
+                              <button
+                                onClick={() => handleDeleteItem('supporters', sup.id)}
+                                title="Delete supporter record"
+                                style={{
+                                  background: 'none',
+                                  border: 'none',
+                                  color: 'rgba(239, 68, 68, 0.6)',
+                                  cursor: 'pointer',
+                                  padding: '5px',
+                                  display: 'flex',
+                                }}
+                              >
+                                <Trash2 style={{ width: 14, height: 14 }} />
+                              </button>
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
-                </div>
-              )
+                )}
+              </div>
             )}
 
             {/* ── TAB 5: VISITORS ──────────────────────────────────────────── */}

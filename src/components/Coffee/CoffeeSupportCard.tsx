@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Coffee, Heart, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
 import { LiquidGlassCard } from '../LiquidGlass/LiquidGlassCard';
-import { getStoredCoffeeStats, CoffeeStats } from '../../config/kofi';
+import { getStoredCoffeeStats, syncSupportersFromSupabase, CoffeeStats } from '../../config/kofi';
 import { CoffeeSupportModal } from './CoffeeSupportModal';
 
 interface CoffeeSupportCardProps {
@@ -20,6 +20,7 @@ export const CoffeeSupportCard: React.FC<CoffeeSupportCardProps> = ({
   const [selectedInitialAmount, setSelectedInitialAmount] = useState<number>(100);
 
   useEffect(() => {
+    syncSupportersFromSupabase();
     const handleUpdate = (e: any) => {
       if (e.detail) setStats(e.detail);
     };

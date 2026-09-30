@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { getTopSupporters, SupporterReview } from '../../config/kofi';
+import { getTopSupporters, syncSupportersFromSupabase, SupporterReview } from '../../config/kofi';
 import { Star, MessageSquare, X, Award } from 'lucide-react';
 import { CoffeeSupportModal } from './CoffeeSupportModal';
 
@@ -10,6 +10,9 @@ export const TopSupportersBar: React.FC = () => {
   const [coffeeModalOpen, setCoffeeModalOpen] = useState(false);
 
   useEffect(() => {
+    syncSupportersFromSupabase().then(() => {
+      setTopSupporters(getTopSupporters(4));
+    });
     const handleUpdate = () => {
       setTopSupporters(getTopSupporters(4));
     };
@@ -158,13 +161,15 @@ export const TopSupportersBar: React.FC = () => {
               </span>
             </div>
 
-            {/* Comment Body */}
-            <div className="mb-6 p-4 rounded-2xl bg-black/60 border border-white/[0.08] relative">
-              <MessageSquare className="w-4 h-4 text-cyan-400 absolute top-4 left-4" />
-              <p className="text-sm text-white/85 leading-relaxed pl-7 font-light italic">
-                "{selectedSupporter.message || 'Proud to support RyperDeck Windows companion development!'}"
-              </p>
-            </div>
+            {/* Comment Body (Only if message exists) */}
+            {selectedSupporter.message && (
+              <div className="mb-6 p-4 rounded-2xl bg-black/60 border border-white/[0.08] relative">
+                <MessageSquare className="w-4 h-4 text-cyan-400 absolute top-4 left-4" />
+                <p className="text-sm text-white/85 leading-relaxed pl-7 font-light italic">
+                  "{selectedSupporter.message}"
+                </p>
+              </div>
+            )}
 
             {/* CTA */}
             <div className="flex items-center gap-3">

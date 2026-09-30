@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LiquidGlassCard } from '../LiquidGlass/LiquidGlassCard';
-import { getStoredSupporters, SupporterReview } from '../../config/kofi';
+import { getStoredSupporters, syncSupportersFromSupabase, SupporterReview } from '../../config/kofi';
 import { Star, Trophy, Award, MessageSquare, Coffee, ExternalLink } from 'lucide-react';
 import { CoffeeSupportModal } from '../Coffee/CoffeeSupportModal';
 
@@ -9,15 +9,25 @@ export const LeaderboardSection: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);
 
   useEffect(() => {
-    const handleUpdate = () => {
-      setSupporters(getStoredSupporters());
+    // Initial sync directly from live Supabase database
+    syncSupportersFromSupabase().then((data) => {
+      if (data) setSupporters(data);
+    });
+
+    const handleUpdate = (e: any) => {
+      if (e.detail) {
+        setSupporters(e.detail);
+      } else {
+        setSupporters(getStoredSupporters());
+      }
     };
     window.addEventListener('ryperdeck_supporters_updated', handleUpdate);
     return () => window.removeEventListener('ryperdeck_supporters_updated', handleUpdate);
   }, []);
 
-  const rankedSupporters = [...supporters].sort((a, b) => b.amount - a.amount);
-  const reviews = supporters.filter(s => s.message);
+  const verifiedSupporters = supporters.filter((s) => s.verified !== false);
+  const rankedSupporters = [...verifiedSupporters].sort((a, b) => b.amount - a.amount);
+  const reviews = verifiedSupporters.filter((s) => s.message && s.message.trim().length > 0);
 
   return (
     <section id="leaderboard" className="relative py-20 sm:py-28 md:py-36 px-4 sm:px-6 bg-black border-t border-white/[0.05] overflow-hidden">

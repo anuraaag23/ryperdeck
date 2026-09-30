@@ -385,6 +385,7 @@ export async function createFeatureRequestByAdmin(item: {
 }
 
 // ── Supporters ────────────────────────────────────────────────────────
+// ── Supporters ────────────────────────────────────────────────────────
 export async function submitSupporter(supporter: {
   name: string;
   amount: number;
@@ -392,6 +393,7 @@ export async function submitSupporter(supporter: {
   rating: number;
   message?: string;
   paymentId?: string;
+  verified?: boolean;
 }): Promise<boolean> {
   if (supabase) {
     try {
@@ -403,7 +405,7 @@ export async function submitSupporter(supporter: {
           rating: supporter.rating,
           message: supporter.message || null,
           payment_id: supporter.paymentId || null,
-          verified: true,
+          verified: supporter.verified ?? true,
         },
       ]);
       if (!error) return true;
@@ -413,7 +415,115 @@ export async function submitSupporter(supporter: {
     }
   }
 
+  // Local fallback
+  try {
+    const list = JSON.parse(localStorage.getItem(LS_KEYS.supporters) || '[]');
+    list.unshift({
+      id: `sup_${Date.now()}`,
+      name: supporter.name,
+      amount: supporter.amount,
+      cups: supporter.cups,
+      rating: supporter.rating,
+      message: supporter.message || undefined,
+      payment_id: supporter.paymentId || undefined,
+      verified: supporter.verified ?? true,
+      created_at: new Date().toISOString(),
+    });
+    localStorage.setItem(LS_KEYS.supporters, JSON.stringify(list));
+  } catch {}
+
   return true;
+}
+
+export async function createSupporterByAdmin(supporter: {
+  name: string;
+  amount: number;
+  cups: number;
+  rating: number;
+  message?: string;
+  payment_id?: string;
+  verified?: boolean;
+}): Promise<boolean> {
+  const finalName = supporter.name.trim() || 'Anonymous Supporter';
+  const finalAmount = Number(supporter.amount) || 50;
+  const finalCups = Number(supporter.cups) || Math.max(1, Math.round(finalAmount / 50));
+  const finalRating = Math.min(5, Math.max(1, Number(supporter.rating) || 5));
+  const finalVerified = supporter.verified ?? true;
+
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('supporters').insert([
+        {
+          name: finalName,
+          amount: finalAmount,
+          cups: finalCups,
+          rating: finalRating,
+          message: supporter.message?.trim() || null,
+          payment_id: supporter.payment_id?.trim() || null,
+          verified: finalVerified,
+        },
+      ]);
+      if (!error) return true;
+      console.error('Supabase create supporter error:', error);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  try {
+    const list = JSON.parse(localStorage.getItem(LS_KEYS.supporters) || '[]');
+    list.unshift({
+      id: `sup_${Date.now()}`,
+      name: finalName,
+      amount: finalAmount,
+      cups: finalCups,
+      rating: finalRating,
+      message: supporter.message?.trim() || undefined,
+      payment_id: supporter.payment_id?.trim() || undefined,
+      verified: finalVerified,
+      created_at: new Date().toISOString(),
+    });
+    localStorage.setItem(LS_KEYS.supporters, JSON.stringify(list));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function updateSupporter(
+  id: string,
+  updates: {
+    name?: string;
+    amount?: number;
+    cups?: number;
+    rating?: number;
+    message?: string;
+    payment_id?: string;
+    verified?: boolean;
+  }
+): Promise<boolean> {
+  if (supabase) {
+    try {
+      const { error } = await supabase.from('supporters').update(updates).eq('id', id);
+      if (!error) return true;
+      console.error('Supabase supporter update error:', error);
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  try {
+    const list = JSON.parse(localStorage.getItem(LS_KEYS.supporters) || '[]');
+    const updated = list.map((s: any) => (s.id === id ? { ...s, ...updates } : s));
+    localStorage.setItem(LS_KEYS.supporters, JSON.stringify(updated));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export async function setSupporterVerified(id: string, verified: boolean): Promise<boolean> {
+  return updateSupporter(id, { verified });
 }
 
 export async function fetchSupporters(): Promise<DbSupporter[]> {
@@ -438,14 +548,35 @@ export async function fetchSupporters(): Promise<DbSupporter[]> {
 }
 
 // ── Delete Records (Admin) ────────────────────────────────────────────
-export async function deleteRecord(table: 'subscribers' | 'bug_reports' | 'feature_requests' | 'supporters', id: string): Promise<boolean> {
+export async function deleteRecord(
+  table: 'subscribers' | 'bug_reports' | 'feature_requests' | 'supporters',
+  id: string
+): Promise<boolean> {
   if (supabase) {
     try {
       const { error } = await supabase.from(table).delete().eq('id', id);
-      return !error;
-    } catch {
-      return false;
+      if (error) console.error(`Error deleting from ${table}:`, error);
+    } catch (err) {
+      console.error(err);
     }
   }
+
+  try {
+    const key =
+      table === 'supporters'
+        ? LS_KEYS.supporters
+        : table === 'bug_reports'
+        ? LS_KEYS.bugs
+        : table === 'feature_requests'
+        ? LS_KEYS.features
+        : LS_KEYS.emails;
+    if (key) {
+      const list = JSON.parse(localStorage.getItem(key) || '[]');
+      const filtered = list.filter((item: any) => (item.id ? item.id !== id : item !== id));
+      localStorage.setItem(key, JSON.stringify(filtered));
+    }
+  } catch {}
+
   return true;
 }
+
