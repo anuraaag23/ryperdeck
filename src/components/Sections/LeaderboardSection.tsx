@@ -25,7 +25,8 @@ export const LeaderboardSection: React.FC = () => {
     return () => window.removeEventListener('ryperdeck_supporters_updated', handleUpdate);
   }, []);
 
-  const verifiedSupporters = supporters.filter((s) => s.verified !== false);
+  // STRICT SECURITY: Only display supporters that have been genuinely verified by admin or webhook
+  const verifiedSupporters = supporters.filter((s) => s.verified === true);
   const rankedSupporters = [...verifiedSupporters].sort((a, b) => b.amount - a.amount);
   const reviews = verifiedSupporters.filter((s) => s.message && s.message.trim().length > 0);
 

@@ -386,6 +386,29 @@ export async function createFeatureRequestByAdmin(item: {
 
 // ── Supporters ────────────────────────────────────────────────────────
 // ── Supporters ────────────────────────────────────────────────────────
+export async function isPaymentIdAlreadyUsed(paymentId: string): Promise<boolean> {
+  const trimmed = paymentId.trim();
+  if (!trimmed) return false;
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('supporters')
+        .select('id')
+        .eq('payment_id', trimmed)
+        .limit(1);
+      if (!error && data && data.length > 0) return true;
+    } catch (err) {
+      console.error('Error checking payment ID:', err);
+    }
+  }
+  try {
+    const list = JSON.parse(localStorage.getItem(LS_KEYS.supporters) || '[]');
+    return list.some((s: any) => (s.payment_id || s.paymentRef) === trimmed);
+  } catch {
+    return false;
+  }
+}
+
 export async function submitSupporter(supporter: {
   name: string;
   amount: number;
@@ -395,17 +418,23 @@ export async function submitSupporter(supporter: {
   paymentId?: string;
   verified?: boolean;
 }): Promise<boolean> {
+  // Clean inputs: strip all links, scripts, and format cleanly
+  const cleanName = supporter.name.replace(/<[^>]*>/g, '').replace(/[<>"'`]/g, '').trim().slice(0, 80) || 'Anonymous Supporter';
+  const cleanMessage = supporter.message ? supporter.message.replace(/<[^>]*>/g, '').replace(/[<>"'`]/g, '').trim().slice(0, 350) : null;
+  const cleanPaymentId = supporter.paymentId ? supporter.paymentId.trim().slice(0, 80) : null;
+  const isVerified = supporter.verified === true; // Default: strictly FALSE unless explicitly confirmed
+
   if (supabase) {
     try {
       const { error } = await supabase.from('supporters').insert([
         {
-          name: supporter.name,
+          name: cleanName,
           amount: supporter.amount,
           cups: supporter.cups,
           rating: supporter.rating,
-          message: supporter.message || null,
-          payment_id: supporter.paymentId || null,
-          verified: supporter.verified ?? true,
+          message: cleanMessage,
+          payment_id: cleanPaymentId,
+          verified: isVerified,
         },
       ]);
       if (!error) return true;
@@ -420,13 +449,13 @@ export async function submitSupporter(supporter: {
     const list = JSON.parse(localStorage.getItem(LS_KEYS.supporters) || '[]');
     list.unshift({
       id: `sup_${Date.now()}`,
-      name: supporter.name,
+      name: cleanName,
       amount: supporter.amount,
       cups: supporter.cups,
       rating: supporter.rating,
-      message: supporter.message || undefined,
-      payment_id: supporter.paymentId || undefined,
-      verified: supporter.verified ?? true,
+      message: cleanMessage || undefined,
+      payment_id: cleanPaymentId || undefined,
+      verified: isVerified,
       created_at: new Date().toISOString(),
     });
     localStorage.setItem(LS_KEYS.supporters, JSON.stringify(list));

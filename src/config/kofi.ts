@@ -20,9 +20,31 @@ export interface CoffeeStats {
   lastUpdated: number;
 }
 
-// Sanitize user input: strip HTML/script tags and limit length
-const sanitizeInput = (str: string, maxLen = 200): string =>
-  str.replace(/<[^>]*>/g, '').replace(/[<>"'`]/g, '').trim().slice(0, maxLen);
+// ── Security & Anti-Spam: Link Detection & Removal ───────────────────────────
+// Matches URLs (http, https, ftp), www. prefixes, IP addresses, and common domain extensions (.com, .io, .gg, etc.)
+export const LINK_REGEX = /(?:https?:\/\/|ftp:\/\/|www\.)[^\s/$.?#].[^\s]*|\b(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+(?:com|org|net|edu|gov|mil|io|co|in|ai|me|xyz|app|dev|gg|link|info|biz|site|online|tech|store|cc|to|is|ru|cn|tv|top)\b(?:\/[^\s]*)?/gi;
+
+export const containsLink = (text: string): boolean => {
+  if (!text) return false;
+  return LINK_REGEX.test(text);
+};
+
+export const sanitizeReviewMessage = (text: string, maxLen = 350): string => {
+  if (!text) return '';
+  // 1. Strip HTML tags and script delimiters
+  let cleaned = text.replace(/<[^>]*>/g, '').replace(/[<>"'`]/g, '');
+  // 2. Strip any URLs, web domains, and links completely
+  cleaned = cleaned.replace(LINK_REGEX, '');
+  // 3. Normalize multiple whitespace and trim
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  return cleaned.slice(0, maxLen);
+};
+
+// Sanitize user input: strip HTML/script tags, strip links, and limit length
+export const sanitizeInput = (str: string, maxLen = 200): string => {
+  if (!str) return '';
+  return sanitizeReviewMessage(str, maxLen);
+};
 
 // Initial leaderboard baseline (starts empty for real supporters)
 export const INITIAL_SUPPORTERS: SupporterReview[] = [];
@@ -63,10 +85,10 @@ export const getStoredSupporters = (): SupporterReview[] => {
   return [];
 };
 
-// Calculate stats dynamically from supporters list
+// Calculate stats dynamically from supporters list (STRICT: only verified === true)
 export const calculateStats = (supporters: SupporterReview[]): CoffeeStats => {
-  // Only calculate stats from verified supporters
-  const verifiedList = supporters.filter((s) => s.verified !== false);
+  // Only calculate stats from genuinely verified supporters
+  const verifiedList = supporters.filter((s) => s.verified === true);
   const totalAmountInr = verifiedList.reduce((acc, s) => acc + (Number(s.amount) || 0), 0);
   const totalCups = verifiedList.reduce((acc, s) => acc + (Number(s.cups) || 0), 0);
   return {
@@ -89,14 +111,15 @@ export const syncSupportersFromSupabase = async (): Promise<SupporterReview[]> =
     if (Array.isArray(dbSupporters)) {
       const reviews: SupporterReview[] = dbSupporters.map((db, idx) => ({
         id: db.id || `sup-${idx}`,
-        name: db.name || 'Anonymous',
+        name: sanitizeInput(db.name || 'Anonymous Supporter', 80),
         amount: Number(db.amount) || 50,
         cups: Number(db.cups) || Math.max(1, Math.round((Number(db.amount) || 50) / 50)),
         rating: Math.min(5, Math.max(1, Number(db.rating) || 5)),
-        message: db.message || undefined,
+        message: db.message ? sanitizeReviewMessage(db.message, 350) : undefined,
         timestamp: db.created_at ? new Date(db.created_at).getTime() : Date.now(),
         paymentRef: db.payment_id || undefined,
-        verified: db.verified ?? true,
+        // STRICT: Only explicitly verified records are verified. Unverified records remain false.
+        verified: db.verified === true,
       }));
 
       // Cache to localStorage
@@ -129,7 +152,7 @@ export const clearLocalSupporters = (): void => {
   } catch {}
 };
 
-// Add new supporter review and broadcast update
+// Add new supporter review and broadcast update (default: verified = false for public submission)
 export const addSupporter = (
   name: string,
   amount: number,
@@ -137,11 +160,11 @@ export const addSupporter = (
   rating: number,
   message?: string,
   paymentRef?: string,
-  verified = true
+  verified = false
 ): { supporter: SupporterReview; stats: CoffeeStats } => {
   const sanitizedName = sanitizeInput(name, 80) || 'Anonymous Supporter';
-  const sanitizedMessage = message ? sanitizeInput(message, 500) : undefined;
-  const sanitizedRef = paymentRef ? sanitizeInput(paymentRef, 60) : undefined;
+  const sanitizedMessage = message ? sanitizeReviewMessage(message, 350) : undefined;
+  const sanitizedRef = paymentRef ? sanitizeInput(paymentRef, 80) : undefined;
   const current = getStoredSupporters();
   const newSupporter: SupporterReview = {
     id: `sup-${Date.now()}`,
@@ -151,7 +174,7 @@ export const addSupporter = (
     rating: Math.min(5, Math.max(1, Math.round(Number(rating)) || 5)),
     message: sanitizedMessage || undefined,
     paymentRef: sanitizedRef || undefined,
-    verified,
+    verified: verified === true,
     timestamp: Date.now(),
   };
 
@@ -176,7 +199,7 @@ export const addSupporter = (
 export const getTopSupporters = (limit = 4): SupporterReview[] => {
   const all = getStoredSupporters();
   return [...all]
-    .filter((s) => s.verified !== false)
+    .filter((s) => s.verified === true)
     .sort((a, b) => b.amount - a.amount)
     .slice(0, limit);
 };
