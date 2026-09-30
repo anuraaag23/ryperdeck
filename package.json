@@ -1,7 +1,26 @@
 {
   "name": "ryperdeck-landing",
-  "private": true,
   "version": "1.0.0",
+  "description": "Next-Gen Wireless Macro Deck for Windows with Liquid Glass UI. Turn your phone or tablet into an ultra-low latency macro controller.",
+  "author": "Anurag <anurag.ay8840@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/anuraaag23/ryperdeck.git"
+  },
+  "homepage": "https://ryperdeck.app",
+  "keywords": [
+    "macro-deck",
+    "streamdeck-alternative",
+    "windows-companion",
+    "android-macro-controller",
+    "react",
+    "vite",
+    "tailwindcss",
+    "liquid-glass",
+    "glassmorphism",
+    "udp-latency"
+  ],
   "type": "module",
   "scripts": {
     "dev": "vite",
