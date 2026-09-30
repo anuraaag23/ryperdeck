@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getStoredCoffeeStats, CoffeeStats } from '../../config/razorpay';
+import { getStoredCoffeeStats, CoffeeStats } from '../../config/kofi';
 import { CoffeeSupportModal } from './CoffeeSupportModal';
 
 export const CoffeePill: React.FC<{ className?: string }> = ({ className = '' }) => {

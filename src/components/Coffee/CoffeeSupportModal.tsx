@@ -7,18 +7,17 @@ import {
   Star,
   Check,
   ArrowLeft,
-  AlertCircle,
-  RefreshCcw,
   CheckCircle2,
-  Lock
+  Heart,
+  Coffee
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import {
-  RAZORPAY_CONFIG,
+  KOFI_CONFIG,
   addSupporter,
   getStoredCoffeeStats,
   CoffeeStats
-} from '../../config/razorpay';
+} from '../../config/kofi';
 import { submitSupporter } from '../../lib/supabase';
 
 interface CoffeeSupportModalProps {
@@ -36,6 +35,7 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
   const [customAmount, setCustomAmount] = useState<string>('');
   const [supporterName, setSupporterName] = useState<string>('');
   const [supporterMessage, setSupporterMessage] = useState<string>('');
+  const [paymentRef, setPaymentRef] = useState<string>('');
   const [starRating, setStarRating] = useState<number>(5);
   const [hoverRating, setHoverRating] = useState<number>(0);
   const [poppedStar, setPoppedStar] = useState<number>(0);
@@ -47,10 +47,8 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
   }, [isOpen]);
   const [stats, setStats] = useState<CoffeeStats>(getStoredCoffeeStats());
 
-  // Payment states: 'details' | 'processing' | 'success' | 'failed'
-  const [step, setStep] = useState<'details' | 'processing' | 'success' | 'failed'>('details');
-  const [paymentError, setPaymentError] = useState<string>('');
-  const [verifiedPaymentId, setVerifiedPaymentId] = useState<string>('');
+  // Modal steps: 'details' | 'success'
+  const [step, setStep] = useState<'details' | 'success'>('details');
 
   useEffect(() => {
     const handleUpdate = (e: any) => {
@@ -75,8 +73,7 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
   useEffect(() => {
     if (isOpen) {
       setStep('details');
-      setPaymentError('');
-      setVerifiedPaymentId('');
+      setPaymentRef('');
     }
   }, [isOpen]);
 
@@ -85,93 +82,38 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
   const currentAmount = customAmount ? parseInt(customAmount, 10) || 0 : selectedAmount;
   const estimatedCups = Math.max(1, Math.round(currentAmount / 50));
 
-  // Trigger real Razorpay payment
-  const handlePay = () => {
+  // Handle Ko-fi payment & review submission
+  const handleSupportOnKofi = () => {
     const finalAmount = currentAmount > 0 ? currentAmount : 100;
     const finalName = supporterName.trim() || 'Anonymous Supporter';
+    const ref = paymentRef.trim() || `kofi-${Date.now()}`;
 
-    setStep('processing');
-    setPaymentError('');
+    // Open Ko-fi in a new tab
+    window.open(KOFI_CONFIG.url, '_blank', 'noopener,noreferrer');
 
-    // Check if Razorpay Standard Checkout SDK is loaded
-    const RazorpayClass = (window as any).Razorpay;
+    // Register supporter locally and in Supabase
+    addSupporter(finalName, finalAmount, estimatedCups, starRating, supporterMessage, ref);
+    submitSupporter({
+      name: finalName,
+      amount: finalAmount,
+      cups: estimatedCups,
+      rating: starRating,
+      message: supporterMessage,
+      paymentId: ref,
+    });
 
-    // If Razorpay API Key ID is provided (from .env or config)
-    if (RazorpayClass && RAZORPAY_CONFIG.keyId) {
-      try {
-        const options = {
-          key: RAZORPAY_CONFIG.keyId,
-          amount: finalAmount * 100, // paise (100 INR = 10000 paise)
-          currency: 'INR',
-          name: 'RyperDeck',
-          description: `Buy Developer ${estimatedCups} Coffee${estimatedCups > 1 ? 's' : ''}`,
-          image: '/logo.png',
-          handler: function (response: any) {
-            // ONLY FIRES IF PAYMENT ACTUALLY SUCCEEDED AT RAZORPAY!
-            if (response && response.razorpay_payment_id) {
-              const pid = response.razorpay_payment_id;
-              setVerifiedPaymentId(pid);
-              addSupporter(finalName, finalAmount, estimatedCups, starRating, supporterMessage, pid);
-              submitSupporter({
-                name: finalName,
-                amount: finalAmount,
-                cups: estimatedCups,
-                rating: starRating,
-                message: supporterMessage,
-                paymentId: pid,
-              });
-              setStep('success');
-              confetti({
-                particleCount: 120,
-                spread: 85,
-                origin: { y: 0.6 },
-                colors: ['#ffffff', '#f59e0b', '#38bdf8', '#34d399'],
-              });
-            } else {
-              setPaymentError('Payment confirmation missing from gateway.');
-              setStep('failed');
-            }
-          },
-          modal: {
-            ondismiss: function () {
-              // User closed the popup without paying
-              setPaymentError('Payment was cancelled or closed before completing.');
-              setStep('failed');
-            },
-          },
-          prefill: {
-            name: finalName,
-          },
-          theme: {
-            color: '#050508',
-          },
-        };
+    setStep('success');
 
-        const rzp = new RazorpayClass(options);
-
-        rzp.on('payment.failed', function (response: any) {
-          const desc = response.error?.description || response.error?.reason || 'Transaction failed. Please try again.';
-          setPaymentError(desc);
-          setStep('failed');
-        });
-
-        rzp.open();
-        return;
-      } catch (err: any) {
-        console.error('Razorpay invocation failed:', err);
-        setPaymentError(err?.message || 'Failed to open Razorpay gateway.');
-        setStep('failed');
-        return;
-      }
+    try {
+      confetti({
+        particleCount: 120,
+        spread: 85,
+        origin: { y: 0.6 },
+        colors: ['#ffffff', '#f59e0b', '#38bdf8', '#34d399', '#ff5f5f'],
+      });
+    } catch {
+      // Confetti fallback
     }
-
-    // Fallback: If no Razorpay Key ID is configured yet
-    // Direct link to official payment URL
-    window.open(RAZORPAY_CONFIG.paymentUrl, '_blank', 'noopener,noreferrer');
-    setPaymentError(
-      'Razorpay direct popup requires VITE_RAZORPAY_KEY_ID in .env. A secure tab was opened at razorpay.me/@ryper.'
-    );
-    setStep('failed');
   };
 
   return createPortal(
@@ -198,7 +140,7 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
           <div>
             {/* Header */}
             <div className="flex items-center gap-3.5 mb-2 pr-10">
-              <div className="w-11 h-11 rounded-2xl liquid-glass-icon-pod text-xl text-white shadow-md">
+              <div className="w-11 h-11 rounded-2xl liquid-glass-icon-pod liquid-glass-icon-pod-amber text-xl text-white shadow-md flex items-center justify-center">
                 ☕
               </div>
               <div>
@@ -206,22 +148,22 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
                   Support the Developer
                 </span>
                 <h3 className="text-[22px] font-bold text-white tracking-tight leading-tight">
-                  Buy a Coffee &amp; Review
+                  Buy a Coffee on Ko-fi
                 </h3>
               </div>
             </div>
 
-            {/* Verified Razorpay Gateway Badge */}
+            {/* Verified Ko-fi Creator Badge */}
             <div className="mb-4 inline-flex items-center gap-2 px-3 py-1 rounded-full liquid-glass-badge text-white/70">
               <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Razorpay Verified:</span>
+              <span>Official Ko-fi Page:</span>
               <a
-                href={RAZORPAY_CONFIG.paymentUrl}
+                href={KOFI_CONFIG.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white font-mono font-medium hover:underline inline-flex items-center gap-1"
+                className="text-amber-300 font-mono font-medium hover:underline inline-flex items-center gap-1"
               >
-                {RAZORPAY_CONFIG.handle}
+                {KOFI_CONFIG.handle}
                 <ExternalLink className="w-3 h-3 text-white/60" />
               </a>
             </div>
@@ -246,7 +188,7 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
                     }}
                     className={`p-3 rounded-2xl border text-center transition-all cursor-pointer ${
                       selectedAmount === tier.amount && !customAmount
-                        ? 'bg-white/20 border-white/60 text-white shadow-[0_0_20px_rgba(255,255,255,0.2),inset_0_1px_1px_rgba(255,255,255,0.4)]'
+                        ? 'bg-amber-500/20 border-amber-400/60 text-white shadow-[0_0_20px_rgba(245,158,11,0.25),inset_0_1px_1px_rgba(255,255,255,0.4)]'
                         : 'bg-white/[0.025] border-white/[0.08] text-white/60 hover:text-white hover:bg-white/[0.05]'
                     }`}
                   >
@@ -314,7 +256,7 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
             {/* Step 3: Your Name */}
             <div className="mb-3.5">
               <label className="block text-xs font-semibold text-white/80 mb-1.5">
-                3. Your Name <span className="text-white/30 text-[10px] font-normal">(Shown on Leaderboard upon verified payment)</span>
+                3. Your Name <span className="text-white/30 text-[10px] font-normal">(Shown on Leaderboard)</span>
               </label>
               <input
                 type="text"
@@ -326,7 +268,7 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
             </div>
 
             {/* Step 4: Optional Comment / Review */}
-            <div className="mb-6">
+            <div className="mb-3.5">
               <label className="block text-xs font-semibold text-white/80 mb-1.5">
                 4. Write a Comment <span className="text-white/30 text-[10px] font-normal">(Optional review)</span>
               </label>
@@ -339,6 +281,20 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
               />
             </div>
 
+            {/* Step 5: Optional Ko-fi Nickname / Note */}
+            <div className="mb-6">
+              <label className="block text-xs font-semibold text-white/80 mb-1.5">
+                5. Ko-fi Name or Note <span className="text-white/30 text-[10px] font-normal">(Optional reference)</span>
+              </label>
+              <input
+                type="text"
+                placeholder="e.g. @your_kofi_name or payment note"
+                value={paymentRef}
+                onChange={(e) => setPaymentRef(e.target.value)}
+                className="w-full h-11 px-3.5 rounded-2xl liquid-glass-input text-xs"
+              />
+            </div>
+
             {/* Action Row */}
             <div className="flex items-center gap-3">
               <button
@@ -347,37 +303,26 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
                 className="w-1/3 h-12 rounded-full liquid-glass-btn-secondary text-white/70 hover:text-white font-medium text-[13px] flex items-center justify-center gap-1.5 cursor-pointer border border-white/10 hover:border-white/25"
               >
                 <ArrowLeft className="w-4 h-4" />
-                <span>Back</span>
+                <span>Cancel</span>
               </button>
 
               <button
                 type="button"
-                onClick={handlePay}
-                className="w-2/3 h-12 rounded-full liquid-glass-btn-primary bg-white text-black font-bold text-[13px] flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_30px_rgba(255,255,255,0.25)] hover:bg-white/90"
+                onClick={handleSupportOnKofi}
+                className="w-2/3 h-12 rounded-full liquid-glass-btn-amber bg-amber-400 hover:bg-amber-300 text-black font-bold text-[13px] flex items-center justify-center gap-2 cursor-pointer shadow-[0_0_30px_rgba(245,158,11,0.35)] transition-all"
               >
-                <Lock className="w-3.5 h-3.5 text-black" />
-                <span>Pay ₹{currentAmount || 100}</span>
+                <span>☕ Support on Ko-fi</span>
+                <ExternalLink className="w-3.5 h-3.5 text-black/70" />
               </button>
             </div>
 
-            <div className="mt-3 text-center text-[10px] text-white/30">
-              Verified through official Razorpay gateway • Reviews published only upon real successful payment
+            <div className="mt-3 text-center text-[10px] text-white/35">
+              Opens ko-fi.com/ryper in a secure tab • Your review &amp; rating will be published on the Community Leaderboard
             </div>
           </div>
         )}
 
-        {/* STEP: PROCESSING / WAITING */}
-        {step === 'processing' && (
-          <div className="py-12 text-center animate-fadeIn">
-            <div className="w-12 h-12 rounded-full border-2 border-white/20 border-t-white animate-spin mx-auto mb-4" />
-            <h3 className="text-[18px] font-bold text-white mb-2">Connecting to Razorpay...</h3>
-            <p className="text-[12px] text-white/50 max-w-xs mx-auto">
-              Please complete the transaction in the Razorpay window.
-            </p>
-          </div>
-        )}
-
-        {/* STEP: SUCCESSFUL PAYMENT WINDOW */}
+        {/* STEP: SUCCESSFUL PAYMENT & REVIEW SUBMISSION */}
         {step === 'success' && (
           <div className="text-center py-6 animate-fadeIn">
             <div className="w-14 h-14 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
@@ -385,7 +330,7 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
             </div>
 
             <span className="text-[11px] font-semibold uppercase tracking-wider text-emerald-400 mb-1 block">
-              Payment Verified ✓
+              Review Added ✓
             </span>
 
             <h3 className="text-[22px] font-bold text-white mb-2">
@@ -393,61 +338,33 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
             </h3>
 
             <p className="text-[13px] text-white/60 max-w-sm mx-auto leading-relaxed mb-6 font-light">
-              Your contribution of <strong className="text-cyan-300">₹{currentAmount || 100}</strong> ({estimatedCups} cups) has been verified. Your review with <strong className="text-amber-300">{starRating} Stars</strong> is now live on the Community Leaderboard!
+              Your contribution of <strong className="text-amber-300">₹{currentAmount || 100}</strong> ({estimatedCups} cups) and <strong className="text-amber-300">{starRating} Stars</strong> review is now live on the Community Leaderboard.
             </p>
 
-            {verifiedPaymentId && (
-              <div className="mb-6 p-3 rounded-2xl bg-white/[0.03] border border-white/[0.08] inline-block text-[11px] font-mono text-white/50">
-                Razorpay ID: <span className="text-white/80">{verifiedPaymentId}</span>
-              </div>
-            )}
-
-            <div>
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-8 py-3 rounded-full liquid-glass-btn-primary bg-white text-black font-bold text-xs cursor-pointer shadow-[0_0_20px_rgba(255,255,255,0.2)]"
+            <div className="mb-6 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.08] text-[12px] text-white/70 max-w-sm mx-auto">
+              <p className="mb-2">If your Ko-fi tab didn't open automatically, you can complete your contribution here:</p>
+              <a
+                href={KOFI_CONFIG.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 text-amber-300 font-mono font-medium hover:underline text-xs"
               >
-                View on Leaderboard
-              </button>
+                <span>ko-fi.com/ryper</span>
+                <ExternalLink className="w-3 h-3" />
+              </a>
             </div>
-          </div>
-        )}
-
-        {/* STEP: FAILED / CANCELLED PAYMENT WINDOW */}
-        {step === 'failed' && (
-          <div className="text-center py-6 animate-fadeIn">
-            <div className="w-14 h-14 rounded-full bg-red-500/10 border border-red-500/20 text-red-400 flex items-center justify-center mx-auto mb-4 text-2xl shadow-lg">
-              <AlertCircle className="w-8 h-8" />
-            </div>
-
-            <span className="text-[11px] font-semibold uppercase tracking-wider text-red-400 mb-1 block">
-              Payment Not Completed
-            </span>
-
-            <h3 className="text-[22px] font-bold text-white mb-2">
-              Payment Cancelled or Failed
-            </h3>
-
-            <p className="text-[13px] text-white/60 max-w-sm mx-auto leading-relaxed mb-6 font-light">
-              {paymentError || 'The transaction was not completed. No review or supporter entry has been added.'}
-            </p>
 
             <div className="flex items-center justify-center gap-3">
               <button
                 type="button"
-                onClick={() => setStep('details')}
-                className="px-6 py-2.5 rounded-full bg-white text-black font-bold text-xs flex items-center gap-1.5 cursor-pointer hover:bg-white/90 transition-all"
+                onClick={() => {
+                  onClose();
+                  const lb = document.getElementById('leaderboard');
+                  if (lb) lb.scrollIntoView({ behavior: 'smooth' });
+                }}
+                className="px-8 py-3 rounded-full liquid-glass-btn-amber bg-amber-400 text-black font-bold text-xs cursor-pointer shadow-[0_0_20px_rgba(245,158,11,0.3)] hover:bg-amber-300 transition-all"
               >
-                <RefreshCcw className="w-3.5 h-3.5" />
-                <span>Try Again</span>
-              </button>
-              <button
-                type="button"
-                onClick={onClose}
-                className="px-5 py-2.5 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.1] text-white/70 hover:text-white text-xs font-medium cursor-pointer transition-all"
-              >
-                Close
+                View on Leaderboard
               </button>
             </div>
           </div>

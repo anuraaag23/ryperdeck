@@ -29,7 +29,7 @@ const SECTIONS = [
   },
   {
     title: 'Coffee / supporter data',
-    body: 'If you choose to support development, your display name and message are stored in your browser\'s localStorage and displayed in the on-page leaderboard. Payment processing is handled by Razorpay under their own Privacy Policy. We do not receive or store your payment details.',
+    body: 'If you choose to support development, your display name and message are stored in your browser\'s localStorage and displayed in the on-page leaderboard. Payment processing is handled securely by Ko-fi (ko-fi.com/ryper) using PayPal and Stripe payment protection under their own Privacy Policies. We do not receive or store your financial details.',
   },
   {
     title: 'Third-party services',

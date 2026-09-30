@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { LiquidGlassCard } from '../LiquidGlass/LiquidGlassCard';
-import { getStoredSupporters, SupporterReview } from '../../config/razorpay';
+import { getStoredSupporters, SupporterReview } from '../../config/kofi';
 import { Star, Trophy, Award, MessageSquare, Coffee, ExternalLink } from 'lucide-react';
 import { CoffeeSupportModal } from '../Coffee/CoffeeSupportModal';
 
@@ -156,7 +156,9 @@ export const LeaderboardSection: React.FC = () => {
 
             <div className="pt-4 border-t border-white/[0.06] mt-6 flex items-center justify-between text-[11px] text-white/35">
               <span>Automatically updated after every payment</span>
-              <span className="text-amber-300/80">via razorpay.me/@ryper</span>
+              <a href="https://ko-fi.com/ryper" target="_blank" rel="noopener noreferrer" className="text-amber-300/80 hover:text-amber-300 hover:underline">
+                via ko-fi.com/ryper
+              </a>
             </div>
           </LiquidGlassCard>
 

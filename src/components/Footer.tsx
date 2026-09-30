@@ -101,7 +101,7 @@ export const Footer: React.FC<Props> = ({ onRequestFeature, onReportBug, onLegal
           <a href="#faq" className="hover:text-white transition-colors duration-200">FAQ</a>
         </div>
 
-        {/* Mandatory Razorpay & RBI Compliance Policy Links */}
+        {/* Legal & Transparency Policy Links */}
         <div className="flex flex-wrap items-center gap-x-4 sm:gap-x-6 gap-y-2 mb-8 text-[12px] text-white/50 border-t border-b border-white/[0.06] py-4">
           <span className="text-[10px] font-mono uppercase tracking-widest text-white/30 mr-1 sm:mr-2">
             Compliance & Policies:

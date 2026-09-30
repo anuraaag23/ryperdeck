@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { CoffeeSupportModal } from './CoffeeSupportModal';
-import { getStoredCoffeeStats, CoffeeStats } from '../../config/razorpay';
+import { getStoredCoffeeStats, CoffeeStats } from '../../config/kofi';
 
 export const FloatingCoffeeWidget: React.FC = () => {
   const [modalOpen, setModalOpen] = useState(false);

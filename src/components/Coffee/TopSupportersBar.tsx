@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { createPortal } from 'react-dom';
-import { getTopSupporters, SupporterReview } from '../../config/razorpay';
+import { getTopSupporters, SupporterReview } from '../../config/kofi';
 import { Star, MessageSquare, X, Award } from 'lucide-react';
 import { CoffeeSupportModal } from './CoffeeSupportModal';
 

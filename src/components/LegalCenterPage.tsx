@@ -89,7 +89,7 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
           </div>
         </div>
 
-        {/* Tab Navigation Controls (Razorpay Compliant Direct Links) */}
+        {/* Tab Navigation Controls */}
         <div className="mb-10 overflow-x-auto scrollbar-none pb-2">
           <div className="flex items-center gap-2 min-w-max p-1.5 rounded-2xl bg-white/[0.03] border border-white/[0.08] backdrop-blur-xl">
             {tabs.map((tab) => {
@@ -120,7 +120,7 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
             <div className="mb-10">
               <div className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full border border-white/[0.1] bg-white/[0.03] text-[11px] font-mono tracking-widest uppercase text-white/60 mb-4">
                 <FileText className="w-3.5 h-3.5 text-white/70" />
-                RBI & RAZORPAY COMPLIANT
+                LEGAL & TRANSPARENCY POLICIES
               </div>
               <h1 className="text-[36px] sm:text-[52px] font-bold tracking-[-0.04em] leading-[1.0] text-white mb-4">
                 Terms and Conditions
@@ -154,7 +154,7 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
                   RyperDeck is free software. No subscription or purchase is required to access any macro features, layouts, or hotkeys.
                 </p>
                 <p>
-                  Users may optionally choose to support ongoing independent development by making voluntary contributions ("Buy a Coffee") starting at ₹50, ₹100, ₹250, or a custom amount. Payments are voluntary gratuities to support server hosting and software development, processed securely via Razorpay under RBI guidelines.
+                  Users may optionally choose to support ongoing independent development by making voluntary contributions ("Buy a Coffee") starting at ₹50, ₹100, ₹250, or a custom amount. Payments are voluntary gratuities to support server hosting and software development, processed securely via Ko-fi (ko-fi.com/ryper) using PayPal and Stripe payment protection.
                 </p>
               </div>
 
@@ -268,9 +268,9 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
               </div>
 
               <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
-                <h3 className="text-[18px] font-semibold text-white mb-2">6. Secure Razorpay Payment Processing</h3>
+                <h3 className="text-[18px] font-semibold text-white mb-2">6. Secure Ko-fi Payment Processing</h3>
                 <p>
-                  If you choose to support development by buying a coffee, payment processing is handled independently by Razorpay (an RBI-licensed Payment Aggregator) under 128-bit bank-grade encryption. RyperDeck never sees, stores, or handles credit/debit card numbers or UPI MPINs.
+                  If you choose to support development by buying a coffee, payment processing is handled independently by Ko-fi (ko-fi.com/ryper) via industry-standard payment processors (PayPal and Stripe) under bank-grade encryption. RyperDeck never sees, stores, or handles credit/debit card numbers or bank credentials.
                 </p>
               </div>
             </div>
@@ -337,9 +337,9 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
                   To initiate a refund, please send an email to <span className="font-mono text-white underline">{supportEmail}</span> with the subject line <strong>"Refund Request - [Your Payment ID]"</strong>. Please include:
                 </p>
                 <ul className="list-disc pl-5 space-y-1 text-white/60 mb-3">
-                  <li>Razorpay Payment ID (e.g. <span className="font-mono text-white/80">pay_...</span>)</li>
-                  <li>Date and amount of the transaction</li>
-                  <li>Payment screenshot or bank reference number (UTR)</li>
+                  <li>Ko-fi transaction reference or supporter nickname</li>
+                  <li>Date and amount of the contribution</li>
+                  <li>Payment confirmation email or receipt screenshot</li>
                 </ul>
                 <p>
                   Requests must be submitted within <strong>7 calendar days</strong> from the date of the transaction.
@@ -349,7 +349,7 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
               <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
                 <h3 className="text-[18px] font-semibold text-white mb-2">4. Refund Processing Time (5–7 Business Days)</h3>
                 <p>
-                  Once approved, your refund will be initiated immediately via the Razorpay payment gateway dashboard. In compliance with RBI settlement guidelines, funds will automatically credit back to your original source of payment (UPI ID, Debit/Credit Card, or Netbanking Account) within <strong>5 to 7 business days</strong>.
+                  Once approved, your refund will be initiated via the Ko-fi / PayPal / Stripe processing dashboard. Funds will automatically credit back to your original source of payment within <strong>5 to 7 business days</strong>.
                 </p>
               </div>
 
@@ -451,7 +451,7 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
               </p>
             </div>
 
-            {/* Merchant Details Grid for Razorpay Verification */}
+            {/* Creator & Operator Details */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
               <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
                 <div className="flex items-center gap-3 mb-4">
@@ -484,7 +484,7 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
                 <div className="space-y-2 text-[14px] text-white/70">
                   <p><strong className="text-white">Operating Hours:</strong> Monday – Saturday (10:00 AM – 6:00 PM IST)</p>
                   <p><strong className="text-white">Email Response Time:</strong> Within 24 to 48 hours</p>
-                  <p><strong className="text-white">Payment Inquiries:</strong> Immediate investigation via Razorpay dashboard</p>
+                  <p><strong className="text-white">Payment Inquiries:</strong> Direct verification via Ko-fi creator dashboard</p>
                 </div>
               </div>
             </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Coffee, Heart, ArrowRight, Sparkles, ShieldCheck } from 'lucide-react';
 import { LiquidGlassCard } from '../LiquidGlass/LiquidGlassCard';
-import { getStoredCoffeeStats, CoffeeStats } from '../../config/razorpay';
+import { getStoredCoffeeStats, CoffeeStats } from '../../config/kofi';
 import { CoffeeSupportModal } from './CoffeeSupportModal';
 
 interface CoffeeSupportCardProps {
@@ -104,7 +104,7 @@ export const CoffeeSupportCard: React.FC<CoffeeSupportCardProps> = ({
             </button>
 
             <span className="text-[11px] text-white/35 font-light">
-              Secured with Razorpay • UPI & Cards
+              Official Ko-fi Page • Cards, UPI & PayPal
             </span>
           </div>
         </div>

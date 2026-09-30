@@ -755,7 +755,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                 {tab === 'bugs' && 'Bug reports sent by users, with direct links to attached Google Drive files.'}
                 {tab === 'features' && 'Manage roadmap, community requests, statuses, and adjust live upvotes.'}
                 {tab === 'emails' && 'Early-access and notification subscribers from landing page forms.'}
-                {tab === 'supporters' && 'Confirmed supporters with amount, coffee cups, rating, and Razorpay transaction IDs.'}
+                {tab === 'supporters' && 'Confirmed supporters with amount, coffee cups, rating, and Ko-fi / contribution references.'}
                 {tab === 'visitors' && 'Unique visitors recorded on this browser and device.'}
               </p>
             </div>
@@ -1362,7 +1362,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                 <EmptyState
                   icon={<Coffee style={{ width: 28, height: 28 }} />}
                   title="No Supporters Recorded Yet"
-                  message="When users make a contribution via Razorpay Standard Checkout, verified payments and messages will appear here."
+                  message="When users make a contribution via Ko-fi (ko-fi.com/ryper), verified payments and supporter reviews will appear here."
                 />
               ) : (
                 <div>
@@ -1417,7 +1417,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
                           )}
                           {sup.payment_id && (
                             <p style={{ margin: '4px 0 0 0', fontSize: '11px', color: '#67e8f9', fontFamily: 'monospace' }}>
-                              Razorpay: {sup.payment_id}
+                              Ref: {sup.payment_id}
                             </p>
                           )}
                         </div>

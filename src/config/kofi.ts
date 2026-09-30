@@ -22,24 +22,31 @@ export interface CoffeeStats {
 const sanitizeInput = (str: string, maxLen = 200): string =>
   str.replace(/<[^>]*>/g, '').replace(/[<>"'`]/g, '').trim().slice(0, maxLen);
 
-
 // Initial leaderboard baseline (starts empty for real supporters)
 export const INITIAL_SUPPORTERS: SupporterReview[] = [];
 
-// Official Razorpay link and API key config
-export const RAZORPAY_CONFIG = {
-  keyId: (import.meta as any).env?.VITE_RAZORPAY_KEY_ID || '', // e.g. rzp_live_... or rzp_test_...
-  paymentUrl: 'https://razorpay.me/@ryper',
+// Official Ko-fi creator config
+export const KOFI_CONFIG = {
+  url: 'https://ko-fi.com/ryper',
   handle: '@ryper',
+  creatorName: 'ryper',
   companyName: 'RyperDeck',
   description: 'Support RyperDeck Windows Controller Development',
   currency: 'INR',
+  cupPriceInr: 50,
+};
+
+// Backward compatibility alias for any remaining references
+export const RAZORPAY_CONFIG = {
+  paymentUrl: KOFI_CONFIG.url,
+  handle: KOFI_CONFIG.handle,
+  companyName: KOFI_CONFIG.companyName,
+  description: KOFI_CONFIG.description,
+  currency: KOFI_CONFIG.currency,
   themeColor: '#00F0FF',
 };
 
 // Get stored supporters leaderboard
-// Returns real supporters first. Falls back to INITIAL_SUPPORTERS baseline only if
-// the user has never made any real payment (i.e. localStorage is empty).
 export const getStoredSupporters = (): SupporterReview[] => {
   if (typeof window === 'undefined') return [];
   try {
@@ -67,7 +74,7 @@ export const calculateStats = (supporters: SupporterReview[]): CoffeeStats => {
   };
 };
 
-// Export getStoredCoffeeStats for backward compatibility and quick stats readout
+// Export getStoredCoffeeStats for quick stats readout
 export const getStoredCoffeeStats = (): CoffeeStats => {
   return calculateStats(getStoredSupporters());
 };

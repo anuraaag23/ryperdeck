@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Menu, X, Bug } from 'lucide-react';
 import { CoffeeSupportModal } from './Coffee/CoffeeSupportModal';
-import { getStoredCoffeeStats, CoffeeStats } from '../config/razorpay';
+import { getStoredCoffeeStats, CoffeeStats } from '../config/kofi';
 
 interface NavbarProps {
   onRequestFeature?: () => void;
