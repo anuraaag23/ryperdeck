@@ -141,7 +141,13 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
               <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
                 <h3 className="text-[18px] font-semibold text-white mb-2">2. Product Nature & License</h3>
                 <p className="mb-3">
-                  RyperDeck is an independent, 100% free software application developed solo by Anurag. It converts Android smartphones and tablets into wireless macro controllers for Windows PCs over local Wi-Fi UDP sockets.
+                  RyperDeck is an independent, 100% free software system developed solo by Anurag. It converts Android smartphones, tablets, and foldables into wireless and wired macro decks, remote keyboards, and multi-touch trackpads for Windows PCs. It supports three connection architectures: high-speed USB Cable (&lt;10ms ultra-low latency), Local Wi-Fi / LAN, and direct Bluetooth.
+                </p>
+                <p className="mb-3">
+                  The Windows PC companion is provided as a single, self-contained, portable executable (<span className="font-mono text-white">RyperDeckAgent.exe</span>) requiring zero installation, administrative registry alterations, or external runtime installations. It docks quietly into the Windows System Tray and runs with a sub-15 MB RAM footprint.
+                </p>
+                <p className="mb-3">
+                  Supported platforms include Windows 10 (Version 1809 / Build 17763 and newer) and Windows 11 (64-bit, including 24H2+), alongside Android devices running Android 8.0 (Oreo) up to Android 14, 15, 16, and 17+.
                 </p>
                 <p>
                   You are granted a personal, non-exclusive, non-transferable, royalty-free license to use RyperDeck for personal, streaming, content creation, gaming, and professional workflows. Reverse engineering, decompiling, or distributing malicious alterations is strictly prohibited.
@@ -159,9 +165,12 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
               </div>
 
               <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
-                <h3 className="text-[18px] font-semibold text-white mb-2">4. User Responsibilities & System Security</h3>
+                <h3 className="text-[18px] font-semibold text-white mb-2">4. User Responsibilities & Connection Security</h3>
+                <p className="mb-3">
+                  RyperDeck communicates purely offline between paired devices over direct USB cables, local Wi-Fi LAN sockets, or direct Bluetooth pairings. You are responsible for ensuring that your local Wi-Fi router is secure and that USB Debugging permissions on your Android device are granted only to your trusted computer.
+                </p>
                 <p>
-                  RyperDeck communicates purely over your local home or office network. You are responsible for ensuring that your local Wi-Fi network is password-protected and secure. RyperDeck transmits hotkey signals to your Windows PC; configure your shortcuts and hotkeys responsibly.
+                  RyperDeck transmits native Windows keystrokes, shortcuts, mouse cursor movements, and media commands to your PC. Users are responsible for configuring their custom macros and automations safely.
                 </p>
               </div>
 
@@ -211,13 +220,13 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
                     The RyperDeck Privacy Guarantee
                   </h2>
                   <p className="text-[14px] sm:text-[15px] text-white/60 leading-relaxed font-light">
-                    RyperDeck is engineered to operate strictly within your local home or office network.
+                    RyperDeck is engineered to operate strictly within your local environment (USB, Wi-Fi LAN, or Bluetooth).
                     Zero cloud relays, zero accounts required, and zero telemetry collected. Your shortcuts,
-                    macros, and usage habits never touch the internet.
+                    live typing console input, trackpad gestures, and usage habits never touch the internet.
                   </p>
                   <div className="flex flex-wrap gap-4 mt-4 pt-4 border-t border-white/[0.06] text-[12px] text-white/50">
                     <span className="flex items-center gap-1.5 text-white/70">
-                      <Check className="w-4 h-4 text-emerald-400" /> 100% Local Subnet
+                      <Check className="w-4 h-4 text-emerald-400" /> 100% Local / Offline
                     </span>
                     <span className="flex items-center gap-1.5 text-white/70">
                       <Check className="w-4 h-4 text-emerald-400" /> 0 External Tracking
@@ -233,16 +242,27 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
             {/* Privacy Sections */}
             <div className="space-y-6 text-[15px] text-white/70 leading-relaxed font-light">
               <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
-                <h3 className="text-[18px] font-semibold text-white mb-2">1. Zero Data Collection</h3>
+                <h3 className="text-[18px] font-semibold text-white mb-2">1. Zero Data Collection & Offline Guarantee</h3>
+                <p className="mb-3">
+                  RyperDeck collects zero personal data. We do not track, log, or store keystrokes, remote typing console content, macro bindings, trackpad gestures, opened applications, hardware metrics, or browsing history.
+                </p>
                 <p>
-                  RyperDeck collects zero personal data. We do not track keystrokes, macro bindings, opened applications, hardware configurations, or browsing history. When you launch a macro or tap a button, that action is executed purely between your Android device and Windows PC on your local subnet.
+                  When you type on the remote keyboard console, glide across the trackpad, or tap an app tile, signals travel directly to your Windows PC over local USB, Wi-Fi UDP, or Bluetooth. No data packets ever leave your local environment.
                 </p>
               </div>
 
               <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
-                <h3 className="text-[18px] font-semibold text-white mb-2">2. Local Network & UDP Communication</h3>
+                <h3 className="text-[18px] font-semibold text-white mb-2">2. Local Multi-Mode Communication (USB, Wi-Fi & Bluetooth)</h3>
+                <p className="mb-3">
+                  RyperDeck operates 100% offline. All communication between the Windows PC Agent (<span className="font-mono text-white">RyperDeckAgent.exe</span>) and the Android mobile app (<span className="font-mono text-white">RyperDeck.apk</span>) occurs via:
+                </p>
+                <ul className="list-disc pl-5 space-y-1.5 text-white/60 mb-3">
+                  <li><strong>USB Cable:</strong> Direct local connection with sub-10ms response time and zero network exposure.</li>
+                  <li><strong>Local Wi-Fi LAN:</strong> Encrypted local UDP socket communication restricted strictly to your internal subnet.</li>
+                  <li><strong>Bluetooth:</strong> Direct device-to-device wireless RFCOMM pairing without requiring an active internet router.</li>
+                </ul>
                 <p>
-                  All communications between the RyperDeck Windows companion app and your phone or tablet occur strictly over your local Wi-Fi network using encrypted UDP sockets. No cloud servers, proxies, relays, or CDN routes are ever used. If you disconnect your internet cable, RyperDeck continues working seamlessly because it does not depend on the internet.
+                  Zero cloud servers, zero proxy relays, and zero telemetry collectors are involved. If your internet connection is unplugged, RyperDeck continues to function without interruption.
                 </p>
               </div>
 
@@ -405,7 +425,7 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
               <div className="p-6 rounded-2xl bg-white/[0.03] border border-white/[0.08]">
                 <h3 className="text-[18px] font-semibold text-white mb-2">1. Nature of Product (Digital Goods Only)</h3>
                 <p>
-                  RyperDeck is exclusively a digital software product consisting of a Windows Companion application (.exe / installer) and an Android application (.apk). We do NOT manufacture, ship, or deliver any physical hardware stream decks, physical plastic boxes, or printed media.
+                  RyperDeck is exclusively a digital software suite consisting of a portable Windows Companion application (<span className="font-mono text-white">RyperDeckAgent.exe</span>) and an Android companion application (<span className="font-mono text-white">RyperDeck.apk</span>). Zero installation is required for the Windows agent. We do NOT manufacture, ship, or deliver any physical hardware stream decks, plastic enclosures, or physical media.
                 </p>
               </div>
 

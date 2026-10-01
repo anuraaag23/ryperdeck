@@ -6,10 +6,16 @@ import { getStoredCoffeeStats, CoffeeStats } from '../config/kofi';
 interface NavbarProps {
   onRequestFeature?: () => void;
   onReportBug?: () => void;
+  onOpenKeyboardMouse?: () => void;
   isModalOpen?: boolean;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ onRequestFeature, onReportBug, isModalOpen = false }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  onRequestFeature,
+  onReportBug,
+  onOpenKeyboardMouse,
+  isModalOpen = false,
+}) => {
   const [scrolled, setScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [coffeeModalOpen, setCoffeeModalOpen] = useState(false);
@@ -73,9 +79,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onRequestFeature, onReportBug, i
           </a>
 
           {/* Links */}
-          <div className="hidden md:flex items-center gap-8 text-[13px] text-white/50 font-normal">
+          <div className="hidden md:flex items-center gap-6 lg:gap-8 text-[13px] text-white/50 font-normal">
             <a href="#current-features" className="hover:text-white transition-colors duration-200">
               Features
+            </a>
+            <a
+              href="#keyboard-mouse"
+              onClick={(e) => {
+                if (onOpenKeyboardMouse) {
+                  e.preventDefault();
+                  onOpenKeyboardMouse();
+                }
+              }}
+              className="inline-flex items-center gap-1.5 hover:text-white transition-colors duration-200"
+            >
+              <span>Keyboard & Mouse</span>
+              <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-semibold">
+                New
+              </span>
             </a>
             <a href="#presets" className="hover:text-white transition-colors duration-200">
               Presets
@@ -121,6 +142,19 @@ export const Navbar: React.FC<NavbarProps> = ({ onRequestFeature, onReportBug, i
               className="text-white/70 py-2 border-b border-white/[0.05]"
             >
               What it offers right now
+            </a>
+            <a
+              href="#keyboard-mouse"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (onOpenKeyboardMouse) onOpenKeyboardMouse();
+              }}
+              className="text-white/90 font-medium py-2 border-b border-white/[0.05] flex items-center justify-between"
+            >
+              <span>Keyboard & Mouse Hub</span>
+              <span className="text-[10px] font-mono uppercase px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+                New Hub
+              </span>
             </a>
             <a
               href="#presets"

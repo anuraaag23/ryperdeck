@@ -38,9 +38,16 @@ interface Props {
   onReportBug: () => void;
   onLegal: (tab: LegalTabType) => void;
   onPrivacy?: () => void;
+  onOpenKeyboardMouse?: () => void;
 }
 
-export const Footer: React.FC<Props> = ({ onRequestFeature, onReportBug, onLegal, onPrivacy }) => {
+export const Footer: React.FC<Props> = ({
+  onRequestFeature,
+  onReportBug,
+  onLegal,
+  onPrivacy,
+  onOpenKeyboardMouse,
+}) => {
   const handleLegal = (tab: LegalTabType) => {
     if (tab === 'privacy' && onPrivacy) {
       onPrivacy();
@@ -93,6 +100,18 @@ export const Footer: React.FC<Props> = ({ onRequestFeature, onReportBug, onLegal
 
         {/* Middle row — nav links */}
         <div className="flex flex-wrap gap-x-8 gap-y-3 mb-8 text-[13px]">
+          <a
+            href="#keyboard-mouse"
+            onClick={(e) => {
+              if (onOpenKeyboardMouse) {
+                e.preventDefault();
+                onOpenKeyboardMouse();
+              }
+            }}
+            className="hover:text-white transition-colors duration-200 text-emerald-400 font-medium"
+          >
+            Keyboard &amp; Mouse Hub
+          </a>
           <a href="#presets" className="hover:text-white transition-colors duration-200">Presets</a>
           <a href="#windows" className="hover:text-white transition-colors duration-200">Windows Native</a>
           <a href="#comparison" className="hover:text-white transition-colors duration-200">vs StreamDeck</a>

@@ -29,9 +29,10 @@ import { HowItWorksSection }      from './components/Sections/HowItWorksSection'
 import { ManifestoSection }       from './components/Sections/ManifestoSection';
 import { DeveloperStorySection }  from './components/Sections/DeveloperStorySection';
 import { DownloadAndFAQ }         from './components/Sections/DownloadAndFAQ';
+import { KeyboardMousePage }      from './components/KeyboardMousePage';
 
 export const App: React.FC = () => {
-  const [currentView, setCurrentView] = useState<'home' | 'legal' | 'admin'>('home');
+  const [currentView, setCurrentView] = useState<'home' | 'legal' | 'admin' | 'keyboard-mouse'>('home');
   const [legalTab, setLegalTab]       = useState<LegalTab>('privacy');
   const [featureOpen, setFeatureOpen] = useState(false);
   const [bugOpen, setBugOpen]         = useState(false);
@@ -43,7 +44,11 @@ export const App: React.FC = () => {
   useEffect(() => {
     const handleHash = () => {
       const h = window.location.hash.toLowerCase();
-      if (h === '#terms' || h === '#terms-and-conditions') {
+      if (h === '#keyboard-mouse' || h === '#remote-control' || h === '#trackpad' || h === '#remote-keyboard') {
+        savedScrollY.current = window.scrollY;
+        setCurrentView('keyboard-mouse');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      } else if (h === '#terms' || h === '#terms-and-conditions') {
         savedScrollY.current = window.scrollY;
         setLegalTab('terms');
         setCurrentView('legal');
@@ -72,7 +77,7 @@ export const App: React.FC = () => {
         savedScrollY.current = window.scrollY;
         setCurrentView('admin');
         window.scrollTo({ top: 0, behavior: 'smooth' });
-      } else if (h === '' && (currentView === 'legal' || currentView === 'admin')) {
+      } else if (h === '' && (currentView === 'legal' || currentView === 'admin' || currentView === 'keyboard-mouse')) {
         setCurrentView('home');
         requestAnimationFrame(() => {
           window.scrollTo({ top: savedScrollY.current, behavior: 'instant' });
@@ -89,6 +94,13 @@ export const App: React.FC = () => {
     setLegalTab(tab);
     setCurrentView('legal');
     window.location.hash = tab === 'privacy' ? 'privacy-policy' : tab;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const openKeyboardMouse = () => {
+    savedScrollY.current = window.scrollY;
+    setCurrentView('keyboard-mouse');
+    window.location.hash = 'keyboard-mouse';
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -114,12 +126,16 @@ export const App: React.FC = () => {
       ) : currentView === 'legal' ? (
         /* DEDICATED LEGAL & COMPLIANCE CENTER */
         <LegalCenterPage initialTab={legalTab} onBack={returnToHome} />
+      ) : currentView === 'keyboard-mouse' ? (
+        /* DEDICATED REMOTE KEYBOARD & PRECISION TRACKPAD HUB */
+        <KeyboardMousePage onBack={returnToHome} />
       ) : (
         <>
           {/* Floating Pill Navigation */}
           <Navbar
             onRequestFeature={() => setFeatureOpen(true)}
             onReportBug={() => setBugOpen(true)}
+            onOpenKeyboardMouse={openKeyboardMouse}
             isModalOpen={featureOpen || bugOpen}
           />
 
@@ -139,9 +155,12 @@ export const App: React.FC = () => {
             {/* 4 — HARDWARE KILLER: Most controllers give you 8 buttons. RyperDeck gives you unlimited pages. */}
             <UnlimitedPagesSection />
 
-            {/* 5 — CAPABILITIES BREAKDOWN: What RyperDeck offers right now (9 capability cards) */}
+            {/* 5 — CAPABILITIES BREAKDOWN: What RyperDeck offers right now (12 capability cards + Hub Spotlight) */}
             <div id="current-features">
-              <CurrentFeaturesSection onRequestFeature={() => setFeatureOpen(true)} />
+              <CurrentFeaturesSection
+                onRequestFeature={() => setFeatureOpen(true)}
+                onOpenKeyboardMouse={openKeyboardMouse}
+              />
             </div>
 
             {/* 6 — TARGET PERSONAS: Built for people who actually focus (Streamer, Gamer, Creator, Power User) */}
@@ -193,6 +212,7 @@ export const App: React.FC = () => {
             onReportBug={() => setBugOpen(true)}
             onLegal={openLegal}
             onPrivacy={() => openLegal('privacy')}
+            onOpenKeyboardMouse={openKeyboardMouse}
           />
 
           {/* Floating Animated Coffee Cup Widget (bottom right corner) */}

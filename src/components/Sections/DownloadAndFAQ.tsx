@@ -8,27 +8,27 @@ export const DownloadAndFAQ: React.FC = () => {
   const faqs = [
     {
       q: 'Is RyperDeck truly 100% free with no limits?',
-      a: 'Yes — completely free, forever. There are no subscriptions, no in-app purchases, no ads, and no page or button limits. Every feature including AI automation, unlimited pages, preset import/export, and all system controls are free. The only optional thing is buying the developer a coffee.',
+      a: 'Yes — completely free, forever. There are no subscriptions, no in-app purchases, no ads, and no page or button limits. Every feature including AI automation, remote keyboard & trackpad, unlimited pages, preset import/export, and all system controls are free. The only optional thing is buying the developer a coffee.',
     },
     {
       q: 'What are the system requirements?',
-      a: 'Windows PC: Windows 10 or Windows 11 (64-bit), any modern CPU, approx. 20 MB disk space. The companion service runs as a lightweight system tray app using under 15 MB of RAM. Android device: Android 8.0 (Oreo) or higher — phones, tablets, and foldables all work.',
+      a: 'Windows PC: Windows 10 (Version 1809 / Build 17763+) or Windows 11 (64-bit, including 24H2+). Zero installation required — RyperDeckAgent.exe is a single self-contained portable executable that lives in your system tray using under 15 MB of RAM. Android device: Android 8.0 (Oreo) up to Android 14, 15, 16, and 17+ on phones, tablets, and foldables.',
     },
     {
-      q: 'How does it connect — does it use Bluetooth or the internet?',
-      a: 'Neither. RyperDeck uses local UDP over your Wi-Fi network. Your phone and PC must be on the same Wi-Fi router. All data stays inside your local network — nothing is sent to any server, cloud, or third party. Sub-millisecond response times are typical on a 5 GHz network.',
+      q: 'How does it connect — does it require the internet?',
+      a: 'Zero internet required. RyperDeck offers 3 connection modes: (1) USB Cable for ultra-low latency (<10ms) that keeps your battery charged, (2) Local Wi-Fi / LAN with instant QR code discovery, and (3) Direct Bluetooth when travelling or when no Wi-Fi router is available. All communication stays 100% offline.',
     },
     {
-      q: 'What is the AI Automation feature?',
-      a: 'RyperDeck includes a built-in Gemini AI engine. Just describe what you want to automate in plain English — for example "Open Spotify, play my playlist, mute everything else" — and the AI creates the macro for you automatically. No manual configuration needed.',
+      q: 'How does the Remote Keyboard & Multi-Touch Trackpad hub work?',
+      a: 'Tap Keyboard & Mouse on the home screen to launch the dedicated 2-button hub. Keyboard Mode gives you a live typing console synced to your active PC window with Gboard/Samsung/IME support and 56dp quick PC hotkeys. Trackpad Mode turns your screen into a Windows Precision touchpad with adjustable DPI, natural 2-finger scrolling, 84dp thumb scroll strip, and 1/2/3/4-finger gestures.',
     },
     {
-      q: 'Can I share my custom button layouts with others?',
-      a: 'Yes. Export any page or your entire workspace as a .json preset file from the Android app. You can share these files directly or import them on another device. The Default Presets section on this site also has ready-made layouts for streamers, gamers, editors, and developers.',
+      q: 'Will my PC apps show crisp, authentic brand logos?',
+      a: 'Yes. RyperDeck features a native Windows Shell icon extraction pipeline that pulls maximum-resolution 256×256 icons directly from your installed programs. For websites (YouTube, GitHub, ChatGPT, Claude, Twitch), it automatically fetches and caches authentic high-res brand logos.',
     },
     {
       q: 'Can I leave an old Android tablet plugged in as a permanent macro pad?',
-      a: 'Yes — and this is exactly how most power users run RyperDeck. Prop an old phone or tablet on a stand beside your keyboard. It automatically reconnects whenever your PC boots. No need to unlock or interact with the phone; just leave it on and it works.',
+      a: 'Yes — and this is how many power users run RyperDeck. Prop an old phone or tablet on a stand beside your keyboard connected via USB or Wi-Fi. It automatically reconnects whenever your PC boots. Full-screen immersion prevents Android system gesture interference.',
     },
   ];
 
