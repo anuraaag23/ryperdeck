@@ -66,7 +66,7 @@ export const LegalCenterPage: React.FC<Props> = ({ initialTab = 'privacy', onBac
   ];
 
   return (
-    <div className="min-h-screen bg-black text-[#f5f5f7] pt-6 pb-24 px-4 sm:px-6 md:px-8 relative z-50">
+    <div className="min-h-screen bg-black text-[#f5f5f7] pt-6 pb-[calc(5rem+env(safe-area-inset-bottom,0px))] sm:pb-24 px-4 sm:px-6 md:px-8 relative z-50">
       {/* Background Optical Ambient */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] rounded-full bg-white/[0.015] blur-[220px] pointer-events-none" />
 

@@ -28,14 +28,14 @@ export const UnlimitedPagesSection: React.FC = () => {
             </span>
           </Reveal>
           <Reveal direction="up" delay={80}>
-            <h2 className="text-[38px] sm:text-[56px] md:text-[70px] font-bold tracking-[-0.04em] leading-[0.97]">
+            <h2 className="text-[28px] sm:text-[50px] md:text-[70px] font-bold tracking-[-0.04em] leading-[0.97]">
               <span className="text-white/25">Most controllers give you<br />8 buttons.</span>
               <br />
               <span className="text-white">RyperDeck gives you<br />unlimited pages.</span>
             </h2>
           </Reveal>
           <Reveal direction="up" delay={140}>
-            <p className="mt-6 text-[15px] sm:text-[16px] text-white/40 font-light max-w-lg leading-relaxed">
+            <p className="mt-5 sm:mt-6 text-[14px] sm:text-[16px] text-white/40 font-light max-w-lg leading-relaxed">
               Pages, drag & drop, live preview. Every workflow you have — one app, beside your screen.
             </p>
           </Reveal>
@@ -77,10 +77,10 @@ export const UnlimitedPagesSection: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex min-h-[240px] sm:min-h-[300px]">
-              {/* Sidebar */}
-              <div className="w-[140px] sm:w-[180px] shrink-0 border-r border-white/[0.07] bg-[#090a0f] p-3 flex flex-col gap-1">
-                <div className="px-2 py-1 mb-2">
+            <div className="flex flex-col sm:flex-row min-h-[240px] sm:min-h-[300px]">
+              {/* Sidebar / Top bar on mobile */}
+              <div className="w-full sm:w-[180px] shrink-0 border-b sm:border-b-0 sm:border-r border-white/[0.07] bg-[#090a0f] p-2.5 sm:p-3 flex sm:flex-col flex-row overflow-x-auto sm:overflow-x-visible gap-1.5 sm:gap-1 items-center sm:items-stretch scrollbar-none">
+                <div className="px-2 py-1 mb-1 sm:mb-2 hidden sm:block">
                   <div className="flex items-center gap-2 text-white/40">
                     <div className="w-4 h-5 rounded-sm border border-white/20 flex items-center justify-center">
                       <div className="w-2 h-2.5 rounded-[1px] border border-white/30" />
@@ -94,11 +94,11 @@ export const UnlimitedPagesSection: React.FC = () => {
                     </div>
                   </div>
                 </div>
-                <p className="text-[9px] text-white/25 font-semibold tracking-[0.2em] uppercase px-2 mb-1">Pages</p>
+                <p className="text-[9px] text-white/25 font-semibold tracking-[0.2em] uppercase px-2 mb-1 hidden sm:block">Pages</p>
                 {pages.map((page, i) => (
                   <div
                     key={i}
-                    className={`flex items-center gap-2 px-2 py-1.5 rounded-lg cursor-default ${
+                    className={`flex items-center gap-2 px-2.5 py-1 sm:py-1.5 rounded-lg cursor-default shrink-0 whitespace-nowrap ${
                       i === 0 ? 'bg-white/[0.08] border border-white/[0.12]' : 'hover:bg-white/[0.04]'
                     }`}
                   >
@@ -115,13 +115,13 @@ export const UnlimitedPagesSection: React.FC = () => {
               </div>
 
               {/* Main area */}
-              <div className="flex-1 p-4 sm:p-5">
-                <div className="flex items-center justify-between mb-4">
+              <div className="flex-1 p-3.5 sm:p-5">
+                <div className="flex items-center justify-between mb-3 sm:mb-4">
                   <div>
-                    <h3 className="text-[16px] sm:text-[18px] font-bold text-white">Streaming</h3>
-                    <p className="text-[11px] text-white/30 mt-0.5">Tap an empty slot to add · Drag to rearrange</p>
+                    <h3 className="text-[15px] sm:text-[18px] font-bold text-white">Streaming</h3>
+                    <p className="text-[10px] sm:text-[11px] text-white/30 mt-0.5">Tap an empty slot to add · Drag to rearrange</p>
                   </div>
-                  <span className="text-[10px] px-2.5 py-1 rounded-full border border-emerald-500/40 text-emerald-400/70 font-mono">
+                  <span className="text-[9px] sm:text-[10px] px-2.5 py-1 rounded-full border border-emerald-500/40 text-emerald-400/70 font-mono">
                     ● LIVE
                   </span>
                 </div>

@@ -119,7 +119,7 @@ export const CurrentFeaturesSection: React.FC<Props> = ({ onRequestFeature, onOp
             </span>
           </Reveal>
           <Reveal direction="up" delay={80}>
-            <h2 className="text-[34px] sm:text-[46px] md:text-[54px] font-bold tracking-[-0.035em] leading-[1.02] text-white">
+            <h2 className="text-[28px] sm:text-[42px] md:text-[54px] font-bold tracking-[-0.035em] leading-[1.02] text-white">
               What RyperDeck offers <br />
               <span className="text-white/40">right out of the box.</span>
             </h2>
@@ -128,7 +128,7 @@ export const CurrentFeaturesSection: React.FC<Props> = ({ onRequestFeature, onOp
 
         {/* SPOTLIGHT HERO: Keyboard & Mouse Option Banner */}
         <Reveal direction="up" delay={120}>
-          <div className="mb-10 p-7 sm:p-9 rounded-[32px] bg-gradient-to-r from-emerald-500/[0.07] via-white/[0.03] to-sky-500/[0.05] border border-white/[0.14] shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-2xl relative overflow-hidden group">
+          <div className="mb-10 p-5 sm:p-9 rounded-[24px] sm:rounded-[32px] bg-gradient-to-r from-emerald-500/[0.07] via-white/[0.03] to-sky-500/[0.05] border border-white/[0.14] shadow-[0_20px_60px_rgba(0,0,0,0.7)] backdrop-blur-2xl relative overflow-hidden group">
             <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-6 relative z-10">
               <div className="max-w-2xl">
                 <div className="flex items-center gap-2 mb-3">
@@ -186,7 +186,7 @@ export const CurrentFeaturesSection: React.FC<Props> = ({ onRequestFeature, onOp
                     else window.location.hash = '#keyboard-mouse';
                   }
                 }}
-                className={`h-full rounded-[24px] p-6 sm:p-7 bg-white/[0.025] hover:bg-white/[0.045] border border-white/[0.07] hover:border-white/[0.14] transition-all duration-300 flex flex-col justify-between group ${
+                className={`h-full rounded-[20px] sm:rounded-[24px] p-4 sm:p-7 bg-white/[0.025] hover:bg-white/[0.045] border border-white/[0.07] hover:border-white/[0.14] transition-all duration-300 flex flex-col justify-between group ${
                   item.link ? 'cursor-pointer hover:border-emerald-500/30' : ''
                 }`}
               >

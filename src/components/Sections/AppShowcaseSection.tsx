@@ -87,23 +87,23 @@ export const AppShowcaseSection: React.FC = () => {
           {/* ── Xiaomi Pad 6 frame (CSS-only, landscape) ── */}
           <div
             className="relative select-none"
-            style={{ width: 720, maxWidth: 'min(95vw, 95%)' }}
+            style={{ width: 720, maxWidth: 'min(96vw, 720px)' }}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
           >
             {/* Outer chassis — dark aluminum glass bezel */}
-            <div className="relative rounded-[32px] p-[10px] bg-[#16161c] shadow-[0_60px_140px_-30px_rgba(0,0,0,0.98),inset_0_1.5px_1px_rgba(255,255,255,0.22),inset_0_-1px_1px_rgba(0,0,0,0.6)] border border-white/[0.1]">
+            <div className="relative rounded-[20px] sm:rounded-[32px] p-1.5 sm:p-[10px] bg-[#16161c] shadow-[0_60px_140px_-30px_rgba(0,0,0,0.98),inset_0_1.5px_1px_rgba(255,255,255,0.22),inset_0_-1px_1px_rgba(0,0,0,0.6)] border border-white/[0.1]">
               {/* Camera + sensors strip (left side) */}
-              <div className="absolute left-[5px] top-1/2 -translate-y-1/2 flex flex-col items-center gap-1.5">
-                <div className="w-[6px] h-[6px] rounded-full bg-[#1c1c22] border border-white/[0.12] shadow-inner" />
-                <div className="w-[4px] h-[4px] rounded-full bg-[#1c1c22] border border-white/[0.08]" />
+              <div className="absolute left-[3px] sm:left-[5px] top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 sm:gap-1.5">
+                <div className="w-[5px] h-[5px] sm:w-[6px] sm:h-[6px] rounded-full bg-[#1c1c22] border border-white/[0.12] shadow-inner" />
+                <div className="w-[3px] h-[3px] sm:w-[4px] sm:h-[4px] rounded-full bg-[#1c1c22] border border-white/[0.08]" />
               </div>
               {/* Volume + power buttons (right side) */}
-              <div className="absolute right-[-3px] top-1/3 w-[3px] h-[28px] rounded-l-sm bg-[#222228] border border-white/[0.08]" />
-              <div className="absolute right-[-3px] top-1/2 w-[3px] h-[20px] rounded-l-sm bg-[#222228] border border-white/[0.08]" />
+              <div className="absolute right-[-3px] top-1/3 w-[3px] h-[22px] sm:h-[28px] rounded-l-sm bg-[#222228] border border-white/[0.08]" />
+              <div className="absolute right-[-3px] top-1/2 w-[3px] h-[16px] sm:h-[20px] rounded-l-sm bg-[#222228] border border-white/[0.08]" />
 
               {/* Inner screen bezel */}
-              <div className="relative rounded-[22px] overflow-hidden bg-black border border-white/[0.06]" style={{ aspectRatio: '16/10' }}>
+              <div className="relative rounded-[14px] sm:rounded-[22px] overflow-hidden bg-black border border-white/[0.06]" style={{ aspectRatio: '16/10' }}>
                 {/* Screenshot */}
                 <img
                   key={animKey}
@@ -125,12 +125,12 @@ export const AppShowcaseSection: React.FC = () => {
           </div>
 
           {/* Quick Tab Selector Pills */}
-          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-2xl px-2">
+          <div className="flex flex-wrap items-center justify-center gap-1 sm:gap-2 max-w-2xl px-1 sm:px-2">
             {slides.map((s, idx) => (
               <button
                 key={idx}
                 onClick={() => go(idx, idx > current ? 'right' : 'left')}
-                className={`px-3 py-1.5 rounded-full text-[11px] sm:text-[12px] transition-all duration-200 cursor-pointer ${
+                className={`px-2.5 py-1 sm:px-3 sm:py-1.5 rounded-full text-[10px] sm:text-[12px] transition-all duration-200 cursor-pointer ${
                   current === idx
                     ? 'bg-white text-black font-semibold shadow-md shadow-white/20 scale-[1.02]'
                     : 'bg-white/[0.04] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/[0.08]'

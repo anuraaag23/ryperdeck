@@ -140,7 +140,7 @@ export const UseCasesSection: React.FC = () => {
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.1] bg-white/[0.03] backdrop-blur-xl text-[10px] font-semibold tracking-[0.3em] uppercase text-white/40 mb-8">
             Why It Matters
           </span>
-          <h2 className="text-[36px] sm:text-[56px] md:text-[72px] font-bold tracking-[-0.04em] leading-[0.97] text-white">
+          <h2 className="text-[28px] sm:text-[50px] md:text-[72px] font-bold tracking-[-0.04em] leading-[0.97] text-white">
             Built for people<br />
             <span className="text-white/25">who actually </span>
             <span className="text-white/60">focus.</span>
@@ -152,7 +152,7 @@ export const UseCasesSection: React.FC = () => {
           {personas.map((p, i) => (
             <div
               key={i}
-              className="rounded-[24px] bg-white/[0.03] border border-white/[0.08] p-6 sm:p-7 flex flex-col gap-4 hover:bg-white/[0.05] hover:border-white/[0.14] transition-all duration-300 cursor-default group"
+              className="rounded-[22px] sm:rounded-[24px] bg-white/[0.03] border border-white/[0.08] p-5 sm:p-7 flex flex-col gap-4 hover:bg-white/[0.05] hover:border-white/[0.14] transition-all duration-300 cursor-default group"
             >
               {/* Visual mockup at top */}
               <div className="mb-1">{p.visual}</div>

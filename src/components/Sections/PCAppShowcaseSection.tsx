@@ -75,7 +75,7 @@ export const PCAppShowcaseSection: React.FC = () => {
           {/* ── PC Monitor (CSS-only) ── */}
           <div className="flex flex-col items-center gap-4">
             {/* Monitor body */}
-            <div className="relative" style={{ width: 560, maxWidth: 'min(90vw, 560px)' }}>
+            <div className="relative" style={{ width: 560, maxWidth: 'min(94vw, 560px)' }}>
               {/* Outer bezel */}
               <div className="relative rounded-[14px] pt-[10px] px-[10px] pb-[34px] bg-[#14141a] border border-white/[0.12] shadow-[0_60px_130px_-30px_rgba(0,0,0,0.98),inset_0_1.5px_1px_rgba(255,255,255,0.2)]">
                 {/* Top camera dot */}
@@ -202,23 +202,23 @@ export const PCAppShowcaseSection: React.FC = () => {
               notifyOpen && !notified ? 'max-h-[220px] opacity-100 mt-4' : 'max-h-0 opacity-0 mt-0'
             }`}
           >
-            <div className="rounded-[24px] liquid-glass-panel border border-white/[0.1] p-5 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.9)]">
+            <div className="rounded-[24px] liquid-glass-panel border border-white/[0.1] p-4 sm:p-5 shadow-[0_20px_60px_-10px_rgba(0,0,0,0.9)]">
               <p className="text-[12px] text-white/40 mb-3 font-light">
                 Drop your email — we'll only write when something worth your time ships.
               </p>
-              <div className="flex gap-2.5">
+              <div className="flex flex-col sm:flex-row gap-2.5">
                 <input
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
                   onKeyDown={e => e.key === 'Enter' && handleNotify()}
                   placeholder="you@email.com"
-                  className="liquid-glass-input flex-1 h-[44px] px-4 text-[13px] rounded-full"
+                  className="liquid-glass-input flex-1 h-[44px] px-4 text-[16px] sm:text-[13px] rounded-full"
                 />
                 <button
                   onClick={handleNotify}
                   disabled={!email.trim()}
-                  className="liquid-glass-btn liquid-glass-btn-primary h-[44px] px-5 text-[13px] font-bold gap-2 whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer rounded-full"
+                  className="liquid-glass-btn liquid-glass-btn-primary h-[44px] px-5 text-[13px] font-bold gap-2 whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer rounded-full w-full sm:w-auto justify-center"
                 >
                   Notify Me
                 </button>

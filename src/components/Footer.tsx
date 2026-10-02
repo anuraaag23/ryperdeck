@@ -57,7 +57,7 @@ export const Footer: React.FC<Props> = ({
   };
 
   return (
-    <footer className="relative border-t border-white/[0.06] bg-black py-16 px-6 text-[12px] text-white/40">
+    <footer className="relative border-t border-white/[0.06] bg-black pt-12 pb-[calc(3rem+env(safe-area-inset-bottom,0px))] sm:py-16 px-4 sm:px-6 text-[12px] text-white/40">
       <div className="max-w-5xl mx-auto">
 
         {/* Top row — brand + social */}

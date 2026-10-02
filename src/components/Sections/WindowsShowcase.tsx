@@ -25,7 +25,7 @@ export const WindowsShowcase: React.FC = () => {
         {/* Feature Grid with Real App Screenshots (Strictly non-clickable) */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 mb-10 sm:mb-16">
           {/* Card 1: Custom Button Layouts & Run Mode */}
-          <LiquidGlassCard className="p-8 flex flex-col justify-between overflow-hidden">
+          <LiquidGlassCard className="p-5 sm:p-8 flex flex-col justify-between overflow-hidden">
             <div>
               <div className="flex items-center gap-2.5 mb-4">
                 <span className="w-8 h-8 rounded-xl liquid-glass-icon-pod">
@@ -35,7 +35,7 @@ export const WindowsShowcase: React.FC = () => {
                   Custom Macro Grids
                 </span>
               </div>
-              <h3 className="text-[22px] font-bold text-white mb-2 tracking-tight">
+              <h3 className="text-[20px] sm:text-[22px] font-bold text-white mb-2 tracking-tight">
                 Any button. Any size. Any action.
               </h3>
               <p className="text-[13px] text-white/50 leading-relaxed mb-6 font-light">
@@ -56,7 +56,7 @@ export const WindowsShowcase: React.FC = () => {
           </LiquidGlassCard>
 
           {/* Card 2: Interactive Grid Editor & Wi-Fi */}
-          <LiquidGlassCard className="p-8 flex flex-col justify-between overflow-hidden">
+          <LiquidGlassCard className="p-5 sm:p-8 flex flex-col justify-between overflow-hidden">
             <div>
               <div className="flex items-center gap-2.5 mb-4">
                 <span className="w-8 h-8 rounded-xl liquid-glass-icon-pod">

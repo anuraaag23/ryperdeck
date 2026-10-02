@@ -160,7 +160,7 @@ export const DeveloperPhotoFrame: React.FC = () => {
       <div className="absolute -inset-4 rounded-[40px] bg-white/[0.025] blur-2xl opacity-60 pointer-events-none" />
 
       {/* Main Frame Box */}
-      <div className="relative w-[280px] sm:w-[320px] md:w-[340px] h-[390px] sm:h-[450px] md:h-[480px] rounded-[30px] sm:rounded-[34px] p-[2px] bg-gradient-to-b from-white/[0.25] via-white/[0.08] to-white/[0.18] shadow-[0_30px_90px_-15px_rgba(0,0,0,0.95),inset_0_1px_1px_rgba(255,255,255,0.4)]">
+      <div className="relative w-[280px] sm:w-[320px] md:w-[340px] max-w-[calc(100vw-3rem)] h-[390px] sm:h-[450px] md:h-[480px] rounded-[30px] sm:rounded-[34px] p-[2px] bg-gradient-to-b from-white/[0.25] via-white/[0.08] to-white/[0.18] shadow-[0_30px_90px_-15px_rgba(0,0,0,0.95),inset_0_1px_1px_rgba(255,255,255,0.4)]">
         
         {/* Inner container with overflow-hidden: strictly clips canvas, lines and grid inside! */}
         <div className="relative w-full h-full rounded-[28px] sm:rounded-[32px] overflow-hidden bg-[#08080a] flex items-end justify-center">

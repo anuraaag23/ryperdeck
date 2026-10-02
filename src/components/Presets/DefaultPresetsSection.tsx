@@ -41,7 +41,7 @@ export const DefaultPresetsSection: React.FC = () => {
 
         {/* Master Preset Showcase Card with attached Import Showcase Screenshot */}
         <LiquidGlassCard
-          className="p-8 sm:p-10 mb-16 border border-white/[0.15] bg-[#0c0d12]"
+          className="p-5 sm:p-10 mb-12 sm:mb-16 border border-white/[0.15] bg-[#0c0d12]"
         >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Content Column */}
@@ -111,7 +111,7 @@ export const DefaultPresetsSection: React.FC = () => {
         </LiquidGlassCard>
 
         {/* Dedicated Gemini AI Automation Feature Card */}
-        <div className="mb-14 p-6 sm:p-8 rounded-[28px] liquid-glass-panel border border-indigo-500/20 bg-gradient-to-br from-indigo-950/20 via-[#0c0d14] to-[#0a0a10]">
+        <div className="mb-12 sm:mb-14 p-4 sm:p-8 rounded-[24px] sm:rounded-[28px] liquid-glass-panel border border-indigo-500/20 bg-gradient-to-br from-indigo-950/20 via-[#0c0d14] to-[#0a0a10]">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="max-w-2xl">
               <div className="mb-3 inline-flex items-center gap-2">
@@ -120,10 +120,10 @@ export const DefaultPresetsSection: React.FC = () => {
                   AI-Powered Automations
                 </span>
               </div>
-              <h3 className="text-[22px] sm:text-[26px] font-bold text-white tracking-tight mb-2.5">
+              <h3 className="text-[20px] sm:text-[26px] font-bold text-white tracking-tight mb-2.5">
                 Make new automations just by explaining what you want.
               </h3>
-              <p className="text-[14px] text-white/60 leading-relaxed font-light">
+              <p className="text-[13.5px] sm:text-[14px] text-white/60 leading-relaxed font-light">
                 No complex scripting or manual key-binding needed. Simply describe your workflow in plain language — for example, <span className="text-white/85 italic">"When I tap this, launch OBS, switch to Gaming scene, mute Discord, and bring Spotify volume to 20%"</span> — and RyperDeck’s integrated Gemini AI automatically generates, configures, and binds the actions directly to your deck.
               </p>
             </div>
@@ -137,7 +137,7 @@ export const DefaultPresetsSection: React.FC = () => {
         </div>
 
         {/* 3-Step Import Guide */}
-        <div className="mb-20 p-6 sm:p-8 rounded-[28px] liquid-glass-panel-subtle">
+        <div className="mb-16 sm:mb-20 p-4 sm:p-8 rounded-[24px] sm:rounded-[28px] liquid-glass-panel-subtle">
           <h4 className="text-[15px] font-bold text-white mb-4 flex items-center gap-2.5">
             <span className="w-7 h-7 rounded-xl liquid-glass-icon-pod">
               <Smartphone className="w-3.5 h-3.5 text-white" />

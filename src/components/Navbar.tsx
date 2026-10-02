@@ -135,7 +135,7 @@ export const Navbar: React.FC<NavbarProps> = ({
 
         {/* Mobile Drawer */}
         {mobileMenuOpen && (
-          <div className="pointer-events-auto fixed inset-x-3 sm:inset-x-4 top-[76px] sm:top-20 rounded-3xl bg-black/60 backdrop-blur-3xl backdrop-saturate-150 border border-white/[0.16] p-5 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.85)] md:hidden z-[999] flex flex-col gap-3 sm:gap-4 text-sm animate-fadeIn">
+          <div className="pointer-events-auto fixed inset-x-3 sm:inset-x-4 top-[76px] sm:top-20 max-h-[calc(100dvh-90px)] overflow-y-auto rounded-3xl bg-black/80 backdrop-blur-3xl backdrop-saturate-150 border border-white/[0.16] p-5 sm:p-6 shadow-[0_25px_60px_rgba(0,0,0,0.85)] md:hidden z-[999] flex flex-col gap-3 sm:gap-4 text-sm animate-fadeIn">
             <a
               href="#current-features"
               onClick={() => setMobileMenuOpen(false)}

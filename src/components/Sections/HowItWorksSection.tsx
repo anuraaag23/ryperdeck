@@ -48,7 +48,7 @@ export const HowItWorksSection: React.FC = () => {
           {steps.map((s, idx) => {
             const Icon = s.icon;
             return (
-              <LiquidGlassCard key={idx} className="p-8 flex flex-col justify-between">
+              <LiquidGlassCard key={idx} className="p-5 sm:p-8 flex flex-col justify-between">
                 <div>
                   <span className="liquid-glass-badge font-mono text-[11px] mb-6 block w-fit">
                     {s.badge}

@@ -56,16 +56,16 @@ export const PrivacyModal: React.FC<Props> = ({ isOpen, onClose }) => {
       className="fixed inset-0 z-[999999] flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-2xl animate-fadeIn cursor-default"
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="relative w-full max-w-2xl rounded-t-[32px] sm:rounded-[32px] bg-[#0b0c14] border border-white/[0.12] shadow-[0_40px_120px_rgba(0,0,0,0.97)] max-h-[90vh] flex flex-col overflow-hidden">
+      <div className="relative w-full max-w-2xl rounded-t-[32px] sm:rounded-[32px] bg-[#0b0c14] border border-white/[0.12] shadow-[0_40px_120px_rgba(0,0,0,0.97)] max-h-[92dvh] sm:max-h-[90vh] flex flex-col overflow-hidden">
 
         {/* Header */}
-        <div className="flex items-start justify-between p-6 sm:p-8 pb-0 shrink-0">
+        <div className="flex items-start justify-between p-4 sm:p-8 pb-0 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-2xl bg-white/[0.06] border border-white/[0.1] flex items-center justify-center">
               <Shield className="w-5 h-5 text-white/60" />
             </div>
             <div>
-              <h2 className="text-[20px] font-bold text-white">Built private. Kept private.</h2>
+              <h2 className="text-[18px] sm:text-[20px] font-bold text-white">Built private. Kept private.</h2>
               <p className="text-[11px] text-white/35 font-light">The RyperDeck Privacy Policy</p>
             </div>
           </div>
@@ -79,15 +79,15 @@ export const PrivacyModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Trust Guarantee Banner (Replaces raw TL;DR) */}
-        <div className="mx-6 sm:mx-8 mt-5 p-4 rounded-2xl bg-white/[0.03] border border-white/[0.1] flex items-start gap-3">
+        <div className="mx-4 sm:mx-8 mt-4 sm:mt-5 p-3.5 sm:p-4 rounded-2xl bg-white/[0.03] border border-white/[0.1] flex items-start gap-3">
           <Shield className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
-          <p className="text-[13px] text-white/70 font-normal leading-relaxed">
+          <p className="text-[12.5px] sm:text-[13px] text-white/70 font-normal leading-relaxed">
             <span className="font-semibold text-white">Our Privacy Guarantee:</span> RyperDeck collects zero data. Direct UDP socket communication over your local home Wi-Fi. No telemetry, no cloud relays, no account required.
           </p>
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto px-6 sm:px-8 py-5 scrollbar-none">
+        <div className="flex-1 overflow-y-auto px-4 sm:px-8 py-4 sm:py-5 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] sm:pb-6 scrollbar-none">
           <div className="flex flex-col gap-6">
             {SECTIONS.map((s, i) => (
               <div key={i} className="border-b border-white/[0.05] pb-5 last:border-0">

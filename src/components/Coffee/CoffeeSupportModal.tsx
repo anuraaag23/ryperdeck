@@ -313,7 +313,7 @@ export const CoffeeSupportModal: React.FC<CoffeeSupportModalProps> = ({
       className="fixed inset-0 flex items-end sm:items-center justify-center p-0 sm:p-4 bg-black/85 backdrop-blur-2xl animate-fadeIn cursor-default overflow-y-auto"
       style={{ zIndex: 9999999 }}
     >
-      <div className="relative w-full max-w-lg rounded-t-[34px] sm:rounded-[34px] bg-[#0c0d14] border border-white/[0.15] p-6 sm:p-8 shadow-[0_40px_100px_rgba(0,0,0,0.95),inset_0_1px_1px_rgba(255,255,255,0.3)] max-h-[90vh] overflow-y-auto scrollbar-none my-auto">
+      <div className="relative w-full max-w-lg rounded-t-[32px] sm:rounded-[34px] bg-[#0c0d14] border border-white/[0.15] p-5 sm:p-8 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px))] sm:pb-8 shadow-[0_40px_100px_rgba(0,0,0,0.95),inset_0_1px_1px_rgba(255,255,255,0.3)] max-h-[92dvh] sm:max-h-[90vh] overflow-y-auto scrollbar-none my-0 sm:my-auto">
         
         {/* Close Button */}
         <button

@@ -29,7 +29,7 @@ export const FloatingCoffeeWidget: React.FC = () => {
   return (
     <>
       <div
-        className={`fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-40 pointer-events-auto transition-all duration-300 ${
+        className={`fixed bottom-[calc(1rem+env(safe-area-inset-bottom,0px))] right-3.5 sm:bottom-6 sm:right-6 z-40 pointer-events-auto transition-all duration-300 ${
           isHidden
             ? 'opacity-0 pointer-events-none scale-75 translate-y-4'
             : 'opacity-100 scale-100 translate-y-0'

@@ -53,7 +53,7 @@ export const LeaderboardSection: React.FC = () => {
           <div className="mt-7">
             <button
               onClick={() => setModalOpen(true)}
-              className="liquid-glass-btn liquid-glass-btn-amber h-11 px-7 text-xs font-bold gap-2 cursor-pointer shadow-[0_0_25px_rgba(245,158,11,0.3)]"
+              className="liquid-glass-btn liquid-glass-btn-amber min-h-11 py-2.5 px-5 sm:px-7 text-xs font-bold gap-2 cursor-pointer shadow-[0_0_25px_rgba(245,158,11,0.3)] whitespace-normal sm:whitespace-nowrap text-center"
             >
               <span>☕ Buy Developer a Coffee & Join Leaderboard</span>
             </button>
@@ -63,7 +63,7 @@ export const LeaderboardSection: React.FC = () => {
         {/* Dual Layout: Top Leaderboard Table + Live Reviews Wall */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Ranked Leaderboard Table (7 Cols) */}
-          <LiquidGlassCard className="lg:col-span-7 p-6 sm:p-8 flex flex-col justify-between">
+          <LiquidGlassCard className="lg:col-span-7 p-4 sm:p-8 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
@@ -102,7 +102,7 @@ export const LeaderboardSection: React.FC = () => {
                     return (
                       <div
                         key={s.id}
-                        className={`flex items-center justify-between p-3.5 rounded-2xl border transition-all ${
+                        className={`flex items-center justify-between p-3 sm:p-3.5 rounded-2xl border transition-all ${
                           idx === 0
                             ? 'bg-amber-500/[0.1] border-amber-400/40 shadow-[0_4px_20px_rgba(245,158,11,0.15)]'
                             : idx === 1

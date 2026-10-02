@@ -113,17 +113,17 @@ export const RequestFeatureModal: React.FC<Props> = ({ isOpen, onClose }) => {
 
   return createPortal(
     <div
-      className="fixed inset-0 overflow-y-auto bg-black/90 backdrop-blur-2xl animate-fadeIn p-4 sm:p-6 md:p-10 cursor-default"
+      className="fixed inset-0 overflow-y-auto bg-black/90 backdrop-blur-2xl animate-fadeIn p-2 sm:p-6 md:p-10 cursor-default"
       style={{ zIndex: 9999999 }}
       onClick={e => { if (e.target === e.currentTarget) onClose(); }}
     >
-      <div className="max-w-4xl mx-auto my-6 sm:my-10 bg-[#090a10] border border-white/[0.12] rounded-[32px] sm:rounded-[40px] shadow-[0_40px_140px_rgba(0,0,0,0.98)] overflow-hidden">
+      <div className="max-w-4xl mx-auto my-2 sm:my-10 bg-[#090a10] border border-white/[0.12] rounded-[24px] sm:rounded-[40px] shadow-[0_40px_140px_rgba(0,0,0,0.98)] overflow-hidden">
         
         {/* Top Bar with 'Back to RyperDeck' and Close */}
-        <div className="p-6 sm:p-8 pb-4 flex items-center justify-between border-b border-white/[0.06]">
+        <div className="p-4 sm:p-8 pb-3 sm:pb-4 flex items-center justify-between border-b border-white/[0.06]">
           <button
             onClick={onClose}
-            className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-[13px] text-white/70 hover:text-white transition-all cursor-pointer active:scale-95"
+            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 rounded-full bg-white/[0.05] hover:bg-white/[0.1] border border-white/[0.08] text-[12px] sm:text-[13px] text-white/70 hover:text-white transition-all cursor-pointer active:scale-95"
           >
             <ArrowLeft className="w-4 h-4" />
             Back to RyperDeck
@@ -139,7 +139,7 @@ export const RequestFeatureModal: React.FC<Props> = ({ isOpen, onClose }) => {
         </div>
 
         {/* Content Body */}
-        <div className="p-6 sm:p-10 md:p-12 space-y-16">
+        <div className="p-4 sm:p-10 md:p-12 space-y-10 sm:space-y-16">
           
           {/* Section 1: Form — Shape what gets built next */}
           <div>
@@ -147,7 +147,7 @@ export const RequestFeatureModal: React.FC<Props> = ({ isOpen, onClose }) => {
               REQUEST A FEATURE
             </span>
 
-            <h1 className="text-[36px] sm:text-[52px] md:text-[64px] font-bold tracking-[-0.04em] leading-[0.98] text-white mb-6">
+            <h1 className="text-[28px] sm:text-[44px] md:text-[64px] font-bold tracking-[-0.04em] leading-[0.98] text-white mb-6">
               Shape what gets built <br />
               <span className="text-white/60">next.</span>
             </h1>
@@ -180,8 +180,8 @@ export const RequestFeatureModal: React.FC<Props> = ({ isOpen, onClose }) => {
                 </div>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="p-6 sm:p-8 rounded-[28px] bg-white/[0.025] border border-white/[0.08] space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <form onSubmit={handleSubmit} className="p-4 sm:p-8 rounded-[22px] sm:rounded-[28px] bg-white/[0.025] border border-white/[0.08] space-y-4 sm:space-y-5">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 sm:gap-4">
                   <div>
                     <label className="text-[11px] font-semibold tracking-wider uppercase text-white/40 block mb-2">
                       Name
@@ -192,7 +192,7 @@ export const RequestFeatureModal: React.FC<Props> = ({ isOpen, onClose }) => {
                       onChange={e => setName(e.target.value)}
                       placeholder="Your name"
                       maxLength={80}
-                      className="liquid-glass-input w-full px-4 py-3 text-[14px] rounded-2xl"
+                      className="liquid-glass-input w-full px-4 py-3 text-[16px] sm:text-[14px] rounded-2xl"
                     />
                   </div>
                   <div>
@@ -205,7 +205,7 @@ export const RequestFeatureModal: React.FC<Props> = ({ isOpen, onClose }) => {
                       onChange={e => setEmail(e.target.value)}
                       placeholder="your@email.com"
                       maxLength={254}
-                      className="liquid-glass-input w-full px-4 py-3 text-[14px] rounded-2xl"
+                      className="liquid-glass-input w-full px-4 py-3 text-[16px] sm:text-[14px] rounded-2xl"
                     />
                   </div>
                 </div>
@@ -221,7 +221,7 @@ export const RequestFeatureModal: React.FC<Props> = ({ isOpen, onClose }) => {
                     placeholder="What should RyperDeck do? Tell us the feature and how you would use it."
                     rows={4}
                     maxLength={1000}
-                    className="liquid-glass-input w-full px-4 py-3 text-[14px] rounded-2xl resize-none"
+                    className="liquid-glass-input w-full px-4 py-3 text-[16px] sm:text-[14px] rounded-2xl resize-none"
                   />
                 </div>
 

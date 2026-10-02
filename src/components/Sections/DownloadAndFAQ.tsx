@@ -52,17 +52,17 @@ export const DownloadAndFAQ: React.FC = () => {
         </div>
 
         {/* Windows & Android Download Card */}
-        <LiquidGlassCard className="p-8 sm:p-10 mb-10 max-w-2xl mx-auto text-center">
+        <LiquidGlassCard className="p-5 sm:p-10 mb-10 max-w-2xl mx-auto text-center">
           <div className="flex flex-col items-center">
             <span className="liquid-glass-badge font-mono text-[11px] mb-5">
               Windows 11 & 10 • Android APK • 100% Free
             </span>
 
-            <h3 className="text-[26px] sm:text-[30px] font-bold text-white mb-2 tracking-tight">
+            <h3 className="text-[24px] sm:text-[30px] font-bold text-white mb-2 tracking-tight">
               RyperDeck for Windows & Android
             </h3>
 
-            <p className="text-[14px] text-white/50 leading-relaxed font-light max-w-md mb-8">
+            <p className="text-[13.5px] sm:text-[14px] text-white/50 leading-relaxed font-light max-w-md mb-8">
               Native Windows system tray companion and ultra-responsive Android macro controller. Zero cloud relay, zero telemetry, sub-millisecond local UDP sync.
             </p>
 
@@ -72,7 +72,7 @@ export const DownloadAndFAQ: React.FC = () => {
               <div className="flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
                 <a
                   href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeckAgent.exe"
-                  className="w-full sm:w-1/2 liquid-glass-btn liquid-glass-btn-primary h-[50px] px-5 text-[13.5px] font-bold gap-2.5 shadow-[0_0_35px_rgba(255,255,255,0.25)] justify-center active:scale-95"
+                  className="w-full sm:w-1/2 liquid-glass-btn liquid-glass-btn-primary h-[50px] px-4 sm:px-5 text-[12.5px] sm:text-[13.5px] font-bold gap-2 sm:gap-2.5 shadow-[0_0_35px_rgba(255,255,255,0.25)] justify-center active:scale-95"
                 >
                   <svg className="w-4 h-4 shrink-0 fill-black" viewBox="0 0 22 22">
                     <rect x="1" y="1" width="9" height="9" rx="1" />
@@ -85,7 +85,7 @@ export const DownloadAndFAQ: React.FC = () => {
 
                 <a
                   href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck.apk"
-                  className="w-full sm:w-1/2 liquid-glass-btn h-[50px] px-5 text-[13.5px] font-bold gap-2.5 border border-white/[0.18] bg-white/[0.08] hover:bg-white/[0.14] hover:border-white/[0.28] text-white justify-center transition-all shadow-[0_0_20px_rgba(255,255,255,0.06)] active:scale-95"
+                  className="w-full sm:w-1/2 liquid-glass-btn h-[50px] px-4 sm:px-5 text-[12.5px] sm:text-[13.5px] font-bold gap-2 sm:gap-2.5 border border-white/[0.18] bg-white/[0.08] hover:bg-white/[0.14] hover:border-white/[0.28] text-white justify-center transition-all shadow-[0_0_20px_rgba(255,255,255,0.06)] active:scale-95"
                 >
                   <Smartphone className="w-4 h-4 text-emerald-400 shrink-0" />
                   <span>Download Android APK</span>
@@ -95,11 +95,11 @@ export const DownloadAndFAQ: React.FC = () => {
               {/* Row 2: Download Both as zip file */}
               <a
                 href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck.Both.PC.+.Mobile.zip"
-                className="w-full liquid-glass-btn h-[50px] px-6 text-[13.5px] font-bold gap-2.5 border border-white/[0.2] bg-white/[0.05] hover:bg-white/[0.12] hover:border-white/[0.32] text-white justify-center transition-all shadow-[0_4px_24px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.2)] active:scale-95 group"
+                className="w-full liquid-glass-btn h-auto sm:h-[50px] py-3 sm:py-0 px-4 sm:px-6 text-[12.5px] sm:text-[13.5px] font-bold gap-2 sm:gap-2.5 border border-white/[0.2] bg-white/[0.05] hover:bg-white/[0.12] hover:border-white/[0.32] text-white justify-center transition-all shadow-[0_4px_24px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.2)] active:scale-95 group flex-wrap sm:flex-nowrap"
               >
                 <FolderArchive className="w-4 h-4 text-sky-400 shrink-0 group-hover:scale-110 transition-transform" />
                 <span>Download Both as zip file</span>
-                <span className="text-[11px] font-mono font-normal text-white/50 px-2.5 py-0.5 rounded-full bg-white/[0.08] border border-white/[0.08] ml-1">
+                <span className="text-[10px] sm:text-[11px] font-mono font-normal text-white/50 px-2 sm:px-2.5 py-0.5 rounded-full bg-white/[0.08] border border-white/[0.08] ml-1">
                   Windows + Android (.zip)
                 </span>
               </a>

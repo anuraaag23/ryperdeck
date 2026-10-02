@@ -17,14 +17,14 @@ export const ManifestoSection: React.FC = () => {
   };
 
   return (
-    <section className="relative py-24 sm:py-36 px-6 bg-black border-t border-white/[0.05] overflow-hidden">
+    <section className="relative py-20 sm:py-28 md:py-36 px-4 sm:px-6 bg-black border-t border-white/[0.05] overflow-hidden">
       {/* Subtle neutral bloom */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[500px] rounded-full bg-white/[0.015] blur-[200px] pointer-events-none" />
 
       <div className="relative z-10 max-w-4xl mx-auto text-center">
         {/* Main bold headline */}
         <Reveal direction="up">
-          <h2 className="text-[52px] sm:text-[72px] md:text-[96px] font-bold tracking-[-0.045em] leading-[0.95] text-white mb-8">
+          <h2 className="text-[36px] sm:text-[60px] md:text-[80px] lg:text-[96px] font-bold tracking-[-0.045em] leading-[0.95] text-white mb-6 sm:mb-8">
             Built with{' '}
             <span className="text-white/50">attention,</span>
             <br />
@@ -34,10 +34,10 @@ export const ManifestoSection: React.FC = () => {
 
         {/* Sub-copy */}
         <Reveal direction="up" delay={100}>
-          <p className="text-[17px] sm:text-[20px] text-white/50 font-light leading-relaxed mb-3 max-w-lg mx-auto">
+          <p className="text-[15px] sm:text-[18px] md:text-[20px] text-white/50 font-light leading-relaxed mb-3 max-w-lg mx-auto">
             Solo built by Anurag. Independent development. Zero funding. Zero team.
           </p>
-          <p className="text-[14px] sm:text-[16px] text-white/25 font-light leading-relaxed mb-12">
+          <p className="text-[13px] sm:text-[15px] text-white/25 font-light leading-relaxed mb-10 sm:mb-12">
             Core stays free, forever — no paywalls, no subscriptions, ever.
           </p>
         </Reveal>
@@ -60,9 +60,9 @@ export const ManifestoSection: React.FC = () => {
 
               {/* Inline email drop */}
               <div className={`w-full max-w-sm overflow-hidden transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] ${
-                open ? 'max-h-[100px] opacity-100' : 'max-h-0 opacity-0'
+                open ? 'max-h-[140px] opacity-100' : 'max-h-0 opacity-0'
               }`}>
-                <div className="flex gap-2 mt-2">
+                <div className="flex flex-col sm:flex-row gap-2 mt-2">
                   <input
                     type="email"
                     value={email}
@@ -70,12 +70,12 @@ export const ManifestoSection: React.FC = () => {
                     onKeyDown={e => e.key === 'Enter' && handleSubmit()}
                     placeholder="your@email.com"
                     maxLength={254}
-                    className="liquid-glass-input flex-1 h-[44px] px-4 text-[13px] rounded-full"
+                    className="liquid-glass-input flex-1 h-[44px] px-4 text-[16px] sm:text-[13px] rounded-full"
                   />
                   <button
                     onClick={handleSubmit}
                     disabled={!email.trim()}
-                    className="liquid-glass-btn liquid-glass-btn-primary h-[44px] px-5 text-[12px] font-bold rounded-full disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer"
+                    className="liquid-glass-btn liquid-glass-btn-primary h-[44px] px-5 text-[12px] font-bold rounded-full disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer w-full sm:w-auto"
                   >
                     Notify me
                   </button>

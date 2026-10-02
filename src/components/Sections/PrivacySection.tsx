@@ -59,7 +59,7 @@ export const PrivacySection: React.FC<Props> = ({ onOpenPrivacyModal }) => {
           </Reveal>
 
           <Reveal direction="up" delay={80}>
-            <h2 className="text-[40px] sm:text-[56px] md:text-[68px] font-bold tracking-[-0.04em] leading-[0.97] text-white mb-8">
+            <h2 className="text-[30px] sm:text-[52px] md:text-[68px] font-bold tracking-[-0.04em] leading-[0.97] text-white mb-6 sm:mb-8">
               Nothing<br />
               <span className="text-white/35">leaves your home.</span>
             </h2>
@@ -95,31 +95,31 @@ export const PrivacySection: React.FC<Props> = ({ onOpenPrivacyModal }) => {
 
         {/* Right Column — Animated Fluid Flow Diagram */}
         <Reveal direction="left" delay={120}>
-          <div className="relative rounded-[32px] p-6 sm:p-8 bg-[#090a10]/80 border border-white/[0.1] backdrop-blur-2xl shadow-[0_30px_90px_rgba(0,0,0,0.8)]">
+          <div className="relative rounded-[24px] sm:rounded-[32px] p-4 sm:p-8 bg-[#090a10]/80 border border-white/[0.1] backdrop-blur-2xl shadow-[0_30px_90px_rgba(0,0,0,0.8)]">
             
             {/* Live Status Header */}
-            <div className="flex items-center justify-between pb-6 mb-6 border-b border-white/[0.06]">
-              <div className="flex items-center gap-2.5">
+            <div className="flex items-center justify-between pb-4 sm:pb-6 mb-4 sm:mb-6 border-b border-white/[0.06]">
+              <div className="flex items-center gap-2 sm:gap-2.5">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
                 </span>
-                <span className="text-[12px] font-mono text-white/60">Local Subnet Socket</span>
+                <span className="text-[11px] sm:text-[12px] font-mono text-white/60">Local Subnet Socket</span>
               </div>
-              <span className="text-[11px] font-mono text-white/30 uppercase tracking-widest px-2.5 py-1 rounded-full bg-white/[0.03] border border-white/[0.06]">
+              <span className="text-[10px] sm:text-[11px] font-mono text-white/30 uppercase tracking-widest px-2 sm:px-2.5 py-0.5 sm:py-1 rounded-full bg-white/[0.03] border border-white/[0.06]">
                 Internet: 0 KB/S
               </span>
             </div>
 
             {/* Stepper with animated packet stream */}
-            <div className="relative flex flex-col gap-3">
+            <div className="relative flex flex-col gap-2.5 sm:gap-3">
               {steps.map((step, i) => {
                 const isStepActive = activeStep === step.id;
                 return (
                   <div key={step.id} className="relative flex flex-col items-start group">
                     {/* Step Card */}
                     <div
-                      className={`w-full rounded-[22px] px-5 sm:px-6 py-4 sm:py-5 border transition-all duration-500 ${
+                      className={`w-full rounded-[18px] sm:rounded-[22px] px-3.5 sm:px-6 py-3 sm:py-5 border transition-all duration-500 ${
                         isStepActive || step.highlight
                           ? 'liquid-glass-panel border-white/[0.22] shadow-[0_0_40px_rgba(255,255,255,0.06)] bg-white/[0.06]'
                           : 'bg-white/[0.025] border-white/[0.06] hover:bg-white/[0.04]'

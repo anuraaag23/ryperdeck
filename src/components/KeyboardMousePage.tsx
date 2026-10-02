@@ -143,7 +143,7 @@ export const KeyboardMousePage: React.FC<Props> = ({ onBack }) => {
             REMOTE DESKTOP INPUT HUB
           </div>
 
-          <h1 className="text-[34px] sm:text-[50px] md:text-[60px] font-bold tracking-[-0.04em] leading-[1.0] text-white mb-6">
+          <h1 className="text-[28px] sm:text-[44px] md:text-[60px] font-bold tracking-[-0.04em] leading-[1.0] text-white mb-6">
             Turn your phone or tablet into a{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-white via-white/90 to-white/50">
               Keyboard & Precision Trackpad.
@@ -478,11 +478,17 @@ export const KeyboardMousePage: React.FC<Props> = ({ onBack }) => {
                 {/* Main Gliding Area */}
                 <div
                   onMouseMove={() => triggerHud(`Cursor Moving (${dpi} DPI)`)}
+                  onTouchMove={(e) => {
+                    e.preventDefault();
+                    triggerHud(`Cursor Moving (${dpi} DPI)`);
+                  }}
+                  onTouchStart={() => triggerHud('Touchpad Finger Engaged')}
                   onClick={() => triggerHud('Left Click (1-Finger Tap)')}
                   onContextMenu={(e) => {
                     e.preventDefault();
                     triggerHud('Right Click (2-Finger Tap)');
                   }}
+                  style={{ touchAction: 'none' }}
                   className="flex-1 flex flex-col items-center justify-center p-6 text-center cursor-crosshair group relative"
                 >
                   {/* Subtle Grid Caustic */}
@@ -507,7 +513,12 @@ export const KeyboardMousePage: React.FC<Props> = ({ onBack }) => {
                 {/* Dedicated 84dp Vertical Scroll Strip */}
                 <div
                   onWheel={() => triggerHud('84dp Vertical Scroll Strip Engaged')}
+                  onTouchMove={(e) => {
+                    e.preventDefault();
+                    triggerHud('84dp Vertical Scroll Strip Engaged');
+                  }}
                   onClick={() => triggerHud('Scroll Strip Thumb Drag')}
+                  style={{ touchAction: 'none' }}
                   className="w-[72px] sm:w-[84px] bg-white/[0.03] border-l border-white/[0.08] flex flex-col items-center justify-between py-6 px-1 hover:bg-white/[0.06] transition-colors cursor-ns-resize group"
                   title="84dp Vertical Thumb Scroll Strip"
                 >

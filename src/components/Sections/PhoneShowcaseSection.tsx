@@ -58,7 +58,7 @@ export const PhoneShowcaseSection: React.FC = () => {
               <div className="absolute -inset-4 rounded-[50px] bg-white/[0.02] blur-3xl opacity-75 pointer-events-none" />
 
               {/* Phone Chassis */}
-              <div className="relative w-[270px] sm:w-[300px] md:w-[320px] rounded-[48px] p-[10px] sm:p-[12px] bg-[#121318] border border-white/[0.14] shadow-[0_50px_120px_-20px_rgba(0,0,0,0.98),inset_0_1px_1px_rgba(255,255,255,0.25)]">
+              <div className="relative w-[260px] sm:w-[300px] md:w-[320px] max-w-[calc(100vw-40px)] rounded-[40px] sm:rounded-[48px] p-2 sm:p-[12px] bg-[#121318] border border-white/[0.14] shadow-[0_50px_120px_-20px_rgba(0,0,0,0.98),inset_0_1px_1px_rgba(255,255,255,0.25)]">
                 
                 {/* Top bezel: Green connection dot & speaker slit */}
                 <div className="absolute top-[8px] left-6 flex items-center gap-1.5 z-20">
@@ -141,7 +141,7 @@ export const PhoneShowcaseSection: React.FC = () => {
           </Reveal>
 
           <Reveal direction="up" delay={80}>
-            <h2 className="text-[46px] sm:text-[64px] md:text-[76px] font-bold tracking-[-0.04em] leading-[0.98] mb-8">
+            <h2 className="text-[36px] sm:text-[54px] md:text-[76px] font-bold tracking-[-0.04em] leading-[0.98] mb-6 sm:mb-8">
               <span className="text-white block">Pick up.</span>
               <span className="text-white block">Tap.</span>
               <span className="text-[#4e82ee] block">Done.</span>
@@ -149,7 +149,7 @@ export const PhoneShowcaseSection: React.FC = () => {
           </Reveal>
 
           <Reveal direction="up" delay={140}>
-            <div className="space-y-6 text-[15px] sm:text-[17px] text-white/50 leading-relaxed font-light mb-10 max-w-xl">
+            <div className="space-y-5 sm:space-y-6 text-[14px] sm:text-[17px] text-white/50 leading-relaxed font-light mb-8 sm:mb-10 max-w-xl">
               <p>
                 Leave your phone charging beside your PC. RyperDeck finds it automatically, reconnects every time you wake your PC, and stays completely invisible until you need it.
               </p>
@@ -159,7 +159,7 @@ export const PhoneShowcaseSection: React.FC = () => {
               <p>
                 Control your Windows PC volume, per-app audio mixer, OBS scenes, mute toggles, and shortcut macros — directly from your phone. Zero setup delay.
               </p>
-              <p className="text-[13px] text-white/35 font-light pt-1">
+              <p className="text-[12px] sm:text-[13px] text-white/35 font-light pt-1">
                 Requires Android 8+. 100% Free, lightweight, zero telemetry.
               </p>
             </div>
@@ -167,10 +167,10 @@ export const PhoneShowcaseSection: React.FC = () => {
 
           {/* Download Action Buttons */}
           <Reveal direction="up" delay={200}>
-            <div className="flex flex-wrap items-center gap-3.5">
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 sm:gap-3.5">
               <a
                 href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck.apk"
-                className="inline-flex items-center gap-3 px-6 py-3.5 rounded-2xl bg-[#0c0d12] hover:bg-[#14151e] border border-white/20 hover:border-white/40 shadow-[0_12px_36px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.25)] text-white text-[13px] font-semibold transition-all group active:scale-95 cursor-pointer"
+                className="inline-flex items-center justify-center gap-3 px-6 py-3.5 rounded-2xl bg-[#0c0d12] hover:bg-[#14151e] border border-white/20 hover:border-white/40 shadow-[0_12px_36px_rgba(0,0,0,0.85),inset_0_1px_1px_rgba(255,255,255,0.25)] text-white text-[13px] font-semibold transition-all group active:scale-95 cursor-pointer w-full sm:w-auto"
               >
                 <div className="w-8 h-8 rounded-xl bg-white/10 flex items-center justify-center shrink-0 group-hover:scale-105 transition-transform">
                   <Smartphone className="w-4 h-4 text-emerald-400" />
@@ -183,13 +183,13 @@ export const PhoneShowcaseSection: React.FC = () => {
 
               <a
                 href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck.Both.PC.+.Mobile.zip"
-                className="inline-flex items-center gap-2.5 px-5 py-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.14] hover:border-white/[0.28] text-white text-[13px] font-semibold transition-all group active:scale-95 cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
+                className="inline-flex items-center justify-center gap-2.5 px-5 py-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.14] hover:border-white/[0.28] text-white text-[13px] font-semibold transition-all group active:scale-95 cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.5)] w-full sm:w-auto"
               >
                 <FolderArchive className="w-4 h-4 text-sky-400 shrink-0 group-hover:scale-110 transition-transform" />
                 <span>Download Both as zip file</span>
               </a>
 
-              <div className="flex items-center gap-2 text-xs text-white/40 ml-1">
+              <div className="flex items-center justify-center sm:justify-start gap-2 text-xs text-white/40 pt-1 sm:pt-0 sm:ml-1">
                 <CheckCircle2 className="w-3.5 h-3.5 text-emerald-400" />
                 <span>Zero Latency · UDP Wi-Fi</span>
               </div>

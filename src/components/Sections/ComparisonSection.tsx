@@ -84,14 +84,18 @@ export const ComparisonSection: React.FC = () => {
         </p>
 
         {/* Comparison Matrix in Liquid Glass Card */}
-        <LiquidGlassCard className="p-6 sm:p-8 text-left">
-          <div className="overflow-x-auto scrollbar-none">
-            <table className="w-full text-[13px]">
+        <LiquidGlassCard className="p-3.5 sm:p-8 text-left">
+          {/* Mobile swipe hint */}
+          <div className="flex items-center justify-center text-[10.5px] font-mono text-white/40 mb-3 px-1 sm:hidden">
+            <span>← Swipe horizontally to view full comparison →</span>
+          </div>
+          <div className="overflow-x-auto scrollbar-none -mx-1 sm:mx-0">
+            <table className="w-full min-w-[500px] text-[12px] sm:text-[13px]">
               <thead>
                 <tr className="border-b border-white/[0.08] text-[11px] text-white/45 uppercase tracking-wider">
-                  <th className="py-3.5 px-4 font-semibold">Capability</th>
-                  <th className="py-3.5 px-4 font-medium text-white/35">StreamDeck</th>
-                  <th className="py-3.5 px-4 font-semibold text-white">RyperDeck for Windows</th>
+                  <th className="py-3.5 px-3 sm:px-4 font-semibold">Capability</th>
+                  <th className="py-3.5 px-3 sm:px-4 font-medium text-white/35">StreamDeck</th>
+                  <th className="py-3.5 px-3 sm:px-4 font-semibold text-white">RyperDeck for Windows</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-white/[0.04]">
