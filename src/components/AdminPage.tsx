@@ -496,15 +496,18 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
             </div>
           )}
 
-          <form onSubmit={handleLogin} noValidate style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+          <form onSubmit={handleLogin} noValidate autoComplete="off" style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
             <div>
               <label style={{ display: 'block', fontSize: '12px', fontWeight: 600, color: 'rgba(255, 255, 255, 0.7)', marginBottom: '6px' }}>
                 Admin Email
               </label>
               <input
-                type="text"
-                autoComplete="email"
-                placeholder="anurag.ay8840@gmail.com"
+                type="email"
+                autoComplete="off"
+                autoCapitalize="none"
+                autoCorrect="off"
+                spellCheck={false}
+                placeholder="Enter admin email"
                 value={adminEmail}
                 onChange={(e) => setAdminEmail(e.target.value.replace(',', '.'))}
                 style={{
@@ -528,7 +531,8 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
               <div style={{ position: 'relative' }}>
                 <input
                   type={showPw ? 'text' : 'password'}
-                  placeholder="••••••••••••"
+                  autoComplete="new-password"
+                  placeholder="Enter admin password"
                   value={pw}
                   onChange={(e) => setPw(e.target.value)}
                   style={{
@@ -676,9 +680,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
         </div>
 
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: isMobile ? 'space-between' : 'flex-end', gap: '8px' }}>
-          {authEmail && !isMobile && (
+          {!isMobile && (
             <span style={{ fontSize: '12px', color: 'rgba(255, 255, 255, 0.5)', marginRight: '6px' }}>
-              <strong style={{ color: '#ffffff' }}>{authEmail}</strong>
+              <span style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', padding: '3px 10px', borderRadius: '999px', background: 'rgba(255, 255, 255, 0.05)', border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                <Shield style={{ width: 12, height: 12, color: '#34d399' }} />
+                <span style={{ color: 'rgba(255, 255, 255, 0.8)', fontSize: '11px', fontFamily: 'monospace' }}>Admin Session</span>
+              </span>
             </span>
           )}
 
