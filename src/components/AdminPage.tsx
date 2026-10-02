@@ -41,6 +41,9 @@ import {
   updateSupporter,
   setSupporterVerified,
   deleteRecord,
+  fetchGlobalVisitorsFromDb,
+  updateGlobalVisitorsInDb,
+  SITE_STATS_SQL,
   DbSubscriber,
   DbBugReport,
   DbFeatureRequest,
@@ -123,6 +126,12 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
   const [editSupVerified, setEditSupVerified]   = useState(true);
   const [savingSupporter, setSavingSupporter]   = useState(false);
 
+  // Visitor Management State
+  const [isDbVisitor, setIsDbVisitor]           = useState(false);
+  const [editVisitorVal, setEditVisitorVal]     = useState('');
+  const [savingVisitor, setSavingVisitor]       = useState(false);
+  const [copiedVisitorSql, setCopiedVisitorSql] = useState(false);
+
   const containerRef = useRef<HTMLDivElement | null>(null);
 
   // Always require fresh authentication when opening the Admin Panel — no auto-login
@@ -145,12 +154,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
       fetchBugReports(),
       fetchFeatureRequests(),
       fetchSupporters(),
+      fetchGlobalVisitorsFromDb(),
     ])
-      .then(([subList, bugList, featList, supList]) => {
+      .then(([subList, bugList, featList, supList, visData]) => {
         setEmails(subList);
         setBugs(bugList);
         setFeatures(featList);
         setSupporters(supList);
+        setVisitorCount(visData.count);
+        setIsDbVisitor(visData.isDb);
+        setEditVisitorVal(String(visData.count));
       })
       .catch((err) => {
         console.error('Error loading dashboard data:', err);
@@ -158,13 +171,6 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
       .finally(() => {
         setLoading(false);
       });
-
-    try {
-      const v = parseInt(localStorage.getItem('ryperdeck_real_visitors_v2') || '1', 10);
-      setVisitorCount(v);
-    } catch {
-      setVisitorCount(1);
-    }
   }, [authed, tick]);
 
   // Handle Login — Strictly server-side Supabase verification, zero client credentials
@@ -369,6 +375,16 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
       await syncSupportersFromSupabase();
       setTick((t) => t + 1);
     }
+  };
+
+  const handleSaveVisitorCount = async () => {
+    const val = parseInt(editVisitorVal, 10);
+    if (isNaN(val) || val < 0) return;
+    setSavingVisitor(true);
+    await updateGlobalVisitorsInDb(val);
+    setVisitorCount(val);
+    setSavingVisitor(false);
+    alert('Visitor count updated successfully!');
   };
 
   const exportJSON = (data: any[], filename: string) => {
@@ -2349,23 +2365,170 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
             {tab === 'visitors' && (
               <div
                 style={{
-                  padding: isMobile ? '24px 16px' : '40px 20px',
-                  borderRadius: '16px',
-                  background: 'rgba(255, 255, 255, 0.03)',
-                  border: '1px solid rgba(255, 255, 255, 0.08)',
-                  textAlign: 'center',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: '20px',
                 }}
               >
-                <BarChart2 style={{ width: 36, height: 36, color: 'rgba(255, 255, 255, 0.35)', margin: '0 auto 16px' }} />
-                <h3 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: 700, color: '#ffffff' }}>
-                  Lifetime Unique Site Visitors
-                </h3>
-                <p style={{ margin: '0 0 8px 0', fontSize: isMobile ? '40px' : '56px', fontWeight: 800, color: '#ffffff', fontFamily: 'monospace', letterSpacing: '-0.04em' }}>
-                  {visitorCount.toLocaleString()}
-                </p>
-                <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255, 255, 255, 0.45)' }}>
-                  Accurate, real visitors count stored in browser storage (no fake inflated metrics).
-                </p>
+                {/* Main counter card */}
+                <div
+                  style={{
+                    padding: isMobile ? '24px 16px' : '40px 24px',
+                    borderRadius: '16px',
+                    background: 'rgba(255, 255, 255, 0.03)',
+                    border: '1px solid rgba(255, 255, 255, 0.08)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <BarChart2 style={{ width: 36, height: 36, color: '#38bdf8', margin: '0 auto 16px' }} />
+                  <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', marginBottom: '8px', flexWrap: 'wrap' }}>
+                    <h3 style={{ margin: 0, fontSize: '16px', fontWeight: 700, color: '#ffffff' }}>
+                      Lifetime Unique Site Visitors
+                    </h3>
+                    <span
+                      style={{
+                        fontSize: '11px',
+                        padding: '2px 10px',
+                        borderRadius: '999px',
+                        background: isDbVisitor ? 'rgba(16, 185, 129, 0.15)' : 'rgba(245, 158, 11, 0.15)',
+                        color: isDbVisitor ? '#34d399' : '#fbbf24',
+                        border: isDbVisitor ? '1px solid rgba(16, 185, 129, 0.3)' : '1px solid rgba(245, 158, 11, 0.3)',
+                        fontWeight: 600,
+                        fontFamily: 'monospace',
+                      }}
+                    >
+                      {isDbVisitor ? '● Supabase Database Synced' : '○ Local Storage Mode'}
+                    </span>
+                  </div>
+                  <p style={{ margin: '0 0 12px 0', fontSize: isMobile ? '44px' : '64px', fontWeight: 800, color: '#ffffff', fontFamily: 'monospace', letterSpacing: '-0.04em' }}>
+                    {visitorCount.toLocaleString()}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '12px', color: 'rgba(255, 255, 255, 0.45)', maxWidth: '540px', marginInline: 'auto' }}>
+                    {isDbVisitor
+                      ? 'Real-time global count stored in Supabase PostgreSQL database across all browsers and devices.'
+                      : 'Visitors currently stored locally on this browser. Enable the Supabase table below so visitors are never lost across devices.'}
+                  </p>
+
+                  {/* Manual count editor */}
+                  <div style={{ marginTop: '24px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', flexWrap: 'wrap' }}>
+                    <input
+                      type="number"
+                      value={editVisitorVal}
+                      onChange={(e) => setEditVisitorVal(e.target.value)}
+                      placeholder="Set visitor baseline"
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.06)',
+                        border: '1px solid rgba(255, 255, 255, 0.2)',
+                        color: '#ffffff',
+                        fontSize: '14px',
+                        fontFamily: 'monospace',
+                        width: '160px',
+                      }}
+                    />
+                    <button
+                      type="button"
+                      onClick={handleSaveVisitorCount}
+                      disabled={savingVisitor}
+                      style={{
+                        padding: '8px 16px',
+                        borderRadius: '8px',
+                        background: '#38bdf8',
+                        color: '#000000',
+                        fontSize: '12px',
+                        fontWeight: 700,
+                        border: 'none',
+                        cursor: 'pointer',
+                        opacity: savingVisitor ? 0.6 : 1,
+                      }}
+                    >
+                      {savingVisitor ? 'Saving...' : 'Set Count'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        fetchGlobalVisitorsFromDb().then(({ count, isDb }) => {
+                          setVisitorCount(count);
+                          setIsDbVisitor(isDb);
+                          setEditVisitorVal(String(count));
+                        });
+                      }}
+                      style={{
+                        padding: '8px 14px',
+                        borderRadius: '8px',
+                        background: 'rgba(255, 255, 255, 0.08)',
+                        color: 'rgba(255, 255, 255, 0.8)',
+                        fontSize: '12px',
+                        fontWeight: 600,
+                        border: 'none',
+                        cursor: 'pointer',
+                      }}
+                    >
+                      Refresh
+                    </button>
+                  </div>
+                </div>
+
+                {/* Database Setup instructions */}
+                {!isDbVisitor && (
+                  <div
+                    style={{
+                      padding: isMobile ? '16px' : '20px',
+                      borderRadius: '16px',
+                      background: 'rgba(245, 158, 11, 0.05)',
+                      border: '1px solid rgba(245, 158, 11, 0.25)',
+                    }}
+                  >
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '12px', flexWrap: 'wrap', marginBottom: '12px' }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Database style={{ width: 18, height: 18, color: '#fbbf24' }} />
+                        <span style={{ fontSize: '14px', fontWeight: 700, color: '#fbbf24' }}>
+                          Connect Lifetime Visitors to Supabase (1-Minute Setup)
+                        </span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          navigator.clipboard.writeText(SITE_STATS_SQL);
+                          setCopiedVisitorSql(true);
+                          setTimeout(() => setCopiedVisitorSql(false), 2500);
+                        }}
+                        style={{
+                          padding: '6px 14px',
+                          borderRadius: '8px',
+                          background: copiedVisitorSql ? '#34d399' : '#fbbf24',
+                          color: '#000000',
+                          fontSize: '12px',
+                          fontWeight: 700,
+                          border: 'none',
+                          cursor: 'pointer',
+                        }}
+                      >
+                        {copiedVisitorSql ? '✓ Copied SQL!' : 'Copy Supabase SQL'}
+                      </button>
+                    </div>
+                    <p style={{ margin: '0 0 10px 0', fontSize: '12px', color: 'rgba(255, 255, 255, 0.7)', lineHeight: 1.5 }}>
+                      To make visitor counts permanent across all devices and never lose counts, run this SQL in your Supabase project (<strong>SQL Editor &gt; New Query &gt; Paste &gt; Run</strong>):
+                    </p>
+                    <pre
+                      style={{
+                        margin: 0,
+                        padding: '12px',
+                        borderRadius: '8px',
+                        background: '#0a0a12',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        color: '#67e8f9',
+                        fontSize: '11px',
+                        fontFamily: 'monospace',
+                        overflowX: 'auto',
+                        maxHeight: '180px',
+                      }}
+                    >
+                      {SITE_STATS_SQL}
+                    </pre>
+                  </div>
+                )}
               </div>
             )}
 

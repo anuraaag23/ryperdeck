@@ -677,3 +677,79 @@ export async function deleteRecord(
   return true;
 }
 
+// ── Global Site Visitor Counter (Supabase) ───────────────────────────
+export const SITE_STATS_SQL = `-- 1. Create table for global site stats
+create table if not exists site_stats (
+  id text primary key,
+  value bigint not null default 0,
+  updated_at timestamp with time zone default timezone('utc'::text, now())
+);
+
+-- 2. Enable Row Level Security (RLS)
+alter table site_stats enable row level security;
+
+-- 3. Allow public select, insert and update
+create policy "Allow public read site_stats" on site_stats for select using (true);
+create policy "Allow public insert site_stats" on site_stats for insert with check (true);
+create policy "Allow public update site_stats" on site_stats for update using (true);
+
+-- 4. Insert initial visitors row
+insert into site_stats (id, value)
+values ('visitors', 1)
+on conflict (id) do nothing;
+
+-- 5. Safe atomic increment function
+create or replace function increment_site_visitors()
+returns bigint
+language plpgsql
+security definer
+as $$
+declare
+  new_count bigint;
+begin
+  insert into site_stats (id, value)
+  values ('visitors', 1)
+  on conflict (id) do update
+  set value = site_stats.value + 1,
+      updated_at = timezone('utc'::text, now())
+  returning value into new_count;
+  return new_count;
+end;
+$$;`;
+
+export async function fetchGlobalVisitorsFromDb(): Promise<{ count: number; isDb: boolean }> {
+  if (supabase) {
+    try {
+      const { data, error } = await supabase
+        .from('site_stats')
+        .select('value')
+        .eq('id', 'visitors')
+        .single();
+      if (!error && data && typeof data.value === 'number') {
+        return { count: data.value, isDb: true };
+      }
+    } catch {}
+  }
+  const local = parseInt(localStorage.getItem('ryperdeck_real_visitors_v3') || '1', 10);
+  return { count: local > 0 ? local : 1, isDb: false };
+}
+
+export async function updateGlobalVisitorsInDb(count: number): Promise<boolean> {
+  try {
+    localStorage.setItem('ryperdeck_real_visitors_v3', String(count));
+    window.dispatchEvent(new CustomEvent('ryperdeck_visitor_updated', { detail: count }));
+  } catch {}
+
+  if (supabase) {
+    try {
+      const { error } = await supabase
+        .from('site_stats')
+        .upsert({ id: 'visitors', value: count, updated_at: new Date().toISOString() });
+      if (!error) return true;
+    } catch (err) {
+      console.error('Error updating site_stats in Supabase:', err);
+    }
+  }
+  return false;
+}
+
