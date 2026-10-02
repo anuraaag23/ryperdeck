@@ -64,12 +64,12 @@ export const DefaultPresetsSection: React.FC = () => {
                 {/* Metadata Chips */}
                 <div className="flex items-center gap-2.5 text-xs text-white/50 mb-8 font-mono flex-wrap">
                   <span className="liquid-glass-badge">
-                    Master Matrix Layout
+                    10 Pages • 96 Buttons
                   </span>
                   <span>•</span>
-                  <span>Gemini AI Automation</span>
+                  <span>32 System Widgets</span>
                   <span>•</span>
-                  <span>.JSON Format</span>
+                  <span>Schema v2 .JSON</span>
                 </div>
               </div>
 
