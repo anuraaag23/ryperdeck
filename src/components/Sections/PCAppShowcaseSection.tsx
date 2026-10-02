@@ -168,7 +168,7 @@ export const PCAppShowcaseSection: React.FC = () => {
         {/* Download Both as zip file */}
         <div className="flex justify-center mb-10">
           <a
-            href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck_Complete_Package.zip"
+            href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck.Both.PC.+.Mobile.zip"
             className="inline-flex items-center gap-2.5 px-6 py-3 rounded-full border border-white/[0.18] bg-white/[0.05] hover:bg-white/[0.12] hover:border-white/[0.32] text-white text-[13px] font-semibold transition-all shadow-[0_4px_24px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.2)] active:scale-95 group cursor-pointer"
           >
             <FolderArchive className="w-4 h-4 text-sky-400 shrink-0 group-hover:scale-110 transition-transform" />

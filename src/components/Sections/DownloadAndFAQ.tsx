@@ -94,7 +94,7 @@ export const DownloadAndFAQ: React.FC = () => {
 
               {/* Row 2: Download Both as zip file */}
               <a
-                href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck_Complete_Package.zip"
+                href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck.Both.PC.+.Mobile.zip"
                 className="w-full liquid-glass-btn h-[50px] px-6 text-[13.5px] font-bold gap-2.5 border border-white/[0.2] bg-white/[0.05] hover:bg-white/[0.12] hover:border-white/[0.32] text-white justify-center transition-all shadow-[0_4px_24px_rgba(0,0,0,0.5),inset_0_1px_1px_rgba(255,255,255,0.2)] active:scale-95 group"
               >
                 <FolderArchive className="w-4 h-4 text-sky-400 shrink-0 group-hover:scale-110 transition-transform" />

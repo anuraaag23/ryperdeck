@@ -182,7 +182,7 @@ export const PhoneShowcaseSection: React.FC = () => {
               </a>
 
               <a
-                href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck_Complete_Package.zip"
+                href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck.Both.PC.+.Mobile.zip"
                 className="inline-flex items-center gap-2.5 px-5 py-4 rounded-2xl bg-white/[0.04] hover:bg-white/[0.09] border border-white/[0.14] hover:border-white/[0.28] text-white text-[13px] font-semibold transition-all group active:scale-95 cursor-pointer shadow-[0_4px_20px_rgba(0,0,0,0.5)]"
               >
                 <FolderArchive className="w-4 h-4 text-sky-400 shrink-0 group-hover:scale-110 transition-transform" />
