@@ -48,8 +48,6 @@ import {
 } from '../lib/supabase';
 import { syncSupportersFromSupabase, clearLocalSupporters } from '../config/kofi';
 
-// Admin password from private environment variables
-const BACKUP_ADMIN_PW = (import.meta as any).env?.VITE_ADMIN_PASSWORD || '';
 
 interface AdminPageProps {
   onBack: () => void;
@@ -127,16 +125,14 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Check if session is already active in Supabase Auth
+  // Always require fresh authentication when opening the Admin Panel — no auto-login
   useEffect(() => {
-    if (supabase) {
-      supabase.auth.getSession().then(({ data: { session } }) => {
-        if (session) {
-          setAuthed(true);
-          setAuthEmail(session.user?.email || 'Admin');
-        }
-      });
-    }
+    setAuthed(false);
+    return () => {
+      if (supabase) {
+        supabase.auth.signOut().catch(() => {});
+      }
+    };
   }, []);
 
   // Fetch real data from Supabase whenever authed or refreshed
@@ -171,7 +167,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
     }
   }, [authed, tick]);
 
-  // Handle Login
+  // Handle Login — Strictly server-side Supabase verification, zero client credentials
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -192,62 +188,49 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
       return;
     }
 
-    if (supabase) {
-      try {
-        const { data, error: authError } = await supabase.auth.signInWithPassword({
-          email: emailTrimmed,
-          password: pwTrimmed,
-        });
-
-        if (!authError && data.session) {
-          setAuthed(true);
-          setAuthEmail(data.user?.email || emailTrimmed);
-          setLoading(false);
-          if (containerRef.current) containerRef.current.scrollTop = 0;
-          return;
-        }
-
-        if (BACKUP_ADMIN_PW && pwTrimmed === BACKUP_ADMIN_PW) {
-          setAuthed(true);
-          setAuthEmail(emailTrimmed);
-          setLoading(false);
-          if (containerRef.current) containerRef.current.scrollTop = 0;
-          return;
-        }
-
-        setError(authError?.message || 'Invalid email or password.');
-      } catch (err: any) {
-        if (BACKUP_ADMIN_PW && pwTrimmed === BACKUP_ADMIN_PW) {
-          setAuthed(true);
-          setAuthEmail(emailTrimmed);
-          setLoading(false);
-          if (containerRef.current) containerRef.current.scrollTop = 0;
-          return;
-        }
-        setError(err?.message || 'Authentication error.');
-      }
-    } else {
-      if (BACKUP_ADMIN_PW && pwTrimmed === BACKUP_ADMIN_PW) {
-        setAuthed(true);
-        setAuthEmail(emailTrimmed);
-        setLoading(false);
-        if (containerRef.current) containerRef.current.scrollTop = 0;
-        return;
-      }
-      setError('Invalid password.');
+    if (!supabase) {
+      setError('Authentication service is not configured.');
+      setLoading(false);
+      return;
     }
 
-    setLoading(false);
+    try {
+      const { data, error: authError } = await supabase.auth.signInWithPassword({
+        email: emailTrimmed,
+        password: pwTrimmed,
+      });
+
+      if (authError || !data.session) {
+        setError(authError?.message || 'Invalid email or password.');
+        setLoading(false);
+        return;
+      }
+
+      setAuthed(true);
+      setAuthEmail(data.user?.email || emailTrimmed);
+      setLoading(false);
+      if (containerRef.current) containerRef.current.scrollTop = 0;
+    } catch (err: any) {
+      setError(err?.message || 'Authentication error.');
+      setLoading(false);
+    }
   };
 
   const handleSignOut = async () => {
     if (supabase) {
-      await supabase.auth.signOut();
+      try {
+        await supabase.auth.signOut();
+      } catch {}
     }
     setAuthed(false);
     setAuthEmail(null);
     setPw('');
     setAdminEmail('');
+  };
+
+  const handleExit = async () => {
+    await handleSignOut();
+    onBack();
   };
 
   const handleDeleteItem = async (
@@ -431,7 +414,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
       >
         {/* Back to site */}
         <button
-          onClick={onBack}
+          onClick={handleExit}
           style={{
             position: 'absolute',
             top: isMobile ? '16px' : '24px',
@@ -650,7 +633,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '10px' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
             <button
-              onClick={onBack}
+              onClick={handleExit}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -721,7 +704,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
             </button>
 
             <button
-              onClick={handleSignOut}
+              onClick={handleExit}
               style={{
                 display: 'inline-flex',
                 alignItems: 'center',
@@ -737,7 +720,7 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
               }}
             >
               <LogOut style={{ width: 13, height: 13 }} />
-              <span>Exit</span>
+              <span>Log Out & Exit</span>
             </button>
           </div>
         </div>
