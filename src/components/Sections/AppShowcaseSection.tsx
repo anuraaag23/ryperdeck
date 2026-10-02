@@ -3,16 +3,14 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Reveal } from '../Reveal';
 
 const slides = [
-  { name: 'Dark mode Media Page',   src: '/screenshots/page_media_dark.jpg' },
-  { name: 'Light mode Media Page',  src: '/screenshots/page_media_light.jpg' },
-  { name: 'Entertainment Page',     src: '/screenshots/page_entertainment.jpg' },
-  { name: 'Gaming Page',            src: '/screenshots/page_gaming.jpg' },
-  { name: 'PC information Page',    src: '/screenshots/page_pc_info.jpg' },
-  { name: 'Work Page',              src: '/screenshots/page_work.jpg' },
-  { name: 'Random Page',            src: '/screenshots/page_random.jpg' },
-  { name: 'Widget Tab',             src: '/screenshots/page_widgets_tab.jpg' },
-  { name: 'Pages Tab',              src: '/screenshots/page_pages_tab.jpg' },
-  { name: 'AI Automations Page',    src: '/screenshots/page_ai_automations.jpg' },
+  { name: 'Home Tab',             src: '/screenshots/home_tab.jpg' },
+  { name: 'Pages Tab',            src: '/screenshots/pages_tab.jpg' },
+  { name: 'Keyboard & Mouse Tab', src: '/screenshots/keyboard_mouse_tab.jpg' },
+  { name: 'Media Page',           src: '/screenshots/media_page.jpg' },
+  { name: 'Widgets Tab',          src: '/screenshots/widgets_tab.png' },
+  { name: 'Recent Window',        src: '/screenshots/recent_window.jpg' },
+  { name: 'Websites Page',        src: '/screenshots/websites_page.jpg' },
+  { name: 'Browser Basic Page',   src: '/screenshots/browser_basic_page.jpg' },
 ];
 
 export const AppShowcaseSection: React.FC = () => {
@@ -89,7 +87,7 @@ export const AppShowcaseSection: React.FC = () => {
           {/* ── Xiaomi Pad 6 frame (CSS-only, landscape) ── */}
           <div
             className="relative select-none"
-            style={{ width: 640, maxWidth: 'min(95vw, 95%)' }}
+            style={{ width: 720, maxWidth: 'min(95vw, 95%)' }}
             onTouchStart={onTouchStart}
             onTouchEnd={onTouchEnd}
           >
@@ -124,6 +122,23 @@ export const AppShowcaseSection: React.FC = () => {
 
             {/* Ambient shadow under tablet */}
             <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 w-3/4 h-8 rounded-full bg-black blur-2xl opacity-80" />
+          </div>
+
+          {/* Quick Tab Selector Pills */}
+          <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 max-w-2xl px-2">
+            {slides.map((s, idx) => (
+              <button
+                key={idx}
+                onClick={() => go(idx, idx > current ? 'right' : 'left')}
+                className={`px-3 py-1.5 rounded-full text-[11px] sm:text-[12px] transition-all duration-200 cursor-pointer ${
+                  current === idx
+                    ? 'bg-white text-black font-semibold shadow-md shadow-white/20 scale-[1.02]'
+                    : 'bg-white/[0.04] text-white/60 hover:text-white hover:bg-white/[0.08] border border-white/[0.08]'
+                }`}
+              >
+                {s.name}
+              </button>
+            ))}
           </div>
 
           {/* Slide name — animates on change */}

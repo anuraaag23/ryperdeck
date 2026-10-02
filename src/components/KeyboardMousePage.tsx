@@ -171,6 +171,28 @@ export const KeyboardMousePage: React.FC<Props> = ({ onBack }) => {
           </div>
         </div>
 
+        {/* Real In-App Hub Screenshot Preview */}
+        <div className="mb-12 max-w-3xl mx-auto">
+          <div className="relative rounded-[28px] p-2.5 sm:p-3 bg-gradient-to-b from-white/[0.12] to-white/[0.03] border border-white/[0.15] shadow-[0_30px_90px_rgba(0,0,0,0.85)]">
+            <div className="relative rounded-[20px] overflow-hidden bg-black" style={{ aspectRatio: '16/10' }}>
+              <img
+                src="/screenshots/keyboard_mouse_tab.jpg"
+                alt="RyperDeck In-App Keyboard & Mouse Dual Hub"
+                className="w-full h-full object-contain pointer-events-none select-none"
+                draggable={false}
+              />
+              <div className="absolute inset-0 bg-white/[0.015] pointer-events-none" />
+            </div>
+            <div className="pt-3 pb-1 px-3 flex flex-wrap items-center justify-between gap-2 text-[11px] text-white/50">
+              <span className="flex items-center gap-1.5 font-mono text-emerald-400">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                Actual RyperDeck Android In-App Hub
+              </span>
+              <span className="text-white/40 font-mono">Dedicated 2-Hub Launch Screen</span>
+            </div>
+          </div>
+        </div>
+
         {/* ========================================================================= */}
         {/* INTERACTIVE HUB SELECTOR (Keyboard vs Mouse) */}
         {/* ========================================================================= */}
