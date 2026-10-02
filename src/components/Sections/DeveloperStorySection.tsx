@@ -1,4 +1,5 @@
 import React from 'react';
+import { ExternalLink } from 'lucide-react';
 import { Reveal } from '../Reveal';
 import { DeveloperPhotoFrame } from './DeveloperPhotoFrame';
 
@@ -83,6 +84,25 @@ export const DeveloperStorySection: React.FC = () => {
                 </Reveal>
               ))}
             </div>
+
+            {/* Discover More From The Developer */}
+            <Reveal direction="up" delay={390}>
+              <div className="mt-8 pt-6 border-t border-white/[0.08] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div>
+                  <p className="text-[14px] font-semibold text-white">Curious what else I'm building?</p>
+                  <p className="text-[12px] text-white/40 font-light">Explore experiments, tools & interactive apps.</p>
+                </div>
+                <a
+                  href="http://anurag-shows-portfolio.vercel.app/"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full liquid-glass-btn border border-white/[0.15] bg-white/[0.05] hover:bg-white/[0.12] text-xs font-semibold text-white transition-all shadow-[0_4px_20px_rgba(255,255,255,0.06)] group cursor-pointer whitespace-nowrap"
+                >
+                  <span>Discover more from the developer</span>
+                  <ExternalLink className="w-3.5 h-3.5 text-white/60 group-hover:text-white transition-colors" />
+                </a>
+              </div>
+            </Reveal>
           </div>
 
           {/* Right — photo + beautiful custom frame with animated lines & grid inside */}
@@ -100,6 +120,17 @@ export const DeveloperStorySection: React.FC = () => {
               in their pocket. No paywalls. No compromises."
             </p>
             <p className="mt-4 text-[12px] text-white/25 tracking-widest uppercase">— Anurag, Creator of RyperDeck</p>
+            <div className="mt-6 flex justify-center">
+              <a
+                href="http://anurag-shows-portfolio.vercel.app/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-2 rounded-full bg-white/[0.04] hover:bg-white/[0.1] border border-white/[0.1] hover:border-white/[0.2] text-[12px] text-white/70 hover:text-white transition-all cursor-pointer group"
+              >
+                <span>Discover more from the developer</span>
+                <ExternalLink className="w-3.5 h-3.5 text-white/40 group-hover:text-white transition-colors" />
+              </a>
+            </div>
           </div>
         </Reveal>
       </div>

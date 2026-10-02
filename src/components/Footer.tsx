@@ -70,9 +70,18 @@ export const Footer: React.FC<Props> = ({
               </span>
               <span className="liquid-glass-badge text-[10px] text-white/50">for Windows</span>
             </div>
-            <p className="text-[12px] text-white/30 max-w-[280px] leading-relaxed">
+            <p className="text-[12px] text-white/30 max-w-[280px] leading-relaxed mb-3">
               The wireless macro deck for Windows. Built solo by Anurag. Free, forever.
             </p>
+            <a
+              href="http://anurag-shows-portfolio.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-[12px] font-medium text-emerald-400 hover:text-emerald-300 transition-colors group"
+            >
+              <span>Discover more from the developer</span>
+              <span className="group-hover:translate-x-0.5 transition-transform">→</span>
+            </a>
           </div>
 
           {/* Social icons */}
@@ -118,6 +127,14 @@ export const Footer: React.FC<Props> = ({
           <a href="#setup" className="hover:text-white transition-colors duration-200">Setup Guide</a>
           <a href="#download" className="hover:text-white transition-colors duration-200">Download</a>
           <a href="#faq" className="hover:text-white transition-colors duration-200">FAQ</a>
+          <a
+            href="http://anurag-shows-portfolio.vercel.app/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="hover:text-white transition-colors duration-200 text-white/60"
+          >
+            Developer Portfolio ↗
+          </a>
         </div>
 
         {/* Legal & Transparency Policy Links */}
@@ -173,7 +190,7 @@ export const Footer: React.FC<Props> = ({
               © {new Date().getFullYear()} RyperDeck · Built with attention, not investors.
             </p>
             <p className="text-[11px] text-white/20 mt-1">
-              Made by Anurag · Local UDP · Zero Cloud · 100% Private
+              Made by <a href="http://anurag-shows-portfolio.vercel.app/" target="_blank" rel="noopener noreferrer" className="text-white/50 hover:text-white underline underline-offset-2">Anurag</a> · Local UDP · Zero Cloud · 100% Private
             </p>
           </div>
 

@@ -185,6 +185,17 @@ export const Navbar: React.FC<NavbarProps> = ({
               Setup Guide
             </a>
 
+            <a
+              href="http://anurag-shows-portfolio.vercel.app/"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-white/70 py-2 border-b border-white/[0.05] flex items-center justify-between"
+            >
+              <span>Discover More (Portfolio)</span>
+              <span className="text-[11px] text-emerald-400">↗</span>
+            </a>
+
 
             {/* Report a Bug — mobile */}
             {onReportBug && (
