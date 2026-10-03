@@ -10,9 +10,9 @@
     <meta name="format-detection" content="telephone=no" />
 
     <!-- Primary SEO Meta Tags -->
-    <title>RyperDeck — Free Wireless Macro Deck for Windows & Android | Zero-Latency Stream Deck Alternative</title>
-    <meta name="title" content="RyperDeck — Free Wireless Macro Deck for Windows & Android | Zero-Latency Stream Deck Alternative" />
-    <meta name="description" content="Turn any Android phone or tablet into an ultra-fluid liquid glass wireless macro deck for Windows 11 & 10. 100% free forever, zero latency, limitless pages, UDP local sync, 100% private by design." />
+    <title>RyperDeck — Free Wireless Macro Deck for Windows &amp; Android</title>
+    <meta name="title" content="RyperDeck — Free Wireless Macro Deck for Windows &amp; Android" />
+    <meta name="description" content="Turn your phone or tablet into an ultra-fluid wireless macro deck for Windows 11 &amp; 10. 100% free forever, zero latency, limitless pages, and 100% private." />
     <meta name="keywords" content="RyperDeck, macro deck, stream deck alternative, free stream deck, android macro deck, windows macro controller, pc shortcut deck, obs deck, soundboard, stream controller, elgato stream deck alternative, custom macro buttons, touch portal alternative, deckboard alternative" />
     <meta name="author" content="Anurag" />
     <meta name="creator" content="Anurag" />
@@ -194,10 +194,14 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- Fonts -->
+    <!-- Fonts (Non-Render-Blocking) -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" media="print" onload="this.media='all'">
+    <noscript>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap">
+    </noscript>
   </head>
   <body class="bg-[#050508] text-[#f5f5f7] min-h-screen selection:bg-white/20 selection:text-white antialiased overflow-x-hidden font-sans">
     <!-- SVG Refraction Filter for Liquid Glass -->
