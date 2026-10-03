@@ -1,4 +1,5 @@
 import React from 'react';
+import { Reveal } from '../Reveal';
 
 /* ── Small visual mockups for each card ──────────────────────────── */
 
@@ -136,7 +137,7 @@ export const UseCasesSection: React.FC = () => {
       <div className="relative z-10 max-w-5xl mx-auto">
 
         {/* Header */}
-        <div className="text-center mb-14 sm:mb-20">
+        <Reveal direction="up" className="text-center mb-14 sm:mb-20">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.1] bg-white/[0.03] backdrop-blur-xl text-[10px] font-semibold tracking-[0.3em] uppercase text-white/40 mb-8">
             Why It Matters
           </span>
@@ -145,33 +146,34 @@ export const UseCasesSection: React.FC = () => {
             <span className="text-white/25">who actually </span>
             <span className="text-white/60">focus.</span>
           </h2>
-        </div>
+        </Reveal>
 
         {/* 2×2 persona grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-5">
           {personas.map((p, i) => (
-            <div
-              key={i}
-              className="rounded-[22px] sm:rounded-[24px] bg-white/[0.03] border border-white/[0.08] p-5 sm:p-7 flex flex-col gap-4 hover:bg-white/[0.05] hover:border-white/[0.14] transition-all duration-300 cursor-default group"
-            >
-              {/* Visual mockup at top */}
-              <div className="mb-1">{p.visual}</div>
+            <Reveal key={i} direction="up" delay={i * 90}>
+              <div
+                className="h-full rounded-[22px] sm:rounded-[24px] bg-white/[0.03] border border-white/[0.08] p-5 sm:p-7 flex flex-col gap-4 hover:bg-white/[0.05] hover:border-white/[0.14] transition-all duration-300 cursor-default group"
+              >
+                {/* Visual mockup at top */}
+                <div className="mb-1">{p.visual}</div>
 
-              {/* Tag */}
-              <span className={`text-[10px] font-bold tracking-[0.25em] uppercase ${p.tagColor}`}>
-                {p.tag}
-              </span>
+                {/* Tag */}
+                <span className={`text-[10px] font-bold tracking-[0.25em] uppercase ${p.tagColor}`}>
+                  {p.tag}
+                </span>
 
-              {/* Headline */}
-              <h3 className="text-[20px] sm:text-[24px] font-bold tracking-tight text-white leading-tight whitespace-pre-line">
-                {p.headline}
-              </h3>
+                {/* Headline */}
+                <h3 className="text-[20px] sm:text-[24px] font-bold tracking-tight text-white leading-tight whitespace-pre-line">
+                  {p.headline}
+                </h3>
 
-              {/* Body */}
-              <p className="text-[13px] text-white/40 leading-relaxed font-light">
-                {p.body}
-              </p>
-            </div>
+                {/* Body */}
+                <p className="text-[13px] text-white/40 leading-relaxed font-light">
+                  {p.body}
+                </p>
+              </div>
+            </Reveal>
           ))}
         </div>
       </div>

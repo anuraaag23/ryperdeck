@@ -1,6 +1,7 @@
 import React from 'react';
 import { LiquidGlassCard } from '../LiquidGlass/LiquidGlassCard';
 import { Check } from 'lucide-react';
+import { Reveal } from '../Reveal';
 
 export const ComparisonSection: React.FC = () => {
   const comparisonItems = [
@@ -45,46 +46,51 @@ export const ComparisonSection: React.FC = () => {
   return (
     <section id="comparison" className="relative py-20 sm:py-28 md:py-36 px-4 sm:px-6 bg-black border-t border-white/[0.05] overflow-hidden">
       <div className="relative max-w-4xl mx-auto text-center">
-        <div className="mb-3 inline-flex items-center gap-2">
-          <span className="liquid-glass-badge">
-            Hardware Comparison
-          </span>
-        </div>
+        <Reveal direction="up">
+          <div className="mb-3 inline-flex items-center gap-2">
+            <span className="liquid-glass-badge">
+              Hardware Comparison
+            </span>
+          </div>
 
-        <h2 className="text-[28px] sm:text-[44px] md:text-[56px] font-bold tracking-[-0.035em] leading-[1.05] text-white mb-4">
-          The StreamDeck<br />
-          <span className="text-white/40">you already own.</span>
-        </h2>
+          <h2 className="text-[28px] sm:text-[44px] md:text-[56px] font-bold tracking-[-0.035em] leading-[1.05] text-white mb-4">
+            The StreamDeck<br />
+            <span className="text-white/40">you already own.</span>
+          </h2>
+        </Reveal>
 
         {/* Pricing Comparison */}
-        <div className="my-10 sm:my-14 flex items-center justify-center gap-8 sm:gap-20">
-          <div className="flex flex-col items-center">
-            <span className="text-[40px] sm:text-[60px] md:text-[76px] font-bold tracking-tight text-white/25 line-through decoration-white/35 decoration-2">
-              $250
-            </span>
-            <span className="text-[11px] uppercase tracking-widest text-white/25 mt-1 font-mono">
-              StreamDeck
-            </span>
+        <Reveal direction="scale" delay={80}>
+          <div className="my-10 sm:my-14 flex items-center justify-center gap-8 sm:gap-20">
+            <div className="flex flex-col items-center">
+              <span className="text-[40px] sm:text-[60px] md:text-[76px] font-bold tracking-tight text-white/25 line-through decoration-white/35 decoration-2">
+                $250
+              </span>
+              <span className="text-[11px] uppercase tracking-widest text-white/25 mt-1 font-mono">
+                StreamDeck
+              </span>
+            </div>
+
+            <span className="text-[16px] text-white/25 font-light">vs</span>
+
+            <div className="flex flex-col items-center">
+              <span className="text-[40px] sm:text-[60px] md:text-[76px] font-bold tracking-tight text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.35)]">
+                $0
+              </span>
+              <span className="liquid-glass-badge text-[11px] uppercase tracking-widest mt-1 font-semibold text-white">
+                RyperDeck
+              </span>
+            </div>
           </div>
 
-          <span className="text-[16px] text-white/25 font-light">vs</span>
-
-          <div className="flex flex-col items-center">
-            <span className="text-[40px] sm:text-[60px] md:text-[76px] font-bold tracking-tight text-white drop-shadow-[0_0_40px_rgba(255,255,255,0.35)]">
-              $0
-            </span>
-            <span className="liquid-glass-badge text-[11px] uppercase tracking-widest mt-1 font-semibold text-white">
-              RyperDeck
-            </span>
-          </div>
-        </div>
-
-        <p className="text-[15px] sm:text-[17px] text-white/50 max-w-md mx-auto leading-relaxed font-light mb-16">
-          The high-resolution touch hardware is already charging on your desk. You paid for it years ago.
-        </p>
+          <p className="text-[15px] sm:text-[17px] text-white/50 max-w-md mx-auto leading-relaxed font-light mb-16">
+            The high-resolution touch hardware is already charging on your desk. You paid for it years ago.
+          </p>
+        </Reveal>
 
         {/* Comparison Matrix in Liquid Glass Card */}
-        <LiquidGlassCard className="p-3.5 sm:p-8 text-left">
+        <Reveal direction="up" delay={140}>
+          <LiquidGlassCard className="p-3.5 sm:p-8 text-left">
           {/* Mobile swipe hint */}
           <div className="flex items-center justify-center text-[10.5px] font-mono text-white/40 mb-3 px-1 sm:hidden">
             <span>← Swipe horizontally to view full comparison →</span>
@@ -121,7 +127,8 @@ export const ComparisonSection: React.FC = () => {
             </table>
           </div>
         </LiquidGlassCard>
-      </div>
-    </section>
+      </Reveal>
+    </div>
+  </section>
   );
 };

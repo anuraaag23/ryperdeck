@@ -3,6 +3,7 @@ import { LiquidGlassCard } from '../LiquidGlass/LiquidGlassCard';
 import { getStoredSupporters, syncSupportersFromSupabase, SupporterReview } from '../../config/kofi';
 import { Star, Trophy, Award, MessageSquare, Coffee, ExternalLink } from 'lucide-react';
 import { CoffeeSupportModal } from '../Coffee/CoffeeSupportModal';
+import { Reveal } from '../Reveal';
 
 export const LeaderboardSection: React.FC = () => {
   const [supporters, setSupporters] = useState<SupporterReview[]>(getStoredSupporters());
@@ -37,7 +38,7 @@ export const LeaderboardSection: React.FC = () => {
 
       <div className="relative max-w-5xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <Reveal direction="up" className="text-center mb-16">
           <div className="mb-3 inline-flex items-center gap-2">
             <span className="liquid-glass-badge liquid-glass-badge-amber">
               Supporter Leaderboard & Reviews
@@ -58,12 +59,13 @@ export const LeaderboardSection: React.FC = () => {
               <span>☕ Buy Developer a Coffee & Join Leaderboard</span>
             </button>
           </div>
-        </div>
+        </Reveal>
 
         {/* Dual Layout: Top Leaderboard Table + Live Reviews Wall */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
           {/* Left Column: Ranked Leaderboard Table (7 Cols) */}
-          <LiquidGlassCard className="lg:col-span-7 p-4 sm:p-8 flex flex-col justify-between">
+          <Reveal direction="left" delay={80} className="lg:col-span-7 flex flex-col">
+            <LiquidGlassCard className="h-full p-4 sm:p-8 flex flex-col justify-between">
             <div>
               <div className="flex items-center justify-between mb-6 pb-4 border-b border-white/[0.08]">
                 <div className="flex items-center gap-2.5">
@@ -172,74 +174,75 @@ export const LeaderboardSection: React.FC = () => {
               </a>
             </div>
           </LiquidGlassCard>
+        </Reveal>
 
-          {/* Right Column: Verified Reviews Wall (5 Cols) */}
-          <div className="lg:col-span-5 flex flex-col gap-4">
-            <div className="flex items-center justify-between px-2">
-              <span className="text-xs font-semibold uppercase tracking-wider text-white/45 flex items-center gap-2">
-                <span className="w-5 h-5 rounded-lg liquid-glass-icon-pod liquid-glass-icon-pod-cyan">
-                  <MessageSquare className="w-3 h-3 text-cyan-400" />
-                </span>
-                <span>Verified User Reviews ({reviews.length})</span>
+        {/* Right Column: Verified Reviews Wall (5 Cols) */}
+        <Reveal direction="right" delay={140} className="lg:col-span-5 flex flex-col gap-4">
+          <div className="flex items-center justify-between px-2">
+            <span className="text-xs font-semibold uppercase tracking-wider text-white/45 flex items-center gap-2">
+              <span className="w-5 h-5 rounded-lg liquid-glass-icon-pod liquid-glass-icon-pod-cyan">
+                <MessageSquare className="w-3 h-3 text-cyan-400" />
               </span>
-            </div>
-
-            <div className="flex flex-col gap-3.5 max-h-[540px] overflow-y-auto scrollbar-none pr-1">
-              {reviews.length === 0 ? (
-                <div className="p-8 rounded-2xl liquid-glass-panel-subtle text-center flex flex-col items-center justify-center gap-3">
-                  <div className="w-10 h-10 rounded-full liquid-glass-icon-pod liquid-glass-icon-pod-cyan flex items-center justify-center text-cyan-400">
-                    <MessageSquare className="w-5 h-5" />
-                  </div>
-                  <h4 className="text-[14px] font-semibold text-white/90">No reviews yet</h4>
-                  <p className="text-[12px] text-white/40 max-w-xs leading-relaxed font-light">
-                    Be the first supporter to leave a 5-star review! Your feedback and rating will be proudly featured right here.
-                  </p>
-                  <button
-                    onClick={() => setModalOpen(true)}
-                    className="mt-1 px-4 py-1.5 rounded-full liquid-glass-btn text-xs font-semibold text-cyan-300 border border-cyan-400/30 hover:border-cyan-400/60 bg-cyan-500/[0.06] hover:bg-cyan-500/[0.12] transition-all cursor-pointer"
-                  >
-                    Write the First Review
-                  </button>
-                </div>
-              ) : (
-                reviews.map((r) => (
-                  <div
-                    key={r.id}
-                    className="p-5 rounded-2xl liquid-glass-panel-subtle hover:border-white/[0.15] transition-colors"
-                  >
-                    <div className="flex items-center justify-between mb-2.5">
-                      <div className="flex items-center gap-2.5">
-                        <div className="w-7 h-7 rounded-full liquid-glass-icon-pod text-[11px] font-bold text-white">
-                          {r.name.charAt(0)}
-                        </div>
-                        <span className="text-[13px] font-semibold text-white">
-                          {r.name}
-                        </span>
-                      </div>
-
-                      {/* Star Rating */}
-                      <div className="flex items-center text-amber-400 text-xs">
-                        {[...Array(r.rating || 5)].map((_, i) => (
-                          <Star key={i} className="w-3.5 h-3.5 fill-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]" />
-                        ))}
-                      </div>
-                    </div>
-
-                    <p className="text-[12px] text-white/75 leading-relaxed font-light italic mb-3.5">
-                      "{r.message}"
-                    </p>
-
-                    <div className="flex items-center justify-between text-[10px] text-white/35 font-mono pt-2.5 border-t border-white/[0.04]">
-                      <span className="text-cyan-400/90 font-semibold">
-                        ₹{r.amount.toLocaleString()} Contribution
-                      </span>
-                      <span>Verified Supporter</span>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
+              <span>Verified User Reviews ({reviews.length})</span>
+            </span>
           </div>
+
+          <div className="flex flex-col gap-3.5 max-h-[540px] overflow-y-auto scrollbar-none pr-1">
+            {reviews.length === 0 ? (
+              <div className="p-8 rounded-2xl liquid-glass-panel-subtle text-center flex flex-col items-center justify-center gap-3">
+                <div className="w-10 h-10 rounded-full liquid-glass-icon-pod liquid-glass-icon-pod-cyan flex items-center justify-center text-cyan-400">
+                  <MessageSquare className="w-5 h-5" />
+                </div>
+                <h4 className="text-[14px] font-semibold text-white/90">No reviews yet</h4>
+                <p className="text-[12px] text-white/40 max-w-xs leading-relaxed font-light">
+                  Be the first supporter to leave a 5-star review! Your feedback and rating will be proudly featured right here.
+                </p>
+                <button
+                  onClick={() => setModalOpen(true)}
+                  className="mt-1 px-4 py-1.5 rounded-full liquid-glass-btn text-xs font-semibold text-cyan-300 border border-cyan-400/30 hover:border-cyan-400/60 bg-cyan-500/[0.06] hover:bg-cyan-500/[0.12] transition-all cursor-pointer"
+                >
+                  Write the First Review
+                </button>
+              </div>
+            ) : (
+              reviews.map((r) => (
+                <div
+                  key={r.id}
+                  className="p-5 rounded-2xl liquid-glass-panel-subtle hover:border-white/[0.15] transition-colors"
+                >
+                  <div className="flex items-center justify-between mb-2.5">
+                    <div className="flex items-center gap-2.5">
+                      <div className="w-7 h-7 rounded-full liquid-glass-icon-pod text-[11px] font-bold text-white">
+                        {r.name.charAt(0)}
+                      </div>
+                      <span className="text-[13px] font-semibold text-white">
+                        {r.name}
+                      </span>
+                    </div>
+
+                    {/* Star Rating */}
+                    <div className="flex items-center text-amber-400 text-xs">
+                      {[...Array(r.rating || 5)].map((_, i) => (
+                        <Star key={i} className="w-3.5 h-3.5 fill-amber-400 drop-shadow-[0_0_6px_rgba(245,158,11,0.5)]" />
+                      ))}
+                    </div>
+                  </div>
+
+                  <p className="text-[12px] text-white/75 leading-relaxed font-light italic mb-3.5">
+                    "{r.message}"
+                  </p>
+
+                  <div className="flex items-center justify-between text-[10px] text-white/35 font-mono pt-2.5 border-t border-white/[0.04]">
+                    <span className="text-cyan-400/90 font-semibold">
+                      ₹{r.amount.toLocaleString()} Contribution
+                    </span>
+                    <span>Verified Supporter</span>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </Reveal>
         </div>
       </div>
 

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { LiquidGlassCard } from '../LiquidGlass/LiquidGlassCard';
 import { Download, ChevronDown, Check, Shield, Smartphone, ExternalLink, FolderArchive } from 'lucide-react';
+import { Reveal } from '../Reveal';
 
 export const DownloadAndFAQ: React.FC = () => {
   const [openFaq, setOpenFaq] = useState<number | null>(0);
@@ -37,7 +38,7 @@ export const DownloadAndFAQ: React.FC = () => {
     <section id="download" className="relative py-20 sm:py-28 md:py-36 px-4 sm:px-6 bg-black border-t border-white/[0.05] overflow-hidden">
       <div className="relative max-w-4xl mx-auto">
         {/* Download Showcase */}
-        <div className="text-center mb-16">
+        <Reveal direction="up" className="text-center mb-16">
           <div className="mb-3 inline-flex items-center gap-2">
             <span className="liquid-glass-badge">
               Get Started
@@ -49,10 +50,11 @@ export const DownloadAndFAQ: React.FC = () => {
           <p className="text-[15px] sm:text-[17px] text-white/50 max-w-md mx-auto leading-relaxed font-light">
             Windows 11 & 10 companion installer. Lightweight, fast, zero telemetry.
           </p>
-        </div>
+        </Reveal>
 
         {/* Windows & Android Download Card */}
-        <LiquidGlassCard className="p-5 sm:p-10 mb-10 max-w-2xl mx-auto text-center">
+        <Reveal direction="scale" delay={80}>
+          <LiquidGlassCard className="p-5 sm:p-10 mb-10 max-w-2xl mx-auto text-center">
           <div className="flex flex-col items-center">
             <span className="liquid-glass-badge font-mono text-[11px] mb-5">
               Windows 11 & 10 • Android APK • 100% Free
@@ -143,8 +145,10 @@ export const DownloadAndFAQ: React.FC = () => {
             </div>
           </div>
         </LiquidGlassCard>
+      </Reveal>
 
-        {/* Windows FAQ */}
+      {/* Windows FAQ */}
+      <Reveal direction="up" delay={120}>
         <div className="max-w-2xl mx-auto mt-20">
           <h3 className="text-[22px] font-bold text-white text-center mb-8 tracking-tight">
             Frequently Asked Questions
@@ -180,6 +184,7 @@ export const DownloadAndFAQ: React.FC = () => {
             })}
           </div>
         </div>
+      </Reveal>
       </div>
     </section>
   );

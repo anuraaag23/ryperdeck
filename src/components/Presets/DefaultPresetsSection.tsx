@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Download, Check, Smartphone, FileJson, Sparkles } from 'lucide-react';
 import { LiquidGlassCard } from '../LiquidGlass/LiquidGlassCard';
+import { Reveal } from '../Reveal';
 
 export const DefaultPresetsSection: React.FC = () => {
   const [downloaded, setDownloaded] = useState(false);
@@ -24,7 +25,7 @@ export const DefaultPresetsSection: React.FC = () => {
 
       <div className="relative max-w-5xl mx-auto">
         {/* Section Header */}
-        <div className="text-center mb-16">
+        <Reveal direction="up" className="text-center mb-16">
           <div className="mb-4 inline-flex items-center gap-2">
             <span className="liquid-glass-badge">
               <FileJson className="w-3 h-3 text-white/70" />
@@ -37,12 +38,13 @@ export const DefaultPresetsSection: React.FC = () => {
           <p className="text-[15px] sm:text-[17px] text-white/50 max-w-xl mx-auto leading-relaxed font-light">
             Just download the <code className="text-white/90 font-mono text-[13px] bg-white/[0.08] px-2 py-0.5 rounded-lg border border-white/[0.1]">.json</code> file and import it into your app to enjoy, customize, or build your own pages.
           </p>
-        </div>
+        </Reveal>
 
         {/* Master Preset Showcase Card with attached Import Showcase Screenshot */}
-        <LiquidGlassCard
-          className="p-5 sm:p-10 mb-12 sm:mb-16 border border-white/[0.15] bg-[#0c0d12]"
-        >
+        <Reveal direction="scale" delay={80}>
+          <LiquidGlassCard
+            className="p-5 sm:p-10 mb-12 sm:mb-16 border border-white/[0.15] bg-[#0c0d12]"
+          >
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             {/* Left Content Column */}
             <div className="lg:col-span-6 flex flex-col justify-between">
@@ -109,8 +111,10 @@ export const DefaultPresetsSection: React.FC = () => {
             </div>
           </div>
         </LiquidGlassCard>
+      </Reveal>
 
-        {/* Dedicated Gemini AI Automation Feature Card */}
+      {/* Dedicated Gemini AI Automation Feature Card */}
+      <Reveal direction="up" delay={120}>
         <div className="mb-12 sm:mb-14 p-4 sm:p-8 rounded-[24px] sm:rounded-[28px] liquid-glass-panel border border-indigo-500/20 bg-gradient-to-br from-indigo-950/20 via-[#0c0d14] to-[#0a0a10]">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="max-w-2xl">
@@ -135,8 +139,10 @@ export const DefaultPresetsSection: React.FC = () => {
             </div>
           </div>
         </div>
+      </Reveal>
 
-        {/* 3-Step Import Guide */}
+      {/* 3-Step Import Guide */}
+      <Reveal direction="up" delay={160}>
         <div className="mb-16 sm:mb-20 p-4 sm:p-8 rounded-[24px] sm:rounded-[28px] liquid-glass-panel-subtle">
           <h4 className="text-[15px] font-bold text-white mb-4 flex items-center gap-2.5">
             <span className="w-7 h-7 rounded-xl liquid-glass-icon-pod">
@@ -160,6 +166,7 @@ export const DefaultPresetsSection: React.FC = () => {
             </div>
           </div>
         </div>
+      </Reveal>
       </div>
     </section>
   );

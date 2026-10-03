@@ -104,16 +104,22 @@ export const AppShowcaseSection: React.FC = () => {
 
               {/* Inner screen bezel */}
               <div className="relative rounded-[14px] sm:rounded-[22px] overflow-hidden bg-black border border-white/[0.06]" style={{ aspectRatio: '16/10' }}>
-                {/* Screenshot */}
-                <img
-                  key={animKey}
-                  src={slides[current].src}
-                  alt={slides[current].name}
-                  className={`absolute inset-0 w-full h-full object-cover showcase-image pointer-events-none select-none ${
-                    dir === 'right' ? 'slide-in-right' : 'slide-in-left'
-                  }`}
-                  draggable={false}
-                />
+                {/* Continuous Sliding Pages Track */}
+                <div
+                  className="flex h-full w-full transition-transform duration-700 ease-[cubic-bezier(0.16,1,0.3,1)]"
+                  style={{ transform: `translateX(-${current * 100}%)` }}
+                >
+                  {slides.map((s, idx) => (
+                    <div key={idx} className="w-full h-full shrink-0 relative bg-black">
+                      <img
+                        src={s.src}
+                        alt={s.name}
+                        className="w-full h-full object-cover pointer-events-none select-none"
+                        draggable={false}
+                      />
+                    </div>
+                  ))}
+                </div>
                 {/* Glass screen reflection */}
                 <div className="absolute inset-0 bg-white/[0.015] pointer-events-none" />
                 <div className="absolute inset-x-0 top-0 h-px bg-white/20 pointer-events-none" />

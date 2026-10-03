@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Download, Mail, Check, Smartphone, Monitor, FolderArchive } from 'lucide-react';
+import { Reveal } from '../Reveal';
 
 const pcSlides = [
   '/screenshots/pc_app_preview_1.png',
@@ -53,7 +54,7 @@ export const PCAppShowcaseSection: React.FC = () => {
       <div className="relative z-10 max-w-6xl mx-auto">
 
         {/* Header */}
-        <div className="text-center mb-16">
+        <Reveal direction="up" className="text-center mb-16">
           <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.1] bg-white/[0.03] backdrop-blur-xl text-[11px] font-medium tracking-widest uppercase text-white/80 mb-6">
             <Monitor className="w-3 h-3 text-white/70" />
             Windows App
@@ -67,10 +68,11 @@ export const PCAppShowcaseSection: React.FC = () => {
           <p className="text-[16px] text-white/40 font-light max-w-md mx-auto">
             One lightweight Windows service. One beautiful companion app. Zero subscriptions.
           </p>
-        </div>
+        </Reveal>
 
         {/* Devices row */}
-        <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-8 lg:gap-16 mb-10 sm:mb-14">
+        <Reveal direction="scale" delay={80}>
+          <div className="flex flex-col lg:flex-row items-center lg:items-end justify-center gap-8 lg:gap-16 mb-10 sm:mb-14">
 
           {/* ── PC Monitor (CSS-only) ── */}
           <div className="flex flex-col items-center gap-4">
@@ -164,8 +166,10 @@ export const PCAppShowcaseSection: React.FC = () => {
             </a>
           </div>
         </div>
+      </Reveal>
 
-        {/* Download Both as zip file */}
+      {/* Download Both as zip file */}
+      <Reveal direction="up" delay={140}>
         <div className="flex justify-center mb-10">
           <a
             href="https://github.com/anuraaag23/ryperdeck/releases/download/v1.0.0/RyperDeck.Both.PC.+.Mobile.zip"
@@ -178,6 +182,7 @@ export const PCAppShowcaseSection: React.FC = () => {
             </span>
           </a>
         </div>
+      </Reveal>
 
         {/* Notify me row + inline dialog */}
         <div className="flex flex-col items-center">

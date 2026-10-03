@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Play, Pause, RotateCcw, Maximize2, Minimize2, Sparkles } from 'lucide-react';
 import { TopSupportersBar } from '../Coffee/TopSupportersBar';
+import { Reveal } from '../Reveal';
 
 export const InActionSection: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -167,32 +168,34 @@ export const InActionSection: React.FC = () => {
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[500px] rounded-full bg-blue-500/[0.03] blur-[180px] pointer-events-none" />
 
       <div className="relative z-10 flex flex-col items-center text-center max-w-4xl mx-auto w-full">
-        {/* Section Badge */}
-        <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.1] bg-white/[0.03] backdrop-blur-xl text-[11px] font-medium tracking-widest uppercase text-white/50 mb-6">
-          <Sparkles className="w-3 h-3 text-white/70" />
-          RyperDeck in Action
-        </span>
-
-        {/* Heading */}
-        <h2 className="text-[28px] sm:text-[42px] md:text-[52px] font-bold tracking-[-0.04em] leading-tight text-white mb-4">
-          See it live.{' '}
-          <span className="text-white/40">
-            Feel the difference.
+        {/* Section Badge & Heading */}
+        <Reveal direction="up" className="flex flex-col items-center text-center">
+          <span className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-white/[0.1] bg-white/[0.03] backdrop-blur-xl text-[11px] font-medium tracking-widest uppercase text-white/50 mb-6">
+            <Sparkles className="w-3 h-3 text-white/70" />
+            RyperDeck in Action
           </span>
-        </h2>
-        <p className="text-[15px] sm:text-[17px] text-white/45 font-light max-w-xl mb-10 px-2 leading-relaxed">
-          Zero latency hardware response. Watch RyperDeck launch instant developer workflows and desktop controls directly from tablet to Windows PC.
-        </p>
+
+          <h2 className="text-[28px] sm:text-[42px] md:text-[52px] font-bold tracking-[-0.04em] leading-tight text-white mb-4">
+            See it live.{' '}
+            <span className="text-white/40">
+              Feel the difference.
+            </span>
+          </h2>
+          <p className="text-[15px] sm:text-[17px] text-white/45 font-light max-w-xl mb-10 px-2 leading-relaxed">
+            Zero latency hardware response. Watch RyperDeck launch instant developer workflows and desktop controls directly from tablet to Windows PC.
+          </p>
+        </Reveal>
 
         {/* Video Player Container — Strict Aspect Ratio matching source 3246:2160 */}
-        <div
-          ref={containerRef}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={handleMouseLeave}
-          onClick={() => togglePlay()}
-          style={{ aspectRatio: '3246 / 2160' }}
-          className="relative w-full max-w-3xl rounded-2xl sm:rounded-3xl overflow-hidden group cursor-pointer bg-[#0a0a0f] border border-white/[0.14] shadow-[0_30px_90px_rgba(0,0,0,0.9),0_0_30px_rgba(255,255,255,0.03)] transition-all duration-300"
-        >
+        <Reveal direction="scale" delay={120} className="w-full flex justify-center">
+          <div
+            ref={containerRef}
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+            onClick={() => togglePlay()}
+            style={{ aspectRatio: '3246 / 2160' }}
+            className="relative w-full max-w-3xl rounded-2xl sm:rounded-3xl overflow-hidden group cursor-pointer bg-[#0a0a0f] border border-white/[0.14] shadow-[0_30px_90px_rgba(0,0,0,0.9),0_0_30px_rgba(255,255,255,0.03)] transition-all duration-300"
+          >
           {/* Native HTML5 Video Element */}
           <video
             ref={videoRef}
@@ -297,12 +300,13 @@ export const InActionSection: React.FC = () => {
             </div>
           </div>
         </div>
-      </div>
+      </Reveal>
+    </div>
 
-      {/* Top Supporters Bar — below the video area */}
-      <div className="relative z-10 w-full max-w-4xl mx-auto mt-16 sm:mt-20">
-        <TopSupportersBar />
-      </div>
-    </section>
+    {/* Top Supporters Bar — below the video area */}
+    <Reveal direction="up" delay={150} className="relative z-10 w-full max-w-4xl mx-auto mt-16 sm:mt-20">
+      <TopSupportersBar />
+    </Reveal>
+  </section>
   );
 };

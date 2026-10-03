@@ -1,12 +1,13 @@
 import React, { useEffect, useRef, useState } from 'react';
 
-type Direction = 'up' | 'left' | 'right' | 'scale';
+type Direction = 'up' | 'down' | 'left' | 'right' | 'scale' | 'fade';
 
 interface RevealProps {
   children: React.ReactNode;
   direction?: Direction;
   delay?: number; // ms
   threshold?: number;
+  rootMargin?: string;
   className?: string;
 }
 
@@ -17,7 +18,8 @@ export const Reveal: React.FC<RevealProps> = ({
   children,
   direction = 'up',
   delay = 0,
-  threshold = 0.12,
+  threshold = 0.05,
+  rootMargin = '0px 0px -30px 0px',
   className = '',
 }) => {
   const ref = useRef<HTMLDivElement>(null);
@@ -33,11 +35,11 @@ export const Reveal: React.FC<RevealProps> = ({
           obs.disconnect();
         }
       },
-      { threshold }
+      { threshold, rootMargin }
     );
     obs.observe(el);
     return () => obs.disconnect();
-  }, [threshold]);
+  }, [threshold, rootMargin]);
 
   return (
     <div
