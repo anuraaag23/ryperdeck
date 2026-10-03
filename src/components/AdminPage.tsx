@@ -134,10 +134,15 @@ export const AdminPage: React.FC<AdminPageProps> = ({ onBack }) => {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Always require fresh authentication when opening the Admin Panel — no auto-login
+  // Always require fresh authentication when opening the Admin Panel — no auto-login & strict noindex
   useEffect(() => {
     setAuthed(false);
+    const metaRobots = document.querySelector('meta[name="robots"]');
+    const originalRobots = metaRobots?.getAttribute('content') || 'index, follow';
+    metaRobots?.setAttribute('content', 'noindex, nofollow, noarchive');
+
     return () => {
+      metaRobots?.setAttribute('content', originalRobots);
       if (supabase) {
         supabase.auth.signOut().catch(() => {});
       }
